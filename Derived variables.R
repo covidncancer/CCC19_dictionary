@@ -273,6 +273,18 @@ ccc19x <- foo
   ccc19x$severe2 <- as.factor(ccc19x$severe2)
   summary(ccc19x$severe2)
   
+  #43. Severe composite outcome v3 (death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation)
+  #Partial derived
+  ccc19x$severe3 <- NA
+  ccc19x$severe3[which(ccc19x$deadbinary == 1)] <- 1
+  ccc19x$severe3[which(ccc19x$hosp == 1 & ccc19x$o2_ever == 1)] <- 1
+  ccc19x$severe3[which(ccc19x$ICU == 1)] <- 1
+  ccc19x$severe3[which(ccc19x$intubated == 1)] <- 1
+  
+  #Factor
+  ccc19x$severe3 <- as.factor(ccc19x$severe3)
+  summary(ccc19x$severe2[ccc19x$redcap_repeat_instrument == ''])
+  
   ##WHO Ordinal scale derived
   #24. WHO orginal scale
   ccc19x$who <- NA
