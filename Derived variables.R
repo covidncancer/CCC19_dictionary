@@ -257,7 +257,7 @@ ccc19x <- foo
   
   #Factor
   ccc19x$severe <- as.factor(ccc19x$severe)
-  summary(ccc19x$severe)
+  summary(ccc19x$severe[ccc19x$redcap_repeat_instrument == ''])
   
   #43. Severe composite outcome v2 (no severe hosp)
   ccc19x$severe2 <- NA
@@ -271,7 +271,7 @@ ccc19x <- foo
   
   #Factor
   ccc19x$severe2 <- as.factor(ccc19x$severe2)
-  summary(ccc19x$severe2)
+  summary(ccc19x$severe2[ccc19x$redcap_repeat_instrument == ''])
   
   #43. Severe composite outcome v3 (death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation)
   #Partial derived
