@@ -1848,18 +1848,17 @@ ccc19x <- foo
   
   #40. Region
   ccc19x$region <- NA
-  # US Northeast, 2: US Midwest, 3: US South, 4: US West, 5: Canada, 6: Spain
   ccc19x$region[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT", 
-                                                               "PA", "NY", "NJ"))] <- 1
+                                                               "PA", "NY", "NJ"))] <- "US Northeast"
   ccc19x$region[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH", "MO", "ND", 
-                                                               "SD", "NE", "KS", "MN", "IA"))] <- 2
+                                                               "SD", "NE", "KS", "MN", "IA"))] <- "US Midwest"
   ccc19x$region[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
                                                                "SC", "GA", "FL", "TN", "KY", "MS", "AL", 
-                                                               "OK", "TX", "LA", "AR"))] <- 3
+                                                               "OK", "TX", "LA", "AR"))] <- "US South"
   ccc19x$region[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
-                                                               "NM", "AK", "WA", "OR", "CA", "HI"))] <- 4
-  ccc19x$region[which(ccc19x$country_of_patient_residen == 39)] <- 5
-  ccc19x$region[which(ccc19x$country_of_patient_residen == 197)] <- 6
+                                                               "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
+  ccc19x$region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
+  ccc19x$region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
   
   #Factor
   ccc19x$region <- as.factor(ccc19x$region)
