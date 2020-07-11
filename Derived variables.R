@@ -1863,8 +1863,26 @@ ccc19x <- foo
   #Factor
   ccc19x$region <- as.factor(ccc19x$region)
   
-  length(unique(ccc19x$record_id))
+  summary(ccc19x$region[ccc19x$redcap_repeat_instrument == ''])
   
+  #40x. US Census Division
+  ccc19x$division <- NA
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT"))] <- "New England"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("PA", "NY", "NJ"))] <- "Middle Atlantic"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH"))] <- "East North Central"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("MO", "ND", "SD", "NE", "KS", "MN", "IA"))] <- "West North Central"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
+                                                                 "SC", "GA", "FL"))] <- "South Atlantic"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("TN", "KY", "MS", "AL"))] <- "East South Central"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("OK", "TX", "LA", "AR"))] <- "West South Central"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
+                                                                 "NM"))] <- "Mountain"
+  ccc19x$division[which(ccc19x$state_of_patient_residence %in% c("AK", "WA", "OR", "CA", "HI"))] <- "Pacific"
+  
+  #Factor
+  ccc19x$division <- as.factor(ccc19x$division)
+  
+  summary(ccc19x$division[ccc19x$redcap_repeat_instrument == ''])
   
   #49. Hypertension
   ccc19x$htn <- NA
