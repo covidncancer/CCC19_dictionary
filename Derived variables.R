@@ -2017,8 +2017,8 @@ ccc19x <- foo
   
   #Ca5. ECOG 0, 1, 2+
   ccc19x$der_ecogcat2 <- ccc19x$ecog_status
-  ccc19x$der_ecogcat2[which(ccc19x$ecogcat2 %in% 2:4)] <- '2+'
-  ccc19x$der_ecogcat2[which(ccc19x$ecogcat2 %in% 88:99)] <- 'Unknown'
+  ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 2:4)] <- '2+'
+  ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 88:99)] <- 'Unknown'
   ccc19x$der_ecogcat2 <- factor(ccc19x$der_ecogcat2)
   summary(ccc19x$der_ecogcat2[ccc19x$redcap_repeat_instrument == ''])
   
@@ -2123,6 +2123,28 @@ ccc19x <- foo
   
   ccc19x$der_neg_control <- factor(ccc19x$der_neg_control)
   summary(ccc19x$der_neg_control[ccc19x$redcap_repeat_instrument == ''])
+  
+  #X2. IMWG frailty index
+  ccc19x$der_imwg <- NA
+  
+  #Age
+  ccc19x$der_imwg[which(ccc19x$der_age <= 75)] <- 0
+  ccc19x$der_imwg[which(ccc19x$der_age > 75 & ccc19x$der_age <= 80)] <- 1
+  ccc19x$der_imwg[which(ccc19x$der_age > 80)] <- 2
+  
+  #Number of comorbidities
+  ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('1','2'))] <- ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('1','2'))] + 1
+  ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('3','4'))] <- ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('3','4'))] + 2
+  ccc19x$der_imwg[which(ccc19x$der_comorbid_no == '99'|is.na(ccc19x$der_comorbid_no))] <- NA
+  
+  #ECOG
+  ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 1)] <- ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 1)] + 1
+  ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] <- ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] + 2
+  ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown'|is.na(ccc19x$der_ecogcat2))] <- NA
+  
+  ccc19x$der_imwg <- factor(ccc19x$der_imwg)
+  summary(ccc19x$der_imwg[which(ccc19x$der_ttype == 'Heme')])
+  
 }
 
 #Save functions here
