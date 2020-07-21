@@ -484,7 +484,7 @@ ccc19x <- foo
         # }
         
         #If patient is deceased and days are missing, check the 30-day mortality variable
-        if(ccc19x$deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
+        if(ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
            (!is.na(ccc19x$mortality[temp.ref]) & ccc19x$mortality[temp.ref] == 0)) ccc19x$der_median_fu[temp.ref] <- 30
       }
     } else
@@ -618,7 +618,7 @@ ccc19x <- foo
   
   ccc19x$der_dead30 <- 0
   
-  temp.ref <- which(ccc19x$deadbinary == 1 & ccc19x$redcap_repeat_instrument != 'followup')
+  temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument != 'followup')
   
   #1. Calculated time to death is <= 30 days
   temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
@@ -1661,7 +1661,7 @@ ccc19x <- foo
   summary(ccc19x$der_surgery)
   
   #D7. Number of comorbidities (just factor)
-  ccc19x$der_comorbid_no <- factor(ccc19x$der_comorbid_no)
+  ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
   summary(ccc19x$der_comorbid_no)
   
   #D8. Simplified # of comorbidities
