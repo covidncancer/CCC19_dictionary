@@ -1951,13 +1951,18 @@ ccc19x <- foo
 
   "ttype"
   #Ca2. Derived variable for type of tumor
+  HemeNOS = c("C27134", "C9300","OTH_H")
   Lymph = c("C8851", "C3209", "C9244", "C3167", "C3163", 
             "C9308", "C4341", "C3211", "C9357", "C4337",
             "C2912", "C8504", "C27908")
+  #Lymph_HGNHL = c("C8851","C9244","C2912")
+  #Lymph_LGNHL = c("C3209", "C3163", "C4341", "C4337", "C8504")
+  #Lymph_ALL = c("C3167")
+  #Lymph_Other = c("C9308", "C3211")
   Myeloid = c("C3247", "C3171", "C4345", "C3106", "C3174")
+  #Myeloid_AML = c("C3171")
   PCDs = c("C3242","C4665","C3819")
-  
-  Heme <- c(Lymph, Myeloid, PCDs, "C9300", "C27134")
+  Heme <- c(HemeNOS,Lymph,Myeloid,PCDs)
   
   ccc19x$der_ttype <- NA
   ccc19x$der_ttype[which(ccc19x$cancer_type %in% Heme)] <- 'Heme'
@@ -1970,6 +1975,38 @@ ccc19x <- foo
   ccc19x$der_ttype <- relevel(ccc19x$der_ttype, ref = 'Solid')
   
   summary(ccc19x$der_ttype)
+  
+  #Ca8 Heme indicator
+  ccc19x$der_heme <- NA
+  ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
+  ccc19x$der_heme[which(ccc19x$cancer_type %in% Heme|ccc19x$cancer_type_2 %in% Heme)] <- 1
+  ccc19x$der_heme <- factor(ccc19x$der_heme)
+  summary(ccc19x$der_heme)
+  
+  #Ca9 Solid indicator
+  SolidNOS = c("C132146","C4039","C3708","C3538","C4912", "C9063", "C9061","C6389","C3224", "C9231","C4815", "C9325", "C3809", "C4906",
+               "C7355", "C9385", "C3267","C4013", "C3871","C4627", "C3270", "C7541","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538",
+               "C4189","C2921","OTH","OTH_S")
+  Breast = c("C4872")
+  #Derm = c("C3224", "C9231","C4819","C2921")
+  #Endo = c("C4815", "C9325", "C3809", "C4906")
+  GI = c("C9291", "C3844", "C2955", 
+         "C9330","C4436","C7724",
+         "C4911", "C3850", "C9382", "C4910", "C3099", "C3513")
+  Prostate <- c("C4863")
+  #GU_Renal <- c("C7355", "C9385", "C3267")
+  GYN = c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")
+  #HNSCC = c("C4013", "C3871")
+  #Neuro = c("C4627", "C3270", "C7541")
+  #Sarcoma = c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")
+  Thoracic = c("C4917", "C2926", "C4878", "C3234","C3411")
+  SolidAll <- c(SolidNOS,Breast,GI,Prostate,GYN,Thoracic)
+  
+  ccc19x$der_solid <- NA
+  ccc19x$der_solid[ccc19x$redcap_repeat_instrument == ''] <- 0
+  ccc19x$der_solid[which(ccc19x$cancer_type %in% SolidAll|ccc19x$cancer_type_2 %in% SolidAll)] <- 1
+  ccc19x$der_solid <- factor(ccc19x$der_solid)
+  summary(ccc19x$der_solid)
   
   #Ca3. ecogcat
   #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
