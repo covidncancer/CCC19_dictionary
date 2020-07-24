@@ -1840,7 +1840,29 @@ ccc19x <- foo
     #Factor
     ccc19x$der_surgery <- as.factor(ccc19x$der_surgery)
     ccc19x$der_surgery <- relevel(ccc19x$der_surgery, ref = 'None')
-    summary(ccc19x$der_surgery)
+    summary(ccc19x$der_surgery[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D18. derived variable indicating if there has been surgery within 3 months
+    ccc19x$der_surgery2 <- NA
+    
+    ccc19x$der_surgery2[which(((ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1) & 
+                                 ccc19x$treatment_modality___14051 == 1)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 1:2))] <- 'Recent surgery'
+    
+    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(88))|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 3)|
+                               ccc19x$recent_surgery == 0) & is.na(ccc19x$der_surgery2)
+    )] <- 'None'
+    
+    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == 'UNK')|
+                               ccc19x$recent_surgery == 99) & is.na(ccc19x$der_surgery2)
+    )] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_surgery2 <- as.factor(ccc19x$der_surgery2)
+    ccc19x$der_surgery2 <- relevel(ccc19x$der_surgery2, ref = 'None')
+    summary(ccc19x$der_surgery2[ccc19x$redcap_repeat_instrument == ''])
     
     #D7. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
@@ -2131,18 +2153,32 @@ ccc19x <- foo
     ccc19x$der_activetx <- relevel(ccc19x$der_activetx, ref = 'None')
     summary(ccc19x$der_activetx)
     
+    #Ca10. Any treatment in past 3 months
+    ccc19x$der_anytx <- NA
+    
+    ccc19x$der_anytx[which(ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1)] <- 'Yes'
+    
+    ccc19x$der_anytx[which((ccc19x$recent_treatment %in% 88|ccc19x$hx_treatment %in% 2:88) &
+                             is.na(ccc19x$der_anytx))] <- 'No'
+    
+    ccc19x$der_anytx[which((ccc19x$recent_treatment %in% 99|ccc19x$hx_treatment %in% 99) &
+                             is.na(ccc19x$der_anytx))] <- 'Unknown'
+    
+    ccc19x$der_anytx <- factor(ccc19x$der_anytx)
+    summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
+    
     "ttype"
     #Ca2. Derived variable for type of tumor
     HemeNOS = c("C27134", "C9300","OTH_H")
     Lymph = c("C8851", "C3209", "C9244", "C3167", "C3163", 
               "C9308", "C4341", "C3211", "C9357", "C4337",
               "C2912", "C8504", "C27908")
-    #Lymph_HGNHL = c("C8851","C9244","C2912")
-    #Lymph_LGNHL = c("C3209", "C3163", "C4341", "C4337", "C8504")
-    #Lymph_ALL = c("C3167")
-    #Lymph_Other = c("C9308", "C3211")
+    Lymph_HGNHL = c("C8851","C9244","C2912")
+    Lymph_LGNHL = c("C3209", "C3163", "C4341", "C4337", "C8504")
+    Lymph_ALL = c("C3167")
+    Lymph_Other = c("C9308", "C3211")
     Myeloid = c("C3247", "C3171", "C4345", "C3106", "C3174")
-    #Myeloid_AML = c("C3171")
+    Myeloid_AML = c("C3171")
     PCDs = c("C3242","C4665","C3819")
     Heme <- c(HemeNOS,Lymph,Myeloid,PCDs)
     
@@ -2303,7 +2339,89 @@ ccc19x <- foo
     ccc19x$der_nlr_cat <- factor(ccc19x$der_nlr_cat)
     summary(ccc19x$der_nlr_cat[ccc19x$redcap_repeat_instrument == ''])
     
+    #L2. D-Dimer
+    ccc19x$der_ddimer <- NA
+    ccc19x$der_ddimer[which(ccc19x$ddimer == 0)] <- 'Normal'
+    ccc19x$der_ddimer[which(ccc19x$ddimer == 1)] <- 'Abnormal'
+    ccc19x$der_ddimer[which(ccc19x$ddimer == 99)] <- 'Unknown'
+    ccc19x$der_ddimer[which(ccc19x$labs == 3|ccc19x$ddimer == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_ddimer <- factor(ccc19x$der_ddimer)
+    summary(ccc19x$der_ddimer[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L3. Fibrinogen
+    ccc19x$der_fibrinogen <- NA
+    ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 0)] <- 'Normal'
+    ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 1)] <- 'Abnormal'
+    ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 99)] <- 'Unknown'
+    ccc19x$der_fibrinogen[which(ccc19x$labs == 3|ccc19x$fibrinogen == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_fibrinogen <- factor(ccc19x$der_fibrinogen)
+    summary(ccc19x$der_fibrinogen[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L4. PT
+    ccc19x$der_pt <- NA
+    ccc19x$der_pt[which(ccc19x$pt == 0)] <- 'Normal'
+    ccc19x$der_pt[which(ccc19x$pt == 1)] <- 'Abnormal'
+    ccc19x$der_pt[which(ccc19x$pt == 99)] <- 'Unknown'
+    ccc19x$der_pt[which(ccc19x$labs == 3|ccc19x$pt == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_pt <- factor(ccc19x$der_pt)
+    summary(ccc19x$der_pt[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L5. aPTT
+    ccc19x$der_aptt <- NA
+    ccc19x$der_aptt[which(ccc19x$aptt == 0)] <- 'Normal'
+    ccc19x$der_aptt[which(ccc19x$aptt == 1)] <- 'Abnormal'
+    ccc19x$der_aptt[which(ccc19x$aptt == 99)] <- 'Unknown'
+    ccc19x$der_aptt[which(ccc19x$labs == 3|ccc19x$aptt == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_aptt <- factor(ccc19x$der_aptt)
+    summary(ccc19x$der_aptt[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L6. High-sensitivity troponin
+    ccc19x$der_hs_trop <- NA
+    ccc19x$der_hs_trop[which(ccc19x$hs_trop == 0)] <- 'Normal'
+    ccc19x$der_hs_trop[which(ccc19x$hs_trop == 1)] <- 'Abnormal'
+    ccc19x$der_hs_trop[which(ccc19x$hs_trop == 99)] <- 'Unknown'
+    ccc19x$der_hs_trop[which(ccc19x$labs == 3|ccc19x$hs_trop == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_hs_trop <- factor(ccc19x$der_hs_trop)
+    summary(ccc19x$der_hs_trop[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L7. BNP
+    ccc19x$der_bnp <- NA
+    ccc19x$der_bnp[which(ccc19x$bnp == 0)] <- 'Normal'
+    ccc19x$der_bnp[which(ccc19x$bnp == 1)] <- 'Abnormal'
+    ccc19x$der_bnp[which(ccc19x$bnp == 99)] <- 'Unknown'
+    ccc19x$der_bnp[which(ccc19x$labs == 3|ccc19x$bnp == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_bnp <- factor(ccc19x$der_bnp)
+    summary(ccc19x$der_bnp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L8. crp
+    ccc19x$der_crp <- NA
+    ccc19x$der_crp[which(ccc19x$crp == 0)] <- 'Normal'
+    ccc19x$der_crp[which(ccc19x$crp == 1)] <- 'Abnormal'
+    ccc19x$der_crp[which(ccc19x$crp == 99)] <- 'Unknown'
+    ccc19x$der_crp[which(ccc19x$labs == 3|ccc19x$crp == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_crp <- factor(ccc19x$der_crp)
+    summary(ccc19x$der_crp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L9. ldh
+    ccc19x$der_ldh <- NA
+    ccc19x$der_ldh[which(ccc19x$ldh == 0)] <- 'Normal'
+    ccc19x$der_ldh[which(ccc19x$ldh == 1)] <- 'Abnormal'
+    ccc19x$der_ldh[which(ccc19x$ldh == 99)] <- 'Unknown'
+    ccc19x$der_ldh[which(ccc19x$labs == 3|ccc19x$ldh == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_ldh <- factor(ccc19x$der_ldh)
+    summary(ccc19x$der_ldh[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L10. il6
+    ccc19x$der_il6 <- NA
+    ccc19x$der_il6[which(ccc19x$il6 == 0)] <- 'Normal'
+    ccc19x$der_il6[which(ccc19x$il6 == 1)] <- 'Abnormal'
+    ccc19x$der_il6[which(ccc19x$il6 == 99)] <- 'Unknown'
+    ccc19x$der_il6[which(ccc19x$labs == 3|ccc19x$il6 == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_il6 <- factor(ccc19x$der_il6)
+    summary(ccc19x$der_il6[ccc19x$redcap_repeat_instrument == ''])
+    
   }
+  
   #Other
   {
     
