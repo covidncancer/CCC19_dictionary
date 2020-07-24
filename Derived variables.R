@@ -2170,17 +2170,20 @@ ccc19x <- foo
                  "C7355", "C9385", "C3267","C4013", "C3871","C4627", "C3270", "C7541","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538",
                  "C4189","C2921","OTH","OTH_S")
     Breast = c("C4872")
-    #Derm = c("C3224", "C9231","C4819","C2921")
-    #Endo = c("C4815", "C9325", "C3809", "C4906")
-    GI = c("C9291", "C3844", "C2955", 
-           "C9330","C4436","C7724",
-           "C4911", "C3850", "C9382", "C4910", "C3099", "C3513")
+    Derm = c("C3224", "C9231","C4819","C2921")
+    Endo = c("C4815", "C9325", "C3809", "C4906")
+    LowerGI <- c("C9291","C4910","C9330","C7724","C2955","C9382")
+    UpperGI = c( "C3844",  
+           "C4436",
+           "C4911", "C3099", "C3513")
+    Pancreas = "C3850"
+    GI <- c(LowerGI,UpperGI,Pancreas)
     Prostate <- c("C4863")
-    #GU_Renal <- c("C7355", "C9385", "C3267")
+    GU_Renal <- c("C7355", "C9385", "C3267")
     GYN = c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")
-    #HNSCC = c("C4013", "C3871")
-    #Neuro = c("C4627", "C3270", "C7541")
-    #Sarcoma = c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")
+    HNSCC = c("C4013", "C3871")
+    Neuro = c("C4627", "C3270", "C7541")
+    Sarcoma = c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")
     Thoracic = c("C4917", "C2926", "C4878", "C3234","C3411")
     SolidAll <- c(SolidNOS,Breast,GI,Prostate,GYN,Thoracic)
     
@@ -2193,10 +2196,10 @@ ccc19x <- foo
     #Ca3. ecogcat
     #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
     ccc19x$der_ecogcat <- NA
-    ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(0,1))] <- 1
+    ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(0,1))] <- '0 or 1'
     ccc19x$der_ecogcat[which(ccc19x$ecog_status == 2)] <- 2
-    ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(3,4))] <- 3
-    ccc19x$der_ecogcat[which(ccc19x$ecog_status == 99)] <- 4
+    ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(3,4))] <- '3 or 4'
+    ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% 88:99)] <- 'Unknown'
     
     #Factor
     ccc19x$der_ecogcat <- as.factor(ccc19x$der_ecogcat)
@@ -2292,6 +2295,10 @@ ccc19x <- foo
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('WNL'))] <- 'Neither'
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('LO'))] <- 'Neither'
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('HI'))] <- 'Neither'
+    
+    #Not tested
+    ccc19x$der_nlr_cat[which((ccc19x$anc_range == 'NT' & ccc19x$alc_range %in% c('NT'))|
+                               ccc19x$labs == 3)] <- 'Not drawn/Not available'
     
     ccc19x$der_nlr_cat <- factor(ccc19x$der_nlr_cat)
     summary(ccc19x$der_nlr_cat[ccc19x$redcap_repeat_instrument == ''])
