@@ -2277,23 +2277,24 @@ ccc19x <- foo
   
   #Laboratory values
   {
-    ccc19x$der_nlr <- NA
+    #L1. Neutrophil:Lympocyte ratio, using categorical values
+    ccc19x$der_nlr_cat <- NA
     
     #High
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('LO','WNL'))] <- 'HI'
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('LO'))] <- 'HI'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('LO','WNL'))] <- 'HI'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('LO'))] <- 'HI'
     
     #Low
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('HI'))] <- 'LO'
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('WNL','HI'))] <- 'LO'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('HI'))] <- 'LO'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('WNL','HI'))] <- 'LO'
     
     #Neither high nor low
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('WNL'))] <- 'Neither'
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('LO'))] <- 'Neither'
-    ccc19x$der_nlr[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('HI'))] <- 'Neither'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('WNL'))] <- 'Neither'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('LO'))] <- 'Neither'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('HI'))] <- 'Neither'
     
-    ccc19x$der_nlr <- factor(ccc19x$der_nlr)
-    summary(ccc19x$der_nlr[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_nlr_cat <- factor(ccc19x$der_nlr_cat)
+    summary(ccc19x$der_nlr_cat[ccc19x$redcap_repeat_instrument == ''])
     
   }
   #Other
