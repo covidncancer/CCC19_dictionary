@@ -500,6 +500,48 @@ ccc19x <- foo
   ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
   summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
   
+  #O20. ATE complications (MI, CVA)
+  ccc19x$der_ATE_comp <- NA
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+  
+  #Present
+  for(i in temp.ref)
+    ccc19x$der_ATE_comp[which(ccc19x[,i] == 1)] <- 1
+  
+  #Not present, something else checked besides unknown
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
+  for(i in 1:nrow(ccc19x))
+    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp[i])) ccc19x$der_ATE_comp[i] <- 0
+  
+  #Unknown
+  
+  #Baseline
+  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+  for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == ''))
+    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+  
+  #Followup
+  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+  for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+  
+  #Merge baseline and followup if discrepancy
+  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+  {
+    temp.ref <- which(ccc19x$record_id == i)
+    temp <- ccc19x$der_ATE_comp[temp.ref]
+    temp <- as.numeric(unique(temp[!is.na(temp)]))
+    if(length(temp) > 0)
+    {
+      if(any(temp == 1)) ccc19x$der_ATE_comp[temp.ref] <- 1
+      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp[temp.ref] <- 99
+      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp[temp.ref] <- 0
+    }
+  }
+  
+  ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
+  summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
+  
   #O16. Arrhythmia complications
   ccc19x$der_arry <- 0
   ccc19x$der_arry[which(ccc19x$c19_complications_card___71908006 == 1|
