@@ -1864,6 +1864,25 @@ ccc19x <- foo
     ccc19x$der_surgery2 <- relevel(ccc19x$der_surgery2, ref = 'None')
     summary(ccc19x$der_surgery2[ccc19x$redcap_repeat_instrument == ''])
     
+    #D19. Baseline VTE
+    ccc19x$der_VTE_baseline <- NA
+    
+    #Present
+    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___128053003 ==1|
+                                    ccc19x$significant_comorbidities___59282003 == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '128053003|59282003|unk'))
+    for(i in which(is.na(ccc19x$der_VTE_baseline)))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_VTE_baseline[i] <- 0
+    
+    #Unknown
+    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___unk ==1 &
+                                    is.na(ccc19x$der_VTE_baseline))] <- 99
+    
+    ccc19x$der_VTE_baseline <- as.factor(ccc19x$der_VTE_baseline)
+    summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
     #D7. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
     summary(ccc19x$der_comorbid_no)
