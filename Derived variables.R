@@ -127,7 +127,10 @@ ccc19x <- foo
     }
     
     #Factor
-    ccc19x$der_hosp<- as.factor(ccc19x$der_hosp)
+    ccc19x$der_hosp <- as.factor(ccc19x$der_hosp)
+    
+    #Relevel
+    #ccc19x$der_hosp <- relevel(ccc19x$der_hosp, ref = '1')
     
     summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
     
@@ -260,8 +263,10 @@ ccc19x <- foo
     summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
     
     #O10. Severe composite outcome v3 (death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation)
-    #Partial derived
-    ccc19x$der_severe3 <- NA
+    
+    #Default is did not have the outcome
+    ccc19x$der_severe3 <- 0
+    
     ccc19x$der_severe3[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_ICU == 1)] <- 1
@@ -269,6 +274,7 @@ ccc19x <- foo
     
     #Factor
     ccc19x$der_severe3 <- as.factor(ccc19x$der_severe3)
+    #ccc19x$der_severe3 <- relevel(ccc19x$der_severe3, ref = '1')
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
     
     ##WHO Ordinal scale derived
@@ -798,6 +804,7 @@ ccc19x <- foo
     # ccc19x$der_dead30 <- ccc19x$mortality
     # ccc19x$der_dead30[which(ccc19x$der_dead30 == 88)] <- NA
     
+    #Default is not dead at 30 days
     ccc19x$der_dead30 <- 0
     
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument != 'followup')
@@ -834,6 +841,7 @@ ccc19x <- foo
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
     
     ccc19x$der_dead30 <- as.factor(ccc19x$der_dead30)
+    #ccc19x$der_dead30 <- relevel(ccc19x$der_dead30, ref = '1')
     summary(ccc19x$der_dead30[ccc19x$redcap_repeat_instrument == ''])
     
   }
@@ -1760,6 +1768,14 @@ ccc19x <- foo
     ccc19x$der_race <- relevel(ccc19x$der_race, ref = 'Non-Hispanic White')
     summary(ccc19x$der_race)
     
+    #D4A. Collapse all but NHW
+    ccc19x$der_race_collapsed <- ccc19x$der_race
+    ccc19x$der_race_collapsed[ccc19x$der_race_collapsed %in% c('Hispanic','Non-Hispanic Black')] <- 'Other'
+    ccc19x$der_race_collapsed <- droplevels(ccc19x$der_race_collapsed)
+    
+    summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    
+    
     "obesity"
     ##D5. derived variable coding the obesity status (binary)
     
@@ -1914,6 +1930,24 @@ ccc19x <- foo
     ccc19x$der_VTE_baseline <- as.factor(ccc19x$der_VTE_baseline)
     summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
     
+    #D20. Baseline dementia
+    ccc19x$der_dementia <- NA
+    
+    #Present
+    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___52448006 ==1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '52448006|unk'))
+    for(i in which(is.na(ccc19x$der_dementia)))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_dementia[i] <- 0
+    
+    #Unknown
+    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___unk ==1 &
+                                is.na(ccc19x$der_dementia))] <- 99
+    
+    ccc19x$der_dementia <- as.factor(ccc19x$der_dementia)
+    summary(ccc19x$der_dementia[ccc19x$redcap_repeat_instrument == ''])
+    
     #D7. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
     summary(ccc19x$der_comorbid_no)
@@ -1923,6 +1957,13 @@ ccc19x <- foo
     ccc19x$der_comorbid_no_collapsed[which(ccc19x$der_comorbid_no %in% c('2','3','4'))] <- 2
     ccc19x$der_comorbid_no_collapsed <- factor(ccc19x$der_comorbid_no_collapsed)
     summary(ccc19x$der_comorbid_no_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D8b. Simplified # of comorbidities 2
+    ccc19x$der_comorbid_no_collapsed2 <- as.character(ccc19x$der_comorbid_no)
+    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('1','2'))] <- '1 to 2'
+    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('3','4'))] <- '3+'
+    ccc19x$der_comorbid_no_collapsed2 <- factor(ccc19x$der_comorbid_no_collapsed2)
+    summary(ccc19x$der_comorbid_no_collapsed2[ccc19x$redcap_repeat_instrument == ''])
     
     #D9. Diabetes mellitus
     ccc19x$der_dm2 <- NA
@@ -2249,8 +2290,19 @@ ccc19x <- foo
     ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
     ccc19x$der_heme[which(ccc19x$cancer_type %in% Heme|ccc19x$cancer_type_2 %in% Heme)] <- 1
     ccc19x$der_heme <- factor(ccc19x$der_heme)
-    summary(ccc19x$der_heme)
+    summary(ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca11 Primary heme type
+    ccc19x$der_heme_type <- NA
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3171"))] <- 'Acute myeloid malignances'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C4345","C3174","C3247"))] <- 'Chronic myeloid malignancies'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908"))] <- 'Aggressive lymphoid malignancies'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3163","C3209","C8504","C4341","C4337","C9308","C3106"))] <- 'Indolent lymphoid malignancies'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% PCDs)] <- 'Plasma cell neoplasms'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C27134","OTH_H"))] <- 'Other'
+    ccc19x$der_heme_type <- factor(ccc19x$der_heme_type)
+    summary(ccc19x$der_heme_type[ccc19x$redcap_repeat_instrument == ''])
+      
     #Ca9 Solid indicator
     SolidNOS = c("C132146","C4039","C3708","C3538","C4912", "C9063", "C9061","C6389","C3224", "C9231","C4815", "C9325", "C3809", "C4906",
                  "C7355", "C9385", "C3267","C4013", "C3871","C4627", "C3270", "C7541","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538",
