@@ -104,6 +104,7 @@ ccc19x <- foo
                             ccc19x$hosp_status_fu %in% c(1:3) | 
                             ccc19x$current_status_fu %in% c(5:8) |
                             ccc19x$current_status_clinical_fu %in% c(4:8) |
+                            ccc19x$who_ordinal_scale %in% 3:7|
                             ccc19x$c19_anticoag_reason_fu___3 == 1) #Can only be true if hospitalized
     ] <- 1
     
@@ -118,11 +119,13 @@ ccc19x <- foo
     {
       temp.ref <- which(ccc19x$record_id == i)
       temp <- ccc19x$der_hosp[temp.ref]
+      temp2 <- ccc19x$der_hosp[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp[2:length(temp)] == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 99
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 99
       }
     }
     
@@ -135,60 +138,129 @@ ccc19x <- foo
     summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
     
     "ICU"
-    #O3. Derived variable indicating time in the ICU
+    #O3. Derived variable indicating time in the ICU (ever/never)
     ccc19x$der_ICU <- NA
     
+    #Yes
+    
+    #Baseline
     ccc19x$der_ICU[which(
       ccc19x$hosp_status %in% c(2:3) | 
         ccc19x$current_status %in% c(7,8) | 
         ccc19x$worst_status_clinical %in% c("7","8")| 
         ccc19x$current_status_clinical %in% c("7","8"))] <- 1
-    ccc19x$der_ICU[which(ccc19x$severity_of_covid_19_v2 == 99 &
-                           ccc19x$hosp_status == 99 &
-                           ccc19x$worst_status_clinical %in% c("OTH", "99") & 
-                           ccc19x$current_status_clinical %in% c("OTH", "99"))] <- 99
-    ccc19x$der_ICU[which(is.na(ccc19x$der_ICU))] <- 0
     
-    ccc19x$fuicu <- NA
-    ccc19x$fuicu[which(ccc19x$hosp_status_fu %in% c(2:3) | 
-                         ccc19x$current_status_fu %in% c(7,8) | 
-                         ccc19x$current_status_clinical_fu %in% c(7,8))] <--1
-    fuicus <- ccc19x$record_id[which(ccc19x$fuicu == 1)]
-    ccc19x$der_ICU[which(ccc19x$record_id %in% fuicus)] <- 1
+    #Follow-up
+    ccc19x$der_ICU[which(
+      ccc19x$hosp_status_fu %in% c(2:3) | 
+        ccc19x$current_status_fu %in% c(7,8) | 
+        ccc19x$current_status_clinical_fu %in% c("7","8"))] <- 1
     
-    icu.num <- length(unique(ccc19x$record_id[which(ccc19x$der_ICU == 1)]))
-    icu.num/length(unique(ccc19x$record_id))
+    #No
+    
+    #Baseline
+    ccc19x$der_ICU[which((
+      ccc19x$hosp_status %in% c(0:1) |  
+        ccc19x$worst_status_clinical %in% 1:6) &
+        is.na(ccc19x$der_ICU))] <- 0
+    
+    #Follow-up
+    ccc19x$der_ICU[which((
+      ccc19x$hosp_status_fu %in% c(0:1)) &
+        is.na(ccc19x$der_ICU))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_ICU[which((ccc19x$hosp_status == 99 |
+                            ccc19x$worst_status_clinical == 99) & 
+                           is.na(ccc19x$der_ICU))] <- 99
+    
+    #Follow-up
+    ccc19x$der_ICU[which((ccc19x$hosp_status_fu == 99) & 
+                           is.na(ccc19x$der_ICU))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ICU[temp.ref]
+      temp2 <- ccc19x$der_ICU[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 99
+      }
+    }
     
     #Factor
     ccc19x$der_ICU <- as.factor(ccc19x$der_ICU)
+    summary(ccc19x$der_ICU[ccc19x$redcap_repeat_instrument == ''])
     
     "intubated"
     #O4. derived variable indicating if patients were intubated or not
     ccc19x$der_intubated <- NA
     
-    #initial form
+    #Yes
     
+    #Baseline
     ccc19x$der_intubated[which(ccc19x$resp_failure_tx ==6 | 
                                  ccc19x$current_status_clinical == 8 | 
                                  ccc19x$worst_status_clinical == 8)] <- 1
-    ccc19x$der_intubated[which(ccc19x$current_status_clinical %in% c("OTH", "99") &
-                                 ccc19x$worst_status_clinical %in% c("OTH", "99"))] <- 99
-    ccc19x$der_intubated[which(is.na(ccc19x$der_intubated))] <- 0
     
-    #followup form
-    ccc19x$fuintubated <- NA
-    ccc19x$fuintubated[which(ccc19x$resp_failure_tx_fu ==6 | 
-                               ccc19x$current_status_clinical_fu == 8)] <--1
-    fuintubateds <- ccc19x$record_id[which(ccc19x$fuintubated == 1)]
-    ccc19x$der_intubated[ccc19x$record_id %in% fuintubateds] <- 1
+    #Follow-up
+    ccc19x$der_intubated[which(ccc19x$resp_failure_tx_fu ==6 | 
+                                 ccc19x$current_status_clinical_fu == 8 | 
+                                 ccc19x$who_ordinal_scale %in% 6:7)] <- 1
     
-    int.num <- length(unique(ccc19x$record_id[which(ccc19x$der_intubated == 1)]))
-    int.num/length(unique(ccc19x$record_id))
+    
+    #No
+    
+    #Baseline
+    ccc19x$der_intubated[which((ccc19x$o2_requirement_c19 == 0 |
+                                  ccc19x$resp_failure_tx %in% 1:5 |
+                                  ccc19x$worst_status_clinical %in% 1:7) &
+                                 is.na(ccc19x$der_intubated))] <- 0
+    
+    #Follow-up
+    ccc19x$der_intubated[which((ccc19x$o2_requirement_fu == 0 |
+                                  ccc19x$resp_failure_tx_fu %in% 1:5) &
+                                 is.na(ccc19x$der_intubated))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_intubated[which((ccc19x$o2_requirement_c19 == 99 |
+                                 ccc19x$resp_failure_tx == 99 |
+                                 ccc19x$worst_status_clinical == 99) &
+                                 is.na(ccc19x$der_intubated))] <- 99
+    
+    #Followup
+    ccc19x$der_intubated[which((ccc19x$o2_requirement_fu == 99 |
+                                  ccc19x$resp_failure_tx_fu == 99) &
+                                 is.na(ccc19x$der_intubated))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_intubated[temp.ref]
+      temp2 <- ccc19x$der_intubated[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_intubated[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_intubated[temp.ref] <- 99
+      }
+    }
     
     #Factor
     ccc19x$der_intubated <- as.factor(ccc19x$der_intubated)
+    summary(ccc19x$der_intubated[ccc19x$redcap_repeat_instrument == ''])
     
-    length(unique(ccc19x$record_id))
     
     "recovered"                           
     #O5. Derived recovery variable
@@ -224,15 +296,58 @@ ccc19x <- foo
     
     #O7. supplemental O2
     ccc19x$der_o2_ever <- NA
+    
+    #Yes
     ccc19x$der_o2_ever[which(ccc19x$o2_requirement == 1)] <- 1
     ccc19x$der_o2_ever[which(ccc19x$o2_requirement_c19 == 1)] <- 1
     ccc19x$der_o2_ever[which(ccc19x$resp_failure_tx %in% c(1:6))] <- 1
     ccc19x$der_o2_ever[which(ccc19x$o2_requirement_fu == 1)] <- 1
     ccc19x$der_o2_ever[which(ccc19x$resp_failure_tx_fu %in% c(1:6))] <- 1
     
+    #No
+    
+    #Baseline
+    ccc19x$der_o2_ever[which(ccc19x$o2_requirement == 0 & 
+                               ccc19x$o2_requirement_c19 == 0 &
+                               ccc19x$c19_complications_pulm___409622000 == 0 &
+                               is.na(ccc19x$der_o2_ever))] <- 0
+    
+    #Follow-up
+    ccc19x$der_o2_ever[which(ccc19x$o2_requirement_fu == 0 &
+                               ccc19x$c19_complications_pulm_fu___409622000 == 0 &
+                               is.na(ccc19x$der_o2_ever))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_o2_ever[which((ccc19x$o2_requirement_c19 == 99|
+                               (ccc19x$c19_complications_pulm___409622000 == 1 &
+                                  ccc19x$resp_failure_tx == 99)) &
+                               is.na(ccc19x$der_o2_ever))] <- 99
+    
+    #Follow-up
+    ccc19x$der_o2_ever[which((ccc19x$o2_requirement_fu == 99|
+                                (ccc19x$c19_complications_pulm_fu___409622000 == 1 &
+                                   ccc19x$resp_failure_tx_fu == 99)) &
+                               is.na(ccc19x$der_o2_ever))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_o2_ever[temp.ref]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          if((is.na(temp[1])|temp[1] == 0) & all(temp[!is.na(temp)][2:length(temp[!is.na(temp)])] == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 99
+      }
+    }
+    
     #Factor
     ccc19x$der_o2_ever <- as.factor(ccc19x$der_o2_ever)
-    summary(ccc19x$der_o2_ever)
+    summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
+    
     
     #O8. Severe composite outcome
     ccc19x$der_severe <- NA
@@ -263,14 +378,26 @@ ccc19x <- foo
     summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
     
     #O10. Severe composite outcome v3 (death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation)
+    ccc19x$der_severe3 <- NA
     
-    #Default is did not have the outcome
-    ccc19x$der_severe3 <- 0
-    
+    #Present
     ccc19x$der_severe3[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_ICU == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_intubated == 1)] <- 1
+    
+    #Absent (requires all five derived variables to be 0, with extra logic for hosp)
+    ccc19x$der_severe3[which(ccc19x$der_deadbinary == 0 &
+                               ((ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)|ccc19x$der_hosp == 0) &
+                               ccc19x$der_ICU == 0 &
+                               ccc19x$der_intubated == 0)] <- 0
+    
+    #Unknown (requires all five derived variables to be 99)
+    ccc19x$der_severe3[which(ccc19x$der_deadbinary == 99 &
+                               ccc19x$der_hosp == 99 & 
+                               ccc19x$der_o2_ever == 99 &
+                               ccc19x$der_ICU == 99 &
+                               ccc19x$der_intubated == 99)] <- 99
     
     #Factor
     ccc19x$der_severe3 <- as.factor(ccc19x$der_severe3)
