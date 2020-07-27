@@ -2258,6 +2258,33 @@ ccc19x <- foo
     ccc19x$der_anytx <- factor(ccc19x$der_anytx)
     summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca10a. Any cytotoxic within 3 months
+    ccc19x$der_any_cyto <- as.character(ccc19x$der_anytx)
+    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 'Yes' & ccc19x$treatment_modality___685 == 1)] <- 'Cytotoxic'
+    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 'Yes')] <- 'No'
+    
+    ccc19x$der_any_cyto <- factor(ccc19x$der_any_cyto)
+    summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10b. Any targeted therapy or ICI within 3 months
+    ccc19x$der_any_targeted_ici <- as.character(ccc19x$der_anytx)
+    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes' & 
+                                        (ccc19x$treatment_modality___58229 == 1|
+                                           ccc19x$what_immunotherapy %in% c('45838','45446',
+                                                                            '45170','45838-45446')))] <- 'Exposed'
+    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes')] <- 'No'
+    
+    ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
+    summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10c. Any transplant or cellular therapy within 3 months
+    ccc19x$der_any_sct_cellular <- as.character(ccc19x$der_anytx)
+    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes' & ccc19x$treatment_modality___45186 == 1)] <- 'Exposed'
+    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes')] <- 'No'
+    
+    ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
+    summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
+    
     "ttype"
     #Ca2. Derived variable for type of tumor
     HemeNOS = c("C27134", "C9300","OTH_H")
