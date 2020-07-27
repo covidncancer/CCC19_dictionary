@@ -811,12 +811,15 @@ ccc19x <- foo
     
     #1. Calculated time to death is <= 30 days
     temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
-    temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
-    ccc19x$der_dead30[temp.ref[temp.ref2]] <- 1
+    if(attr(temp.diff, 'units') == 'days') temp.ref2 <- which(temp.diff[temp.ref] <= 30)
+    if(attr(temp.diff, 'units') == 'seconds') temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
+    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+    ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
     # #2. 30-day mortality flag is set
     temp.ref2 <- which(ccc19x$mortality[temp.ref] == 0)
-    ccc19x$der_dead30[temp.ref[temp.ref2]] <- 1
+    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+    ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
     #3. 30-day follow-up form is filled out as death
     temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 30 & (
@@ -839,6 +842,11 @@ ccc19x <- foo
     #6. Rescind status if days to death > 30
     temp <- ccc19x$record_id[which(ccc19x$days_to_death_combined > 30)]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
+    
+    #7. Declare unknown if days to death cannot be calculated
+    temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead30 == 0 &
+            (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
+    ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 99
     
     ccc19x$der_dead30 <- as.factor(ccc19x$der_dead30)
     #ccc19x$der_dead30 <- relevel(ccc19x$der_dead30, ref = '1')
@@ -2264,6 +2272,7 @@ ccc19x <- foo
     ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 'Yes')] <- 'No'
     
     ccc19x$der_any_cyto <- factor(ccc19x$der_any_cyto)
+    ccc19x$der_any_cyto <- relevel(ccc19x$der_any_cyto, ref = 'No')
     summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10b. Any targeted therapy or ICI within 3 months
@@ -2275,6 +2284,7 @@ ccc19x <- foo
     ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes')] <- 'No'
     
     ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
+    ccc19x$der_any_targeted_ici <- relevel(ccc19x$der_any_targeted_ici, ref = 'No')
     summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10c. Any transplant or cellular therapy within 3 months
@@ -2283,6 +2293,7 @@ ccc19x <- foo
     ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes')] <- 'No'
     
     ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
+    ccc19x$der_any_sct_cellular <- relevel(ccc19x$der_any_sct_cellular, ref = 'No')
     summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
     
     "ttype"
