@@ -160,13 +160,15 @@ ccc19x <- foo
     
     #Baseline
     ccc19x$der_ICU[which((
-      ccc19x$hosp_status %in% c(0:1) |  
+      ccc19x$hosp_status %in% c(0:1) | 
+        ccc19x$current_status %in% c(1,3,5) |
         ccc19x$worst_status_clinical %in% 1:6) &
         is.na(ccc19x$der_ICU))] <- 0
     
     #Follow-up
     ccc19x$der_ICU[which((
-      ccc19x$hosp_status_fu %in% c(0:1)) &
+      ccc19x$hosp_status_fu %in% c(0:1) |
+        ccc19x$worst_complications_severity_fu %in% 0:2) &
         is.na(ccc19x$der_ICU))] <- 0
     
     #Unknown
@@ -336,11 +338,13 @@ ccc19x <- foo
     {
       temp.ref <- which(ccc19x$record_id == i)
       temp <- ccc19x$der_o2_ever[temp.ref]
+      temp2 <- ccc19x$der_o2_ever[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp[!is.na(temp)][2:length(temp[!is.na(temp)])] == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 99
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 99
       }
     }
     
@@ -349,7 +353,7 @@ ccc19x <- foo
     summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
     
     
-    #O8. Severe composite outcome
+    #O8. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe[which(ccc19x$der_intubated == 1)] <- 1
@@ -363,7 +367,7 @@ ccc19x <- foo
     ccc19x$der_severe <- as.factor(ccc19x$der_severe)
     summary(ccc19x$der_severe[ccc19x$redcap_repeat_instrument == ''])
     
-    #O9. Severe composite outcome v2 (no severe hosp)
+    #O9. Severe composite outcome v2 - mechanical ventilation, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe2 <- NA
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$der_intubated == 1)] <- 1
@@ -377,7 +381,7 @@ ccc19x <- foo
     ccc19x$der_severe2 <- as.factor(ccc19x$der_severe2)
     summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
     
-    #O10. Severe composite outcome v3 (death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation)
+    #O10. Severe composite outcome v3 - death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation
     ccc19x$der_severe3 <- NA
     
     #Present
