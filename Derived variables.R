@@ -2473,7 +2473,7 @@ ccc19x <- foo
     summary(ccc19x$der_heme_type[ccc19x$redcap_repeat_instrument == ''])
       
     #Ca9 Solid indicator
-    SolidNOS = c("C132146","C4039","C3708","C3538","C4912", "C9063", "C9061","C6389","C3224", "C9231","C4815", "C9325", "C3809", "C4906",
+    SolidNOS = c("C132146","C4039","C3708","C3538","C9061","C6389","C3224", "C9231","C4815", "C9325", "C3809", "C4906",
                  "C7355", "C9385", "C3267","C4013", "C3871","C4627", "C3270", "C7541","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538",
                  "C4189","C2921","OTH","OTH_S")
     Breast = c("C4872")
@@ -2486,6 +2486,7 @@ ccc19x <- foo
     Pancreas = "C3850"
     GI <- c(LowerGI,UpperGI,Pancreas)
     Prostate <- c("C4863")
+    GU_Other <- c("C9063","C4912")
     GU_Renal <- c("C7355", "C9385", "C3267")
     GYN = c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")
     HNSCC = c("C4013", "C3871")
@@ -2781,6 +2782,24 @@ ccc19x <- foo
     
     ccc19x$der_imwg <- factor(ccc19x$der_imwg)
     summary(ccc19x$der_imwg[which(ccc19x$der_ttype == 'Heme')])
+    
+    #X3. Modified Khorana (?)
+    ccc19x$der_VTE_risk <- NA
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Pancreas,UpperGI,Neuro)|
+                    ccc19x$cancer_type_2 %in% c(Pancreas,UpperGI,Neuro)))] <- 'High-risk VTE malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Thoracic,GYN,GU_Other,GU_Renal,Lymph,PCDs)|
+                                 ccc19x$cancer_type_2 %in% c(Thoracic,GYN,GU_Other,GU_Renal,Lymph,PCDs)))] <- 'Intermediate-risk VTE malignancy'
+    
+    temp <- SolidAll[!SolidAll %in% c(Pancreas,UpperGI,Neuro,Thoracic,GYN,GU_Other,GU_Renal,Breast,Prostate,LowerGI)]
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Breast,Prostate,LowerGI,temp)|
+                                 ccc19x$cancer_type_2 %in% c(Breast,Prostate,LowerGI,temp)))] <- 'Low-risk VTE malignancy'
+    
+    temp <- Heme[!Heme %in% c(Lymph,PCDs)]
+    ccc19x$der_VTE_risk[which(ccc19x$cancer_type %in% temp|
+                                 ccc19x$cancer_type_2 %in% temp)] <- 'Other hematologic malignancy'
+    
+    ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
+    summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
     
   }
 }
