@@ -631,7 +631,8 @@ ccc19x <- foo
       temp <- temp[!is.na(temp)]
       temp <- unique(temp)
       if(length(temp) >= 1)
-        if(length(temp) == 1 & temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
+        if(length(temp) == 1)
+          if(temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
     }
     
     ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
@@ -1034,12 +1035,12 @@ ccc19x <- foo
     for(i in 1:length(trial.ref))
     {
       temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx___rxcui_5521','covid_19_trial_tx___rxcui_18631')]
-      if(temp[1] == 1 & temp[2] == 0) temp2 <- 'HCQ alone' else
-        if(temp[1] == 0 & temp[2] == 1) temp2 <- 'AZ alone' else
-          if(temp[1] == 1 & temp[2] == 1) temp2 <- 'AZ+HCQ' else temp2 <- 'Neither HCQ nor AZ'
+      if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
+        if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
+          if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
           
-          if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp2 == 'AZ alone' |
-             ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp2 == 'HCQ alone' |
+          if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
+             ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
              ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ' 
           
     }
@@ -1051,13 +1052,16 @@ ccc19x <- foo
       for(i in 1:length(trial.ref))
       {
         temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx_fu___rxcui_5521','covid_19_trial_tx_fu___rxcui_18631')]
-        if(temp[1] == 1 & temp[2] == 0) temp2 <- 'HCQ alone' else
-          if(temp[1] == 0 & temp[2] == 1) temp2 <- 'AZ alone' else
-            if(temp[1] == 1 & temp[2] == 1) temp2 <- 'AZ+HCQ' else temp2 <- 'Neither HCQ nor AZ'
+        if(temp[1] != 0 & temp[2] != 0)
+        {
+        if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
+          if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
+            if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
             
-            if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp2 == 'AZ alone' |
-               ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp2 == 'HCQ alone' |
+            if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
+               ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
                ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ'
+        }
       }         
     }
     
@@ -2807,6 +2811,7 @@ ccc19x <- foo
 }
 
 #Save functions here
+save(ccc19x, file = paste(Sys.time(),'.data with derived variables for 4th data lock QA.RData'))
 save(ccc19x, file = paste(Sys.time(),'.data with derived variables for SABCS.RData'))
 save(ccc19x, file = paste(Sys.time(),'.data with derived variables for Cancer Discovery R0.RData'))
 save(ccc19x, file = paste('ccc19 data with derived variables for AACR_', Sys.time(),'.RData', sep = ''))
