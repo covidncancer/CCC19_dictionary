@@ -2822,7 +2822,7 @@ ccc19x <- foo
 }
 
 #Save functions here
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables for 4th data lock QA.RData'))
+save(ccc19x, file = paste(Sys.time(),'.data with derived variables (4th data lock).RData'))
 save(ccc19x, file = paste(Sys.time(),'.data with derived variables for SABCS.RData'))
 save(ccc19x, file = paste(Sys.time(),'.data with derived variables for Cancer Discovery R0.RData'))
 save(ccc19x, file = paste('ccc19 data with derived variables for AACR_', Sys.time(),'.RData', sep = ''))
