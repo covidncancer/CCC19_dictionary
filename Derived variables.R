@@ -1662,6 +1662,63 @@ ccc19x <- foo
     ccc19x$der_ac_apa_baseline <- factor(ccc19x$der_ac_apa_baseline)
     summary(ccc19x$der_ac_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
     
+    #Rx11a. Anticoagulation at baseline
+    ccc19x$der_ac_baseline <- NA
+    ccc19x$der_ac_baseline[which(ccc19x$concomitant_meds___b01a == 1)] <- 1
+    
+    summary(factor(ccc19x$der_ac_baseline))
+    
+    #Unexposed
+    ccc19x$der_ac_baseline[which(is.na(ccc19x$der_ac_baseline) &
+                                   ccc19x$concomitant_meds___b01a == 0 &
+                                   ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    summary(factor(ccc19x$der_ac_baseline))
+    
+    #Unknown baseline
+    ccc19x$der_ac_baseline[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_ac_baseline))] <- 99
+    
+    summary(factor(ccc19x$der_ac_baseline))
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_baseline[i] <- NA
+    
+    summary(factor(ccc19x$der_ac_baseline))
+    
+    ccc19x$der_ac_baseline <- factor(ccc19x$der_ac_baseline)
+    summary(ccc19x$der_ac_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx11b. Aspirin or APA at baseline
+    ccc19x$der_apa_baseline <- NA
+    ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___n02ba == 1|
+                                    ccc19x$concomitant_meds___b01ac == 1)] <- 1
+    
+    summary(factor(ccc19x$der_apa_baseline))
+    
+    #Unexposed
+    ccc19x$der_apa_baseline[which(is.na(ccc19x$der_apa_baseline) & ccc19x$concomitant_meds___n02ba == 0 &
+                                    ccc19x$concomitant_meds___b01ac == 0 &
+                                    ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    summary(factor(ccc19x$der_apa_baseline))
+    
+    #Unknown baseline
+    ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_apa_baseline))] <- 99
+    
+    summary(factor(ccc19x$der_apa_baseline))
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_apa_baseline[i] <- NA
+    
+    summary(factor(ccc19x$der_apa_baseline))
+    
+    ccc19x$der_apa_baseline <- factor(ccc19x$der_apa_baseline)
+    summary(ccc19x$der_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx12. Aspirin or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_as_apa <- NA
     ccc19x$der_as_apa[which(ccc19x$concomitant_meds___n02ba == 1|
