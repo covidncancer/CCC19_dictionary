@@ -2331,6 +2331,7 @@ ccc19x <- foo
                                                                      "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
+    ccc19x$der_region[is.na(ccc19x$der_region)] <- 'Other'
     
     #Factor
     ccc19x$der_region <- as.factor(ccc19x$der_region)
