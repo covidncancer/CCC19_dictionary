@@ -2755,6 +2755,45 @@ ccc19x <- foo
     ccc19x$der_il6 <- factor(ccc19x$der_il6)
     summary(ccc19x$der_il6[ccc19x$redcap_repeat_instrument == ''])
     
+    #L11. creatinine
+    ccc19x$der_creat <- NA
+    ccc19x$der_creat[which(ccc19x$creat == 0)] <- 'Normal'
+    ccc19x$der_creat[which(ccc19x$creat == 1)] <- 'Abnormal'
+    ccc19x$der_creat[which(ccc19x$creat == 99)] <- 'Unknown'
+    ccc19x$der_creat[which(ccc19x$labs == 3|ccc19x$creat == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_creat <- factor(ccc19x$der_creat)
+    summary(ccc19x$der_creat[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L12. wbc
+    ccc19x$der_wbc <- NA
+    ccc19x$der_wbc[which(ccc19x$wbc_range == 'WNL')] <- 'Normal'
+    ccc19x$der_wbc[which(ccc19x$wbc_range == 'LO')] <- 'Low'
+    ccc19x$der_wbc[which(ccc19x$wbc_range == 'HI')] <- 'High'
+    ccc19x$der_wbc[which(ccc19x$wbc_range == 99)] <- 'Unknown'
+    ccc19x$der_wbc[which(ccc19x$labs == 3|ccc19x$wbc_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_wbc <- factor(ccc19x$der_wbc)
+    summary(ccc19x$der_wbc[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L13. hgb
+    ccc19x$der_hgb <- NA
+    ccc19x$der_hgb[which(ccc19x$hgb_range == 'WNL')] <- 'Normal'
+    ccc19x$der_hgb[which(ccc19x$hgb_range == 'LO')] <- 'Low'
+    ccc19x$der_hgb[which(ccc19x$hgb_range == 'HI')] <- 'High'
+    ccc19x$der_hgb[which(ccc19x$hgb_range == 99)] <- 'Unknown'
+    ccc19x$der_hgb[which(ccc19x$labs == 3|ccc19x$hgb_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_hgb <- factor(ccc19x$der_hgb)
+    summary(ccc19x$der_hgb[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L14. plt
+    ccc19x$der_plt <- NA
+    ccc19x$der_plt[which(ccc19x$plt_range == 'WNL')] <- 'Normal'
+    ccc19x$der_plt[which(ccc19x$plt_range == 'LO')] <- 'Low'
+    ccc19x$der_plt[which(ccc19x$plt_range == 'HI')] <- 'High'
+    ccc19x$der_plt[which(ccc19x$plt_range == 99)] <- 'Unknown'
+    ccc19x$der_plt[which(ccc19x$labs == 3|ccc19x$plt_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_plt <- factor(ccc19x$der_plt)
+    summary(ccc19x$der_plt[ccc19x$redcap_repeat_instrument == ''])
+    
   }
   
   #Other
