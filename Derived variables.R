@@ -277,7 +277,8 @@ ccc19x <- foo
     ccc19x$furecovered <- NA
     ccc19x$furecovered[which(ccc19x$covid_19_status_fu %in% c("1", "1b"))] <- 1
     furecovereds <- ccc19x$record_id[which(ccc19x$furecovered == 1)]
-    ccc19x$der_recovered[which(ccc19x$record_id %in% ccc19x$furecovereds)] <- 1
+    ccc19x$der_recovered[which(ccc19x$record_id %in% furecovereds)] <- 1
+    rm(furecoverds)
     
     #Factor
     ccc19x$der_recovered <- as.factor(ccc19x$der_recovered)
@@ -1911,6 +1912,7 @@ ccc19x <- foo
     #D1. age with estimation for categoricals
     ccc19x$der_age <- ccc19x$age_exact
     ccc19x$der_age[which(is.na(ccc19x$der_age))] <- ccc19x$age[which(is.na(ccc19x$der_age))]
+    ccc19x$der_age[which(ccc19x$der_age == 1)] <- 18
     ccc19x$der_age[which(ccc19x$der_age == 2)] <- (18+29)/2
     ccc19x$der_age[which(ccc19x$der_age == 3)] <- (30+39)/2
     ccc19x$der_age[which(ccc19x$der_age == 4)] <- (40+49)/2
@@ -1919,6 +1921,11 @@ ccc19x <- foo
     ccc19x$der_age[which(ccc19x$der_age == 7)] <- (70+79)/2
     ccc19x$der_age[which(ccc19x$der_age == 8)] <- (80+89)/2
     ccc19x$der_age[which(ccc19x$der_age == 9)] <- 90
+    
+    #Treat unknown as missing
+    ccc19x$der_age[which(ccc19x$der_age == 10)] <- NA
+    
+    summary(ccc19x$der_age[ccc19x$redcap_repeat_instrument == ''])
     
     "sex"
     #D2. Sex
@@ -1944,7 +1951,7 @@ ccc19x <- foo
     ccc19x$der_smoking <- as.factor(ccc19x$der_smoking)
     ccc19x$der_smoking <- relevel(ccc19x$der_smoking, ref = 'Never')
     
-    summary(ccc19x$der_smoking)
+    summary(ccc19x$der_smoking[ccc19x$redcap_repeat_instrument == ''])
     
     "race"
     #D4. Derived variable for race/ethnicity
@@ -1966,7 +1973,7 @@ ccc19x <- foo
     #Factor
     ccc19x$der_race <- as.factor(ccc19x$der_race)
     ccc19x$der_race <- relevel(ccc19x$der_race, ref = 'Non-Hispanic White')
-    summary(ccc19x$der_race)
+    summary(ccc19x$der_race[ccc19x$redcap_repeat_instrument == ''])
     
     #D4A. Collapse all but NHW
     ccc19x$der_race_collapsed <- ccc19x$der_race
@@ -1991,15 +1998,17 @@ ccc19x <- foo
     ccc19x$der_obesity[which(temp < 30)] <- 'Not obese'
     
     #Records with height/weight recorded, no BMI
-    temp.ref <- which(is.na(ccc19x$bmi) & ccc19x$height != '' & ccc19x$weight != '' & 
+    temp.ref <- which(is.na(ccc19x$bmi) & !ccc19x$height %in% c('','unk') & !ccc19x$weight %in% c('','unk') & 
                         ccc19x$significant_comorbidities___238136002 == 0 &
                         ccc19x$significant_comorbidities___414916001 == 0)
     
     #removing rows that are missing height or weight
     temp <- ccc19x[temp.ref,c('height','weight')]
+    temp$height <- trimws(temp$height)
+    temp$weight <- trimws(temp$weight)
     
     #fixing transposed data
-    temp[grepl("kg", temp$height, fixed = TRUE), c("height", "weight")] <- temp[grepl("kg", temp$height, fixed = TRUE), c("weight", "height")]
+    temp[grepl("kg", temp$height, ignore.case = T), c("height", "weight")] <- temp[grepl("kg", temp$height, ignore.case = T), c("weight", "height")]
     temp[grepl("lb", temp$height, fixed = TRUE), c("height", "weight")] <- temp[grepl("lb", temp$height, fixed = TRUE), c("weight", "height")]
     temp[grepl("'", temp$weight, fixed = TRUE), c("height", "weight")] <- temp[grepl("'", temp$weight, fixed = TRUE), c("weight", "height")]
     
@@ -2018,13 +2027,23 @@ ccc19x <- foo
     x <- paste(x[[1]], 'inches')
     temp[grepl("'", temp$height, fixed = TRUE), "height"] <- x
     
-    #fixed the two height entries in the format "x foot y inches"
+    #fixed the height entries in the format "x foot y inches"
     temp[grepl("foot", temp$height, fixed = TRUE), "height"] <- "61 inches"
+    temp$height[which(temp$height == '5 ft 2.5 in')] <- '62.5 inches'
+    temp$height[which(temp$height == '5 feet 3 inches')] <- '63 inches'
+    temp$height[which(temp$height == '5 feet 4 inches')] <- '64 inches'
+    temp$height[which(temp$height == '5 feet 6 inches')] <- '66 inches'
+    temp$height[which(temp$height == '5 feet 7 inches')] <- '67 inches'
     temp$height[which(temp$height == '5 feet 8 inches')] <- '68 inches'
+    temp$height[which(temp$height == '5 feet 9 inches')] <- '69 inches'
+    temp$height[which(temp$height == '5 feet 10 inches')] <- '70 inches'
+    temp$height[which(temp$height == '5 feet 11 inches')] <- '71 inches'
+    temp$height[which(temp$height == '6 feet 2 inches')] <- '74 inches'
     
     #converted height strings into double values and put them in a new column
+    #temp$height <- gsub(temp$height, pattern = 'C$', replacement = 'cm')
     temp$mheight <- temp$height
-    temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '')
+    temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
     temp$mheight <- as.numeric(temp$mheight)
     
     #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
@@ -2641,6 +2660,13 @@ ccc19x <- foo
     #Level
     ccc19x$der_no_drugs[which(ccc19x$der_no_drug >= 3)] <- '3+'
     
+    #If a systemic treatment modality was checked but no drug names available --> missing
+    ccc19x$der_no_drugs[which((ccc19x$treatment_modality___685 == 1 | 
+                                 ccc19x$treatment_modality___694 == 1 |
+                                 ccc19x$treatment_modality___58229 == 1 |
+                                 ccc19x$treatment_modality___691 == 1) & ccc19x$der_no_drugs == 0
+    )] <- NA
+    
     ccc19x$der_no_drugs <- factor(ccc19x$der_no_drugs)
     summary(ccc19x$der_no_drugs[ccc19x$redcap_repeat_instrument == ''])
     
@@ -2717,6 +2743,7 @@ ccc19x <- foo
     ccc19x$der_ddimer[which(ccc19x$ddimer == 99)] <- 'Unknown'
     ccc19x$der_ddimer[which(ccc19x$labs == 3|ccc19x$ddimer == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ddimer <- factor(ccc19x$der_ddimer)
+    ccc19x$der_ddimer <- relevel(ccc19x$der_ddimer, ref = 'Normal')
     summary(ccc19x$der_ddimer[ccc19x$redcap_repeat_instrument == ''])
     
     #L3. Fibrinogen
@@ -2726,6 +2753,7 @@ ccc19x <- foo
     ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 99)] <- 'Unknown'
     ccc19x$der_fibrinogen[which(ccc19x$labs == 3|ccc19x$fibrinogen == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_fibrinogen <- factor(ccc19x$der_fibrinogen)
+    ccc19x$der_fibrinogen <- relevel(ccc19x$der_fibrinogen, ref = 'Normal')
     summary(ccc19x$der_fibrinogen[ccc19x$redcap_repeat_instrument == ''])
     
     #L4. PT
@@ -2735,6 +2763,7 @@ ccc19x <- foo
     ccc19x$der_pt[which(ccc19x$pt == 99)] <- 'Unknown'
     ccc19x$der_pt[which(ccc19x$labs == 3|ccc19x$pt == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_pt <- factor(ccc19x$der_pt)
+    ccc19x$der_pt <- relevel(ccc19x$der_pt, ref = 'Normal')
     summary(ccc19x$der_pt[ccc19x$redcap_repeat_instrument == ''])
     
     #L5. aPTT
@@ -2744,6 +2773,7 @@ ccc19x <- foo
     ccc19x$der_aptt[which(ccc19x$aptt == 99)] <- 'Unknown'
     ccc19x$der_aptt[which(ccc19x$labs == 3|ccc19x$aptt == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_aptt <- factor(ccc19x$der_aptt)
+    ccc19x$der_aptt <- relevel(ccc19x$der_aptt, ref = 'Normal')
     summary(ccc19x$der_aptt[ccc19x$redcap_repeat_instrument == ''])
     
     #L6. High-sensitivity troponin
@@ -2753,6 +2783,7 @@ ccc19x <- foo
     ccc19x$der_hs_trop[which(ccc19x$hs_trop == 99)] <- 'Unknown'
     ccc19x$der_hs_trop[which(ccc19x$labs == 3|ccc19x$hs_trop == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_hs_trop <- factor(ccc19x$der_hs_trop)
+    ccc19x$der_hs_trop <- relevel(ccc19x$der_hs_trop, ref = 'Normal')
     summary(ccc19x$der_hs_trop[ccc19x$redcap_repeat_instrument == ''])
     
     #L7. BNP
@@ -2762,6 +2793,7 @@ ccc19x <- foo
     ccc19x$der_bnp[which(ccc19x$bnp == 99)] <- 'Unknown'
     ccc19x$der_bnp[which(ccc19x$labs == 3|ccc19x$bnp == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_bnp <- factor(ccc19x$der_bnp)
+    ccc19x$der_bnp <- relevel(ccc19x$der_bnp, ref = 'Normal')
     summary(ccc19x$der_bnp[ccc19x$redcap_repeat_instrument == ''])
     
     #L8. crp
@@ -2771,6 +2803,7 @@ ccc19x <- foo
     ccc19x$der_crp[which(ccc19x$crp == 99)] <- 'Unknown'
     ccc19x$der_crp[which(ccc19x$labs == 3|ccc19x$crp == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_crp <- factor(ccc19x$der_crp)
+    ccc19x$der_crp <- relevel(ccc19x$der_crp, ref = 'Normal')
     summary(ccc19x$der_crp[ccc19x$redcap_repeat_instrument == ''])
     
     #L9. ldh
@@ -2780,6 +2813,7 @@ ccc19x <- foo
     ccc19x$der_ldh[which(ccc19x$ldh == 99)] <- 'Unknown'
     ccc19x$der_ldh[which(ccc19x$labs == 3|ccc19x$ldh == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ldh <- factor(ccc19x$der_ldh)
+    ccc19x$der_ldh <- relevel(ccc19x$der_ldh, ref = 'Normal')
     summary(ccc19x$der_ldh[ccc19x$redcap_repeat_instrument == ''])
     
     #L10. il6
@@ -2789,6 +2823,7 @@ ccc19x <- foo
     ccc19x$der_il6[which(ccc19x$il6 == 99)] <- 'Unknown'
     ccc19x$der_il6[which(ccc19x$labs == 3|ccc19x$il6 == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_il6 <- factor(ccc19x$der_il6)
+    ccc19x$der_il6 <- relevel(ccc19x$der_il6, ref = 'Normal')
     summary(ccc19x$der_il6[ccc19x$redcap_repeat_instrument == ''])
     
     #L11. creatinine
@@ -2798,6 +2833,7 @@ ccc19x <- foo
     ccc19x$der_creat[which(ccc19x$creat == 99)] <- 'Unknown'
     ccc19x$der_creat[which(ccc19x$labs == 3|ccc19x$creat == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_creat <- factor(ccc19x$der_creat)
+    ccc19x$der_creat <- relevel(ccc19x$der_creat, ref = 'Normal')
     summary(ccc19x$der_creat[ccc19x$redcap_repeat_instrument == ''])
     
     #L12. wbc
@@ -2808,6 +2844,7 @@ ccc19x <- foo
     ccc19x$der_wbc[which(ccc19x$wbc_range == 99)] <- 'Unknown'
     ccc19x$der_wbc[which(ccc19x$labs == 3|ccc19x$wbc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_wbc <- factor(ccc19x$der_wbc)
+    ccc19x$der_wbc <- relevel(ccc19x$der_wbc, ref = 'Normal')
     summary(ccc19x$der_wbc[ccc19x$redcap_repeat_instrument == ''])
     
     #L13. hgb
@@ -2818,6 +2855,7 @@ ccc19x <- foo
     ccc19x$der_hgb[which(ccc19x$hgb_range == 99)] <- 'Unknown'
     ccc19x$der_hgb[which(ccc19x$labs == 3|ccc19x$hgb_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_hgb <- factor(ccc19x$der_hgb)
+    ccc19x$der_hgb <- relevel(ccc19x$der_hgb, ref = 'Normal')
     summary(ccc19x$der_hgb[ccc19x$redcap_repeat_instrument == ''])
     
     #L14. plt
@@ -2828,7 +2866,30 @@ ccc19x <- foo
     ccc19x$der_plt[which(ccc19x$plt_range == 99)] <- 'Unknown'
     ccc19x$der_plt[which(ccc19x$labs == 3|ccc19x$plt_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_plt <- factor(ccc19x$der_plt)
+    ccc19x$der_plt <- relevel(ccc19x$der_plt, ref = 'Normal')
     summary(ccc19x$der_plt[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L15. alc
+    ccc19x$der_alc <- NA
+    ccc19x$der_alc[which(ccc19x$alc_range == 'WNL')] <- 'Normal'
+    ccc19x$der_alc[which(ccc19x$alc_range == 'LO')] <- 'Low'
+    ccc19x$der_alc[which(ccc19x$alc_range == 'HI')] <- 'High'
+    ccc19x$der_alc[which(ccc19x$alc_range == 99)] <- 'Unknown'
+    ccc19x$der_alc[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_alc <- factor(ccc19x$der_alc)
+    ccc19x$der_alc <- relevel(ccc19x$der_alc, ref = 'Normal')
+    summary(ccc19x$der_alc[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L16. anc
+    ccc19x$der_anc <- NA
+    ccc19x$der_anc[which(ccc19x$anc_range == 'WNL')] <- 'Normal'
+    ccc19x$der_anc[which(ccc19x$anc_range == 'LO')] <- 'Low'
+    ccc19x$der_anc[which(ccc19x$anc_range == 'HI')] <- 'High'
+    ccc19x$der_anc[which(ccc19x$anc_range == 99)] <- 'Unknown'
+    ccc19x$der_anc[which(ccc19x$labs == 3|ccc19x$anc_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_anc <- factor(ccc19x$der_anc)
+    ccc19x$der_anc <- relevel(ccc19x$der_anc, ref = 'Normal')
+    summary(ccc19x$der_anc[ccc19x$redcap_repeat_instrument == ''])
     
   }
   
