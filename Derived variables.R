@@ -2593,20 +2593,56 @@ ccc19x <- foo
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = '~/Box Sync/CCC19 VUMC data/Mapping - medications/ccc19-ca-drugs-05-18.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2020-08-08.csv', header = T, stringsAsFactors = F)
+    
+    #Just keep the rows with drug information
+    drugs <- drugs[drugs$drug1 != '',]
+    
+    for(i in 13:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
+    
+    #Add structured drugs later
+    temp.exclude <- c('Acalabrutinib','Dasatinib','Fedratinib','Ibrutinib',
+                      'Imatinib','Nilotinib','Ruxolitinib','Tofacitinib',
+                      'Ipilimumab','Nivolumab','Pembrolizumab','Atezolizumab',
+                      'Durvalumab','Avelumab','Cemiplimab',
+                      'ADT','Degarelix','Goserelin','Leuprolide','Leuprorelin')
     
     ccc19x$der_no_drugs <- NA
-    temp.ref <- which(drugs$drug3 != '')
-    ccc19x$der_no_drugs[which(ccc19x$record_id %in% drugs$record_id[temp.ref])] <- 3
-    temp.ref <- which(drugs$drug2 != '' & drugs$drug3 == '')
-    ccc19x$der_no_drugs[which(ccc19x$record_id %in% drugs$record_id[temp.ref])] <- 2
-    temp.ref <- which(drugs$drug1 != '' & drugs$drug2 == '')
-    ccc19x$der_no_drugs[which(ccc19x$record_id %in% drugs$record_id[temp.ref])] <- 1
+    
+    #Count the drugs excluding the structured drugs
+    drugs.ref <- which(colnames(drugs) == 'drug1'):which(colnames(drugs) == 'drug12')
+    for(i in 1:nrow(drugs))
+    {
+      temp.ref <- which(ccc19x$record_id == drugs$record_id[i] & ccc19x$redcap_repeat_instrument == '')
+      temp <- drugs[i,drugs.ref]
+      temp <- temp[!is.na(temp)]
+      temp <- temp[temp != '']
+      temp <- temp[!temp %in% temp.exclude]
+      ccc19x$der_no_drugs[temp.ref] <- length(temp)
+    }
+    
+    #Now add the structured drugs - targeted therapy and ADT
+    temp.ref <- c(grep(colnames(ccc19x), pattern = 'what_targeted_tx___l'), which(colnames(ccc19x) == 'adt'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      temp[which(temp == 99)] <- 0
+      if(is.na(ccc19x$der_no_drugs[i])) ccc19x$der_no_drugs[i] <- sum(temp)
+      else ccc19x$der_no_drugs[i] <- ccc19x$der_no_drugs[i] + sum(temp)
+    }
+    
+    #Immunotherapy
+    temp.ref <- which(ccc19x$what_immunotherapy %in% c(45838,45446,45170))
+    ccc19x$der_no_drugs[temp.ref] <- ccc19x$der_no_drugs[temp.ref] + 1
+    temp.ref <- which(ccc19x$what_immunotherapy %in% c('45838-45446'))
+    ccc19x$der_no_drugs[temp.ref] <- ccc19x$der_no_drugs[temp.ref] + 2
+    
+    #Level
+    ccc19x$der_no_drugs[which(ccc19x$der_no_drug >= 3)] <- '3+'
     
     ccc19x$der_no_drugs <- factor(ccc19x$der_no_drugs)
     summary(ccc19x$der_no_drugs[ccc19x$redcap_repeat_instrument == ''])
-    
-    
     
     #Ca5. ECOG 0, 1, 2+
     ccc19x$der_ecogcat2 <- ccc19x$ecog_status
