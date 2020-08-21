@@ -278,7 +278,7 @@ ccc19x <- foo
     ccc19x$furecovered[which(ccc19x$covid_19_status_fu %in% c("1", "1b"))] <- 1
     furecovereds <- ccc19x$record_id[which(ccc19x$furecovered == 1)]
     ccc19x$der_recovered[which(ccc19x$record_id %in% furecovereds)] <- 1
-    rm(furecoverds)
+    rm(furecovereds)
     
     #Factor
     ccc19x$der_recovered <- as.factor(ccc19x$der_recovered)
@@ -925,7 +925,10 @@ ccc19x <- foo
       ccc19x$der_righttime3[temp.ref] <- temp.time
     }
     
-    temp <- ccc19x$record_id[which(as.numeric(ccc19x$der_righttime3 - ccc19x$der_lefttime3)/(24*60*60) >= 30)]
+    temp.diff <- ccc19x$der_righttime3 - ccc19x$der_lefttime3
+    if(attr(temp.diff, 'units') == 'days') temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
+    if(attr(temp.diff, 'units') == 'seconds') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/(24*60*60) >= 30)]
+    
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
     
     ccc19x$der_d30 <- factor(ccc19x$der_d30)
