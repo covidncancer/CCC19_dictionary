@@ -972,11 +972,11 @@ ccc19x <- foo
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
     #5. Days to death <= 30
-    temp <- ccc19x$record_id[which(ccc19x$days_to_death_combined <= 30)]
+    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 30)]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
     #6. Rescind status if days to death > 30
-    temp <- ccc19x$record_id[which(ccc19x$days_to_death_combined > 30)]
+    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30)]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
     
     #7. Declare unknown if days to death cannot be calculated
