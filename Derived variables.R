@@ -2321,7 +2321,8 @@ ccc19x <- foo
                             ccc19x$significant_comorbidities___19829001 == 1|
                             ccc19x$significant_comorbidities___195967001 == 1|
                             ccc19x$significant_comorbidities___84004001 == 1|
-                            ccc19x$significant_comorbidities___427046006 == 1)] <- 1
+                            ccc19x$significant_comorbidities___427046006 == 1|
+                            ccc19x$o2_requirement == 1)] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___13645005|
