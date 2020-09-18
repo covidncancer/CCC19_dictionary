@@ -2602,7 +2602,9 @@ ccc19x <- foo
     Myeloid = c("C3247", "C3171", "C4345", "C3106", "C3174")
     Myeloid_AML = c("C3171")
     PCDs = c("C3242","C4665","C3819")
-    Heme <- c(HemeNOS,Lymph,Myeloid,PCDs)
+    
+    temp <- read.csv(file = 'Heme.csv', header = F, stringsAsFactors = F)
+    Heme <- temp$V1
     
     ccc19x$der_ttype <- NA
     ccc19x$der_ttype[which(ccc19x$cancer_type %in% Heme)] <- 'Heme'
@@ -2656,7 +2658,9 @@ ccc19x <- foo
     Neuro_other = c("C5111","C132067", "C3270", "C7541")
     Sarcoma = c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")
     Thoracic = c("C4917", "C2926", "C4878", "C3234","C3411")
-    SolidAll <- c(SolidNOS,Breast,GI,Prostate,GYN,Thoracic)
+    
+    temp <- read.csv(file = 'Solid.csv', header = F, stringsAsFactors = F)
+    SolidAll <- temp$V1
     
     ccc19x$der_solid <- NA
     ccc19x$der_solid[ccc19x$redcap_repeat_instrument == ''] <- 0
@@ -2765,7 +2769,6 @@ ccc19x <- foo
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 VUMC data/Institution list.csv', header = T, stringsAsFactors = F)
-    sites$Center.ID <- gsub(sites$Center.ID, pattern = '-', replacement = '')
     
     #ccc19x institutions, first
     temp <- unique(ccc19x$ccc19_institution)
@@ -3107,7 +3110,7 @@ ccc19x <- foo
     ###############
     
     #High levels of baseline missingness
-    dict <- read.csv(file = 'COVID19AndCancerConsortiumCCC1_DataDictionary_2020-07-31.csv', header = T, stringsAsFactors = F)
+    dict <- read.csv(file = 'CCC19_DataDictionary.csv', header = T, stringsAsFactors = F)
     colnames(dict)[1] <- 'name'
     
     ccc19x$missing <- 0
