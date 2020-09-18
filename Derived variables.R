@@ -2545,6 +2545,52 @@ ccc19x <- foo
     ccc19x$der_activetx <- relevel(ccc19x$der_activetx, ref = 'None')
     summary(ccc19x$der_activetx)
     
+    #Ca1a. Derived variable for what type of active cancer therapy within 3 months
+    ccc19x$der_activetx3mo <- NA
+    
+    ccc19x$der_activetx3mo[which(ccc19x$on_treatment == 0 |
+                                   (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% c(88)))] <- 'None'
+    
+    temp.ref <- which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
+                        ccc19x$hx_treatment == 1)
+    
+    #First everything but chemo
+    ccc19x$der_activetx3mo[temp.ref[which(ccc19x$treatment_modality___694[temp.ref] == 1|
+                                            ccc19x$treatment_modality___58229[temp.ref] == 1|
+                                            ccc19x$treatment_modality___691[temp.ref] == 1|
+                                            ccc19x$treatment_modality___695[temp.ref] == 1|
+                                            ccc19x$treatment_modality___45186[temp.ref] == 1|
+                                            ccc19x$treatment_modality___14051[temp.ref] == 1|
+                                            ccc19x$treatment_modality___oth[temp.ref] == 1|
+                                            ccc19x$treatment_modality___45215[temp.ref] == 1)
+    ]] <- 'Non-cytotoxic'
+    
+    #Chemo - overwrite if needed
+    ccc19x$der_activetx3mo[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 1)]] <- 'Cytotoxic'
+    
+    #Re-assign surgery only to no active treatment
+    ccc19x$der_activetx3mo[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___45186[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___45215[temp.ref] == 0 &
+                                            ccc19x$treatment_modality___14051[temp.ref] == 1)
+    ]] <- 'None'
+    
+    ccc19x$der_activetx3mo[which(ccc19x$on_treatment == 99 | 
+                                   ccc19x$recent_treatment == 99 |
+                                   ccc19x$hx_treatment == 99 |
+                                   (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))
+    )] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_activetx3mo <- as.factor(ccc19x$der_activetx3mo)
+    ccc19x$der_activetx3mo <- relevel(ccc19x$der_activetx3mo, ref = 'None')
+    summary(ccc19x$der_activetx3mo[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca10. Any treatment in past 3 months
     ccc19x$der_anytx <- NA
     
@@ -3067,8 +3113,12 @@ ccc19x <- foo
     ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] <- ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] + 2
     ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown'|is.na(ccc19x$der_ecogcat2))] <- NA
     
+    #Recast unknowns
+    ccc19x$der_imwg[which(ccc19x$der_comorbid_no == '99')] <- 99
+    ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown')] <- 99
+    
     ccc19x$der_imwg <- factor(ccc19x$der_imwg)
-    summary(ccc19x$der_imwg[which(ccc19x$der_ttype == 'Heme')])
+    summary(ccc19x$der_imwg[ccc19x$redcap_repeat_instrument == ''])
     
     #X3. Modified Khorana
     ccc19x$der_VTE_risk <- NA
