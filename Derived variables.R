@@ -3381,6 +3381,88 @@ ccc19x <- foo
     #Remove leading semicolon
     ccc19x$der_problems <- gsub(ccc19x$der_problems, pattern = '^; ', replacement = '')
     
+    #X6 Modified Charlson
+    ccc19x$der_ccc19cci <- NA
+    
+    #Set to 0 for patients with any comorbidities or "none" checked
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_co') & colnames(ccc19x) != 'significant_comorbidities___unk')
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1)) ccc19x$der_ccc19cci[i] <- 0
+    
+    #CAD
+    temp.ref <- which(ccc19x$significant_comorbidities___53741008 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #CHF
+    temp.ref <- which(ccc19x$significant_comorbidities___42343007 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #PVD
+    temp.ref <- which(ccc19x$significant_comorbidities___400047006 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #CVA
+    temp.ref <- which(ccc19x$significant_comorbidities___275526006 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #COPD
+    temp.ref <- which(ccc19x$significant_comorbidities___13645005 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #Dementia
+    temp.ref <- which(ccc19x$significant_comorbidities___52448006 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #Diabetes without complications
+    temp.ref <- which(ccc19x$significant_comorbidities___73211009 == 1 &
+                        ccc19x$significant_comorbidities___46177005 == 0 &
+                        ccc19x$significant_comorbidities___723190009 == 0 &
+                        ccc19x$significant_comorbidities___236435004 == 0 &
+                        ccc19x$significant_comorbidities___53741008 == 0 &
+                        ccc19x$significant_comorbidities___46177005 == 0 &
+                        ccc19x$significant_comorbidities___190388001 == 0)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #Diabetes with complications
+    temp.ref <- which((ccc19x$significant_comorbidities___73211009 == 1 &
+                        (ccc19x$significant_comorbidities___723190009 == 1 |
+                        ccc19x$significant_comorbidities___46177005 == 1 |
+                        ccc19x$significant_comorbidities___236435004 == 1 |
+                        ccc19x$significant_comorbidities___53741008 == 1 |
+                        ccc19x$significant_comorbidities___46177005 == 1)) |
+                        ccc19x$significant_comorbidities___190388001 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 2
+    
+    #Renal
+    temp.ref <- which(ccc19x$significant_comorbidities___723190009 == 1 |
+                        ccc19x$significant_comorbidities___46177005 == 1 |
+                        ccc19x$significant_comorbidities___236435004 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 2
+    
+    #Liver disease NOS
+    temp.ref <- which(ccc19x$significant_comorbidities___235856003 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #Cirrhosis
+    temp.ref <- which(ccc19x$significant_comorbidities___19943007 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 3
+    
+    #Rheum/autoimmune disease
+    temp.ref <- which(ccc19x$significant_comorbidities___24526004 == 1 |
+                        ccc19x$significant_comorbidities___85828009 == 1)
+    ccc19x$der_ccc19cci[temp.ref] <- ccc19x$der_ccc19cci[temp.ref] + 1
+    
+    #HIV with CD4 <200
+    temp.ref <- which(ccc19x$significant_comorbidities___62479008 == 1)
+    temp.ref2 <- which(ccc19x$hiv_cd4[temp.ref] < 200)
+    ccc19x$der_ccc19cci[temp.ref[temp.ref2]] <- ccc19x$der_ccc19cci[temp.ref[temp.ref2]] + 6
+    
+    #Unknown (unknown is the ONLY "comorbidity" that is checked)
+    temp.ref <- which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_ccc19cci))
+    ccc19x$der_ccc19cci[temp.ref] <- 99
+    
+    ccc19x$der_ccc19cci <- factor(ccc19x$der_ccc19cci)
+    summary(ccc19x$der_ccc19cci[ccc19x$redcap_repeat_instrument == ''])
   }
 }
 
