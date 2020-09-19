@@ -2635,6 +2635,18 @@ ccc19x <- foo
     ccc19x$der_any_sct_cellular <- relevel(ccc19x$der_any_sct_cellular, ref = 'No')
     summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca12. Allogeneic transplant within one year (default is no)
+    ccc19x$der_allo365 <- 0
+    ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
+                           ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
+    ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
+                           ccc19x$transplant_cellular_timing == 5)] <- 99
+    ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
+                               is.na(ccc19x$transplant_cellular_timing))] <- NA
+    
+    ccc19x$der_allo365 <- factor(ccc19x$der_allo365)
+    summary(ccc19x$der_allo365[ccc19x$redcap_repeat_instrument == ''])
+    
     "ttype"
     #Ca2. Derived variable for type of tumor
     HemeNOS = c("C27134", "C9300","OTH_H")
@@ -2738,7 +2750,6 @@ ccc19x <- foo
     ccc19x$der_cancer_status <- as.factor(ccc19x$der_cancer_status)
     ccc19x$der_cancer_status <- relevel(ccc19x$der_cancer_status, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status)
-    
     
     #Ca4. Number of anti-cancer drugs
     
