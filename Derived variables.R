@@ -3048,6 +3048,28 @@ ccc19x <- foo
     ccc19x$der_anc <- relevel(ccc19x$der_anc, ref = 'Normal')
     summary(ccc19x$der_anc[ccc19x$redcap_repeat_instrument == ''])
     
+    #L17. Troponin
+    ccc19x$der_tni <- NA
+    ccc19x$der_tni[which(ccc19x$tni == 0)] <- 'Normal'
+    ccc19x$der_tni[which(ccc19x$tni == 1)] <- 'Abnormal'
+    ccc19x$der_tni[which(ccc19x$tni == 99)] <- 'Unknown'
+    ccc19x$der_tni[which(ccc19x$labs == 3|ccc19x$tni == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_tni <- factor(ccc19x$der_tni)
+    ccc19x$der_tni <- relevel(ccc19x$der_tni, ref = 'Normal')
+    summary(ccc19x$der_tni[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L18. Combined lymphopenia and neutropenia
+    ccc19x$der_lnpenia <- NA
+    ccc19x$der_lnpenia[which(ccc19x$anc_range == 'LO')] <- 'Neutropenia'
+    ccc19x$der_lnpenia[which(ccc19x$alc_range == 'LO')] <- 'Lymphopenia'
+    ccc19x$der_lnpenia[which(ccc19x$alc_range == 'LO' & ccc19x$anc_range == 'LO')] <- 'Both'
+    ccc19x$der_lnpenia[which(ccc19x$alc_range %in% c('WNL','HI') & ccc19x$anc_range %in% c('WNL','HI'))] <- 'Neither'
+    
+    #If either is unknown - mark as unknown
+    ccc19x$der_lnpenia[which(ccc19x$alc_range == 99 | ccc19x$anc_range == 99)] <- 'Unknown'
+    
+    ccc19x$der_lnpenia <- factor(ccc19x$der_lnpenia)
+    summary(ccc19x$der_lnpenia[ccc19x$redcap_repeat_instrument == ''])
   }
   
   #Other
