@@ -2647,6 +2647,18 @@ ccc19x <- foo
     ccc19x$der_allo365 <- factor(ccc19x$der_allo365)
     summary(ccc19x$der_allo365[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca13. Autologous transplant within 100 days (default is no)
+    ccc19x$der_auto100 <- 0
+    ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
+                               ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
+    ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
+                               ccc19x$transplant_cellular_timing == 5)] <- 99
+    ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
+                               is.na(ccc19x$transplant_cellular_timing))] <- NA
+    
+    ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
+    summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
+    
     "ttype"
     #Ca2. Derived variable for type of tumor
     HemeNOS = c("C27134", "C9300","OTH_H")
