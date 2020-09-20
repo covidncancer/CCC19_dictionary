@@ -310,7 +310,7 @@ ccc19x <- foo
     #No
     
     #Baseline
-    ccc19x$der_o2_ever[which(ccc19x$o2_requirement == 0 & 
+    ccc19x$der_o2_ever[which(ccc19x$o2_requirement %in% c('',0,99) & 
                                ccc19x$o2_requirement_c19 == 0 &
                                ccc19x$c19_complications_pulm___409622000 == 0 &
                                is.na(ccc19x$der_o2_ever))] <- 0
