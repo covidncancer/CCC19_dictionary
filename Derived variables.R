@@ -714,6 +714,55 @@ ccc19x <- foo
     ccc19x$der_arry <- factor(ccc19x$der_arry)
     summary(ccc19x$der_arry[ccc19x$redcap_repeat_instrument == ''])
     
+    #O21. CV events 
+    ccc19x$der_CV_event <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007') & 
+                        grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_CV_event[which(ccc19x[,i] == 1)] <- 1
+    
+    ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 1|ccc19x$hotn_pressors_fu == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & 
+                        !grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007|unk'))
+    for(i in 1:nrow(ccc19x))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_CV_event[i])) ccc19x$der_CV_event[i] <- 0
+    
+    ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 0 & is.na(ccc19x$der_CV_event))] <- 0
+    ccc19x$der_CV_event[which(ccc19x$hotn_pressors_fu == 0 & is.na(ccc19x$der_CV_event))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_CV_event[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_CV_event[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CV_event[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CV_event[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_CV_event <- as.factor(ccc19x$der_CV_event)
+    summary(ccc19x$der_CV_event[ccc19x$redcap_repeat_instrument == ''])
+    
     #O17. Worst severity of complications 
     ccc19x$der_worst <- NA
     
