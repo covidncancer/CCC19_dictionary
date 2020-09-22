@@ -356,6 +356,8 @@ ccc19x <- foo
     
     #O8. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
+    
+    #Present
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe[which(ccc19x$der_intubated == 1)] <- 1
     ccc19x$der_severe[which(ccc19x$der_ICU == 1)] <- 1
@@ -363,6 +365,17 @@ ccc19x <- foo
     ccc19x$der_severe[which(ccc19x$current_status_clinical %in% 6:8)] <- 1
     ccc19x$der_severe[which(ccc19x$worst_status_clinical %in% 6:8)] <- 1
     ccc19x$der_severe[which(ccc19x$current_status_clinical %in% 6:8)] <- 1
+    
+    #Absent (requires all 3 derived variables to be absent, and not meeting another criteria)
+    ccc19x$der_severe[which(ccc19x$der_deadbinary == 0 &
+                              ccc19x$der_ICU == 0 &
+                              ccc19x$der_intubated == 0 &
+                              is.na(ccc19x$der_severe))] <- 0
+    
+    #Unknown (requires all 3 derived variables to be 99)
+    ccc19x$der_severe[which(ccc19x$der_deadbinary == 99 &
+                               ccc19x$der_ICU == 99 &
+                               ccc19x$der_intubated == 99)] <- 99
     
     #Factor
     ccc19x$der_severe <- as.factor(ccc19x$der_severe)
@@ -373,10 +386,20 @@ ccc19x <- foo
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$der_intubated == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$der_ICU == 1)] <- 1
-    ccc19x$der_severe2[which(ccc19x$severity_of_covid_19_v2 == 3)] <- 1
     ccc19x$der_severe2[which(ccc19x$current_status_clinical %in% 7:8)] <- 1
     ccc19x$der_severe2[which(ccc19x$worst_status_clinical %in% 7:8)] <- 1
     ccc19x$der_severe2[which(ccc19x$current_status_clinical %in% 7:8)] <- 1
+    
+    #Absent (requires all 3 derived variables to be absent, and not meeting another criteria)
+    ccc19x$der_severe2[which(ccc19x$der_deadbinary == 0 &
+                              ccc19x$der_ICU == 0 &
+                              ccc19x$der_intubated == 0 &
+                              is.na(ccc19x$der_severe2))] <- 0
+    
+    #Unknown (requires all 3 derived variables to be 99)
+    ccc19x$der_severe2[which(ccc19x$der_deadbinary == 99 &
+                              ccc19x$der_ICU == 99 &
+                              ccc19x$der_intubated == 99)] <- 99
     
     #Factor
     ccc19x$der_severe2 <- as.factor(ccc19x$der_severe2)
