@@ -2909,7 +2909,7 @@ ccc19x <- foo
     
     
     #Ca6: Center type
-    sites <- read.csv(file = '~/Box Sync/CCC19 VUMC data/Institution list.csv', header = T, stringsAsFactors = F)
+    sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
     #ccc19x institutions, first
     temp <- unique(ccc19x$ccc19_institution)
