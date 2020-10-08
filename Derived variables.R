@@ -3535,7 +3535,30 @@ ccc19x <- foo
     
     ccc19x$der_ccc19cci <- factor(ccc19x$der_ccc19cci)
     summary(ccc19x$der_ccc19cci[ccc19x$redcap_repeat_instrument == ''])
-  }
+  
+    
+    #X7. Breast biomarkers
+    ccc19x$der_breast_biomarkers <- NA
+    
+    #HR+, HER2-
+    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 0)] <- 1
+    
+    #HR+, HER2+
+    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 1)] <- 2
+    
+    #HR-, HER2+
+    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 1)] <- 3
+    
+    #Triple negative
+    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___tnbc == 1)] <- 4
+    
+    #Unknown
+    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___99 == 1 & is.na(ccc19x$der_breast_biomarkers))] <- 99
+    
+    ccc19x$der_breast_biomarkers <- factor(ccc19x$der_breast_biomarkers)
+    summary(ccc19x$der_breast_biomarkers[ccc19x$redcap_repeat_instrument == ''])
+    
+    }
 }
 
 #Save functions here
