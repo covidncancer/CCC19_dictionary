@@ -3362,6 +3362,7 @@ ccc19x <- foo
     
     #ADT (prostate)
     temp.ref <- which((ccc19x$adt == 99|is.na(ccc19x$adt)) &
+                        !ccc19x$hx_treatment %in% c(3,88) &
                         (ccc19x$cancer_type == 'C4863'|ccc19x$cancer_type_2 == 'C4863'))
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
