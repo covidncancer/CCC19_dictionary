@@ -3,6 +3,9 @@
 #Create an object that is a copy of the original data
 ccc19x <- foo
 
+#Define the desired suffix for the save function
+suffix <- 'data with derived variables (4th data lock)'
+
 ##DERIVED VARIABLES to recode:
 {
   #Outcomes
@@ -3562,11 +3565,5 @@ ccc19x <- foo
     }
 }
 
-#Save functions here
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables (Lancet LTTE).RData'))
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables.RData'))
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables (4th data lock).RData'))
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables for SABCS.RData'))
-save(ccc19x, file = paste(Sys.time(),'.data with derived variables for Cancer Discovery R0.RData'))
-save(ccc19x, file = paste('ccc19 data with derived variables for AACR_', Sys.time(),'.RData', sep = ''))
-save(ccc19x, file = paste('ccc19 data with derived variables_', Sys.time(),'.RData', sep = ''))
+#Save here
+save(ccc19x, file = paste(Sys.time(),'.',suffix,'.RData', sep = ''))
