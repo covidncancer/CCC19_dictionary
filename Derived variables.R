@@ -4,7 +4,7 @@
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (4th data lock)'
+suffix <- 'data with derived variables (thru 10-17-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -1063,7 +1063,65 @@ suffix <- 'data with derived variables (4th data lock)'
     #ccc19x$der_dead30 <- relevel(ccc19x$der_dead30, ref = '1')
     summary(ccc19x$der_dead30[ccc19x$redcap_repeat_instrument == ''])
     
-  }
+    #T9 Month and year of diagnosis, accounting for interval bounds
+    temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
+    
+    #First, extract month and year from the POSIXlt objects
+    x1 <- months(ccc19x$der_lefttime[temp.ref])
+    x2 <- months(ccc19x$der_lefttime3[temp.ref])
+    y1 <- format(ccc19x$der_lefttime[temp.ref], format = '%Y')
+    y2 <- format(ccc19x$der_lefttime3[temp.ref], format = '%Y')
+    
+    ccc19x$der_month_dx <- NA
+    temp.ref2 <- which(x1 == x2 & y1 == y2 & y1 != 2099)
+    
+    ccc19x$der_month_dx[temp.ref[temp.ref2]] <- paste(x1[temp.ref2], y1[temp.ref2])
+    ccc19x$der_month_dx <- factor(ccc19x$der_month_dx)
+    summary(ccc19x$der_month_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T10 Quarter and year of diagnosis, accounting for interval bounds
+    ccc19x$der_quarter_dx <- NA
+    
+    #Q1
+    temp.ref2 <- which(x1 %in% c('January','February','March') & 
+                         x2 %in% c('January','February','March') & y1 == y2 & y1 != 2099)
+    ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q1', y1[temp.ref2])
+    
+    #Q2
+    temp.ref2 <- which(x1 %in% c('April','May','June') & 
+                         x2 %in% c('April','May','June') & y1 == y2 & y1 != 2099)
+    ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q2', y1[temp.ref2])
+    
+    #Q3
+    temp.ref2 <- which(x1 %in% c('July','August','September') & 
+                         x2 %in% c('July','August','September') & y1 == y2 & y1 != 2099)
+    ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q3', y1[temp.ref2])
+    
+    #Q4
+    temp.ref2 <- which(x1 %in% c('October','November','December') & 
+                         x2 %in% c('October','November','December') & y1 == y2 & y1 != 2099)
+    ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q4', y1[temp.ref2])
+    
+    ccc19x$der_quarter_dx <- factor(ccc19x$der_quarter_dx)
+    summary(ccc19x$der_quarter_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T11 Hemi-year of diagnosis, accounting for interval bounds
+    ccc19x$der_hemi_dx <- NA
+    
+    #H1
+    temp.ref2 <- which(x1 %in% c('January','February','March','April','May','June') & 
+                         x2 %in% c('January','February','March','April','May','June') & y1 == y2 & y1 != 2099)
+    ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H1', y1[temp.ref2])
+    
+    #H2
+    temp.ref2 <- which(x1 %in% c('July','August','September','October','November','December') & 
+                         x2 %in% c('July','August','September','October','November','December') & y1 == y2 & y1 != 2099)
+    ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H2', y1[temp.ref2])
+    
+    ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
+    summary(ccc19x$der_hemi_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    }
   
   #Treatments
   {
