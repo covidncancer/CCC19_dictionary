@@ -4,7 +4,7 @@
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 10-17-2020)'
+suffix <- 'data with derived variables (thru 10-25-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -28,18 +28,18 @@ suffix <- 'data with derived variables (thru 10-17-2020)'
     #Unknown on primary form
     ccc19x$der_deadbinary[which(ccc19x$current_status_retro == 99)] <- 99
     
+    #Alive on followup form
+    temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+                        ccc19x$fu_reason %in% 1:2)
+    
+    ccc19x$der_deadbinary[temp.ref] <- 0
+    
     #Dead on followup form
     temp.ref <- which(ccc19x$covid_19_status_fu ==3 | 
                         ccc19x$current_status_fu == 9 |
                         ccc19x$fu_reason == 3)
     
     ccc19x$der_deadbinary[temp.ref] <- 1
-    
-    #Alive on followup form
-    temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
-                        ccc19x$fu_reason %in% 1:2)
-    
-    ccc19x$der_deadbinary[temp.ref] <- 0
     
     #Unknown on followup form
     temp.ref <- which(ccc19x$covid_19_status_fu == 99)
@@ -1002,7 +1002,7 @@ suffix <- 'data with derived variables (thru 10-17-2020)'
     
     temp.diff <- ccc19x$der_righttime3 - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
-    if(attr(temp.diff, 'units') == 'seconds') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/(24*60*60) >= 30)]
+    if(attr(temp.diff, 'units') == 'secs') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/(24*60*60) >= 30)]
     
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
     
@@ -1023,7 +1023,7 @@ suffix <- 'data with derived variables (thru 10-17-2020)'
     #1. Calculated time to death is <= 30 days
     temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
     if(attr(temp.diff, 'units') == 'days') temp.ref2 <- which(temp.diff[temp.ref] <= 30)
-    if(attr(temp.diff, 'units') == 'seconds') temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
+    if(attr(temp.diff, 'units') == 'secs') temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
