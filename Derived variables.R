@@ -1,10 +1,11 @@
 ###Code to create derived variables
+setwd("~/Box Sync/CCC19 data")
 
 #Create an object that is a copy of the original data
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 10-25-2020)'
+suffix <- 'data with derived variables (thru 10-28-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -1120,6 +1121,56 @@ suffix <- 'data with derived variables (thru 10-25-2020)'
     
     ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
     summary(ccc19x$der_hemi_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T12 Early ICU admission (within 48 hours)
+    ccc19x$der_early_icu <- NA
+    
+    #Baseline
+    ccc19x$der_early_icu[which(ccc19x$hosp_status == 3)] <- 1
+    ccc19x$der_early_icu[which(ccc19x$hosp_status == 2 & ccc19x$hosp_los_2 <= 2)] <- 1
+    ccc19x$der_early_icu[which(ccc19x$hosp_status %in% 0:1)] <- 0
+    ccc19x$der_early_icu[which(ccc19x$hosp_status == 2 & ccc19x$hosp_los_2 > 2)] <- 0
+    
+    #Follow-up if baseline was outpatient
+    temp <- ccc19x$record_id[which(ccc19x$hosp_status == 0)]
+    temp <- temp[which(ccc19x$record_id %in% temp & ccc19x$redcap_repeat_instrument == 'followup')]
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      query <- any(ccc19x$hosp_status_fu[temp.ref] == 3 |
+                     (ccc19x$hosp_status_fu[temp.ref] == 2 & ccc19x$hosp_los_fu_2[temp.ref] <= 2))
+      if(is.na(query)) query <- F
+      if(query) ccc19$der_early_icu[temp.ref] <- 1
+      query <- all(ccc19x$hosp_status_fu[temp.ref] %in% 0:1 |
+                     (ccc19x$hosp_status_fu[temp.ref] == 2 & ccc19x$hosp_los_fu_2[temp.ref] > 2))
+      if(is.na(query)) query <- F
+      if(query) ccc19x$der_early_icu[temp.ref] <- 0
+    }
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_early_icu[which(ccc19x$hosp_status == 99 & is.na(ccc19x$der_early_icu))] <- 99
+    
+    #Follow-up
+    ccc19x$der_early_icu[which(ccc19x$hosp_status_fu == 99 & is.na(ccc19x$der_early_icu))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_early_icu[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_early_icu[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_early_icu[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_early_icu[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_early_icu <- factor(ccc19x$der_early_icu)
+    summary(ccc19x$der_early_icu[ccc19x$redcap_repeat_instrument == ''])
     
     }
   
