@@ -207,17 +207,17 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     
     "intubated"
     #O4. derived variable indicating if patients were intubated or not
-    ccc19x$der_intubated <- NA
+    ccc19x$der_mv <- NA
     
     #Yes
     
     #Baseline
-    ccc19x$der_intubated[which(ccc19x$resp_failure_tx ==6 | 
+    ccc19x$der_mv[which(ccc19x$resp_failure_tx ==6 | 
                                  ccc19x$current_status_clinical == 8 | 
                                  ccc19x$worst_status_clinical == 8)] <- 1
     
     #Follow-up
-    ccc19x$der_intubated[which(ccc19x$resp_failure_tx_fu ==6 | 
+    ccc19x$der_mv[which(ccc19x$resp_failure_tx_fu ==6 | 
                                  ccc19x$current_status_clinical_fu == 8 | 
                                  ccc19x$who_ordinal_scale %in% 6:7)] <- 1
     
@@ -225,47 +225,47 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     #No
     
     #Baseline
-    ccc19x$der_intubated[which((ccc19x$o2_requirement_c19 == 0 |
+    ccc19x$der_mv[which((ccc19x$o2_requirement_c19 == 0 |
                                   ccc19x$resp_failure_tx %in% 1:5 |
                                   ccc19x$worst_status_clinical %in% 1:7) &
-                                 is.na(ccc19x$der_intubated))] <- 0
+                                 is.na(ccc19x$der_mv))] <- 0
     
     #Follow-up
-    ccc19x$der_intubated[which((ccc19x$o2_requirement_fu == 0 |
+    ccc19x$der_mv[which((ccc19x$o2_requirement_fu == 0 |
                                   ccc19x$resp_failure_tx_fu %in% 1:5) &
-                                 is.na(ccc19x$der_intubated))] <- 0
+                                 is.na(ccc19x$der_mv))] <- 0
     
     #Unknown
     
     #Baseline
-    ccc19x$der_intubated[which((ccc19x$o2_requirement_c19 == 99 |
+    ccc19x$der_mv[which((ccc19x$o2_requirement_c19 == 99 |
                                  ccc19x$resp_failure_tx == 99 |
                                  ccc19x$worst_status_clinical == 99) &
-                                 is.na(ccc19x$der_intubated))] <- 99
+                                 is.na(ccc19x$der_mv))] <- 99
     
     #Followup
-    ccc19x$der_intubated[which((ccc19x$o2_requirement_fu == 99 |
+    ccc19x$der_mv[which((ccc19x$o2_requirement_fu == 99 |
                                   ccc19x$resp_failure_tx_fu == 99) &
-                                 is.na(ccc19x$der_intubated))] <- 99
+                                 is.na(ccc19x$der_mv))] <- 99
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
       temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_intubated[temp.ref]
-      temp2 <- ccc19x$der_intubated[temp.ref][2:length(temp.ref)]
+      temp <- ccc19x$der_mv[temp.ref]
+      temp2 <- ccc19x$der_mv[temp.ref][2:length(temp.ref)]
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_intubated[temp.ref] <- 1
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_intubated[temp.ref] <- 99
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 99
       }
     }
     
     #Factor
-    ccc19x$der_intubated <- as.factor(ccc19x$der_intubated)
-    summary(ccc19x$der_intubated[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_mv <- as.factor(ccc19x$der_mv)
+    summary(ccc19x$der_mv[ccc19x$redcap_repeat_instrument == ''])
     
     
     "recovered"                           
@@ -363,7 +363,7 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     
     #Present
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 1)] <- 1
-    ccc19x$der_severe[which(ccc19x$der_intubated == 1)] <- 1
+    ccc19x$der_severe[which(ccc19x$der_mv == 1)] <- 1
     ccc19x$der_severe[which(ccc19x$der_ICU == 1)] <- 1
     ccc19x$der_severe[which(ccc19x$severity_of_covid_19_v2 == 3)] <- 1
     ccc19x$der_severe[which(ccc19x$current_status_clinical %in% 6:8)] <- 1
@@ -373,13 +373,13 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     #Absent (requires all 3 derived variables to be absent, and not meeting another criteria)
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 0 &
                               ccc19x$der_ICU == 0 &
-                              ccc19x$der_intubated == 0 &
+                              ccc19x$der_mv == 0 &
                               is.na(ccc19x$der_severe))] <- 0
     
     #Unknown (requires all 3 derived variables to be 99)
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 99 &
                                ccc19x$der_ICU == 99 &
-                               ccc19x$der_intubated == 99)] <- 99
+                               ccc19x$der_mv == 99)] <- 99
     
     #Factor
     ccc19x$der_severe <- as.factor(ccc19x$der_severe)
@@ -388,7 +388,7 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     #O9. Severe composite outcome v2 - mechanical ventilation, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe2 <- NA
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 1)] <- 1
-    ccc19x$der_severe2[which(ccc19x$der_intubated == 1)] <- 1
+    ccc19x$der_severe2[which(ccc19x$der_mv == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$der_ICU == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$current_status_clinical %in% 7:8)] <- 1
     ccc19x$der_severe2[which(ccc19x$worst_status_clinical %in% 7:8)] <- 1
@@ -397,13 +397,13 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     #Absent (requires all 3 derived variables to be absent, and not meeting another criteria)
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 0 &
                               ccc19x$der_ICU == 0 &
-                              ccc19x$der_intubated == 0 &
+                              ccc19x$der_mv == 0 &
                               is.na(ccc19x$der_severe2))] <- 0
     
     #Unknown (requires all 3 derived variables to be 99)
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 99 &
                               ccc19x$der_ICU == 99 &
-                              ccc19x$der_intubated == 99)] <- 99
+                              ccc19x$der_mv == 99)] <- 99
     
     #Factor
     ccc19x$der_severe2 <- as.factor(ccc19x$der_severe2)
@@ -416,20 +416,20 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
     ccc19x$der_severe3[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 1
     ccc19x$der_severe3[which(ccc19x$der_ICU == 1)] <- 1
-    ccc19x$der_severe3[which(ccc19x$der_intubated == 1)] <- 1
+    ccc19x$der_severe3[which(ccc19x$der_mv == 1)] <- 1
     
     #Absent (requires all five derived variables to be 0, with extra logic for hosp)
     ccc19x$der_severe3[which(ccc19x$der_deadbinary == 0 &
                                ((ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)|ccc19x$der_hosp == 0) &
                                ccc19x$der_ICU == 0 &
-                               ccc19x$der_intubated == 0)] <- 0
+                               ccc19x$der_mv == 0)] <- 0
     
     #Unknown (requires all five derived variables to be 99)
     ccc19x$der_severe3[which(ccc19x$der_deadbinary == 99 &
                                ccc19x$der_hosp == 99 & 
                                ccc19x$der_o2_ever == 99 &
                                ccc19x$der_ICU == 99 &
-                               ccc19x$der_intubated == 99)] <- 99
+                               ccc19x$der_mv == 99)] <- 99
     
     #Factor
     ccc19x$der_severe3 <- as.factor(ccc19x$der_severe3)
@@ -466,9 +466,9 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
                            (ccc19x$resp_failure_tx %in% c(2:5) | 
                               ccc19x$resp_failure_tx_fu %in% c(2:5)))] <- 5
     #6 Intubated
-    ccc19x$der_who[ccc19x$der_intubated == 1] <- 6
+    ccc19x$der_who[ccc19x$der_mv == 1] <- 6
     #7. Intubated + additional organ support such as pressors, RRT, or ECMO
-    ccc19x$der_who[ccc19x$der_intubated == 1 & 
+    ccc19x$der_who[ccc19x$der_mv == 1 & 
                      (ccc19x$hotn_pressors_fu == 1 | 
                         ccc19x$sepsis_pressors == 1 | 
                         ccc19x$significant_comorbidities___236435004 == 1)] <- 7
@@ -3532,7 +3532,7 @@ suffix <- 'data with derived variables (thru 10-28-2020)'
                                            '; Hospital status missing or unknown', sep = '')
     
     #Intubation status missing/unk
-    temp.ref <- which((ccc19x$der_intubated == 99|is.na(ccc19x$der_intubated)) &
+    temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
                         ccc19x$redcap_repeat_instrument == '')
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
