@@ -1058,6 +1058,25 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #7. Declare unknown if days to death cannot be calculated
     temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead30 == 0 &
             (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
+    flag <- rep(T, length(temp))
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i])
+      temp2 <- c(ccc19x$hosp_los[temp.ref],
+                 ccc19x$hosp_los_2[temp.ref],
+                 ccc19x$hosp_los_fu[temp.ref],
+                 ccc19x$hosp_los_fu_2[temp.ref],
+                 ccc19x$icu_los[temp.ref],
+                 ccc19x$icu_los_fu[temp.ref])
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp2) > 0)
+      {
+        temp2 <- sum(temp2)
+        if(temp2 > 30) flag[i] <- F
+      }
+    }
+    temp <- temp[flag]
+    
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 99
     
     ccc19x$der_dead30 <- as.factor(ccc19x$der_dead30)
@@ -2566,6 +2585,21 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_card[i] <- 99
+    }
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_card[temp.ref]
+      temp2 <- ccc19x$der_card[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 99
+      }
     }
     
     ccc19x$der_card <- factor(ccc19x$der_card)
