@@ -1079,6 +1079,15 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 99
     
+    #8. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
+    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180) & 
+                                     ccc19x$redcap_repeat_instance > 1 &
+                                     (ccc19x$fu_reason == 3 |
+                                        ccc19x$covid_19_status_fu == 3 |
+                                        ccc19x$current_status_fu == 9 ) &
+                                     ccc19x$der_dead30 == 99)]
+    ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
+    
     ccc19x$der_dead30 <- as.factor(ccc19x$der_dead30)
     #ccc19x$der_dead30 <- relevel(ccc19x$der_dead30, ref = '1')
     summary(ccc19x$der_dead30[ccc19x$redcap_repeat_instrument == ''])
