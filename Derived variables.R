@@ -135,11 +135,40 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     
     #Factor
     ccc19x$der_hosp <- as.factor(ccc19x$der_hosp)
-    
-    #Relevel
-    #ccc19x$der_hosp <- relevel(ccc19x$der_hosp, ref = '1')
-    
     summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #O2a. Hospitalization within first 30 days
+    ccc19x$der_hosp_bl <- NA
+    
+    #Initial form
+    
+    #No
+    ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 0|
+                               ccc19x$worst_status_clinical %in% c(1:3))] <- 0
+    
+    #Yes
+    ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:3) | 
+                               ccc19x$current_status %in% c(5:8)|
+                               ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
+                               ccc19x$worst_status_clinical %in% c(5:8)| 
+                               ccc19x$current_status_clinical %in% c(4:8))] <- 1
+    
+    #Interventions that could only happen in a hospital
+    ccc19x$der_hosp_bl[which(ccc19x$resp_failure_tx %in% 2:6 |
+                               ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
+    
+    #Unknown
+    ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 99 & is.na(ccc19x$der_hosp_bl))] <- 99
+    
+    #Followup ONLY if less than or equal to 30 days and for hospitalization
+    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
+                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
+                                        ccc19x$fu_weeks == 30))]
+    ccc19x$der_hosp_bl[which(ccc19x$record_id %in% temp & ccc19x$redcap_repeat_instrument == '')] <- 1
+    
+    #Factor
+    ccc19x$der_hosp_bl <- as.factor(ccc19x$der_hosp_bl)
+    summary(ccc19x$der_hosp_bl[ccc19x$redcap_repeat_instrument == ''])
     
     "ICU"
     #O3. Derived variable indicating time in the ICU (ever/never)
@@ -1019,7 +1048,7 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #Default is not dead at 30 days
     ccc19x$der_dead30 <- 0
     
-    temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument != 'followup')
+    temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 30 days
     temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
@@ -2355,6 +2384,7 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #temp$height <- gsub(temp$height, pattern = 'C$', replacement = 'cm')
     temp$mheight <- temp$height
     temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
+    if(any(grepl(temp$mheight, pattern = '[a-z]', ignore.case = T))) err <- temp$mheight[grepl(temp$mheight, pattern = '[a-z]', ignore.case = T)]
     temp$mheight <- as.numeric(temp$mheight)
     
     #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
@@ -2370,6 +2400,11 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #converting weight value strings to double values and entering them into a new column
     temp$kgweight <- temp$weight
     temp$kgweight <- gsub(temp$kgweight, pattern = 'lbs|lb|pounds|kg| |', replacement = '', ignore.case = T)
+    if(any(grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T))) 
+      err <- data.frame(record_id = ccc19x$record_id[temp.ref[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)]],
+                        error = temp$kgweight[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)],
+                        stringsAsFactors = F)
+    
     temp$kgweight <- as.double(temp$kgweight)
     
     #Convert lbs into kg (assume that any value without a unit is already in kg)
