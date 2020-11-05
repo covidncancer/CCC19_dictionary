@@ -2693,12 +2693,21 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
                                                                      "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
-    ccc19x$der_region[is.na(ccc19x$der_region)] <- 'Other'
+    ccc19x$der_region[is.na(ccc19x$der_region) & ccc19x$redcap_repeat_instrument == ''] <- 'Other'
     
     #Factor
     ccc19x$der_region <- as.factor(ccc19x$der_region)
     
     summary(ccc19x$der_region[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D14a. Region with ex-US collapsed
+    ccc19x$der_region_v2 <- as.character(ccc19x$der_region)
+    ccc19x$der_region_v2[ccc19x$country_of_patient_residen != 1 & ccc19x$redcap_repeat_instrument == ''] <- 'Non-US'
+    ccc19x$der_region_v2[ccc19x$country_of_patient_residen == 1 & ccc19x$der_region_v2 == 'Other'] <- 'Undesignated US'
+    
+    #Factor
+    ccc19x$der_region_v2 <- as.factor(ccc19x$der_region_v2)
+    summary(ccc19x$der_region_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #D15. US Census Division
     ccc19x$der_division <- NA
