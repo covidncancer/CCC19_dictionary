@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for QA (thru 11-01-2020)'
+suffix <- 'data with derived variables for QA (thru 11-06-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -73,7 +73,8 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #Initial form
     
     #No
-    ccc19x$der_hosp[which(ccc19x$hosp_status == 0|
+    ccc19x$der_hosp[which(ccc19x$hosp_status == 0| 
+                            ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
                             ccc19x$worst_status_clinical %in% c(1:3))] <- 0
     
     summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
@@ -82,7 +83,8 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     ccc19x$der_hosp[which(ccc19x$hosp_status %in% c(1:3) | 
                             ccc19x$current_status %in% c(5:8)|
                             ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
-                            ccc19x$worst_status_clinical %in% c(5:8)| 
+                            ccc19x$worst_status_clinical %in% c(5:8)|
+                            ccc19x$labs == '2a'| #Labs drawn at time of hospitalization
                             ccc19x$current_status_clinical %in% c(4:8))] <- 1
     
     summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
@@ -94,7 +96,9 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
     
     #Unknown
-    ccc19x$der_hosp[which(ccc19x$hosp_status == 99 & is.na(ccc19x$der_hosp))] <- 99
+    ccc19x$der_hosp[which((ccc19x$hosp_status == 99 |
+                            ccc19x$worst_status_clinical == 99) & 
+                           is.na(ccc19x$der_hosp))] <- 99
     
     summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
     
@@ -116,7 +120,10 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     ccc19x$der_hosp[which(ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
     
     #Unknown
-    ccc19x$der_hosp[which(ccc19x$hosp_status_fu == 99 & is.na(ccc19x$der_hosp))] <- 99
+    ccc19x$der_hosp[which((ccc19x$hosp_status_fu == 99 |
+                            ccc19x$current_status_fu == 99 |
+                            ccc19x$current_status_clinical_fu == 99) & 
+                           is.na(ccc19x$der_hosp))] <- 99
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
@@ -143,14 +150,16 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #Initial form
     
     #No
-    ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 0|
-                               ccc19x$worst_status_clinical %in% c(1:3))] <- 0
+    ccc19x$der_hosp[which(ccc19x$hosp_status == 0| 
+                            ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
+                            ccc19x$worst_status_clinical %in% c(1:3))] <- 0
     
     #Yes
     ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:3) | 
                                ccc19x$current_status %in% c(5:8)|
                                ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
                                ccc19x$worst_status_clinical %in% c(5:8)| 
+                               ccc19x$labs == '2a'| #Labs drawn at time of hospitalization
                                ccc19x$current_status_clinical %in% c(4:8))] <- 1
     
     #Interventions that could only happen in a hospital
@@ -158,7 +167,9 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
                                ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
     
     #Unknown
-    ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 99 & is.na(ccc19x$der_hosp_bl))] <- 99
+    ccc19x$der_hosp_bl[which((ccc19x$hosp_status == 99 |
+                             ccc19x$worst_status_clinical == 99) & 
+                            is.na(ccc19x$der_hosp_bl))] <- 99
     
     #Followup ONLY if less than or equal to 30 days and for hospitalization
     temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
@@ -174,45 +185,40 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #O3. Derived variable indicating time in the ICU (ever/never)
     ccc19x$der_ICU <- NA
     
-    #Yes
-    
-    #Baseline
-    ccc19x$der_ICU[which(
-      ccc19x$hosp_status %in% c(2:3) | 
-        ccc19x$current_status %in% c(7,8) | 
-        ccc19x$worst_status_clinical %in% c("7","8")| 
-        ccc19x$current_status_clinical %in% c("7","8"))] <- 1
-    
-    #Follow-up
-    ccc19x$der_ICU[which(
-      ccc19x$hosp_status_fu %in% c(2:3) | 
-        ccc19x$current_status_fu %in% c(7,8) | 
-        ccc19x$current_status_clinical_fu %in% c("7","8"))] <- 1
+    #Initial form
     
     #No
+    ccc19x$der_ICU[which((ccc19x$hosp_status %in% c(0:1) | 
+                            ccc19x$current_status %in% c(1,3) |
+                            ccc19x$worst_status_clinical %in% 1:6) &
+                           is.na(ccc19x$der_ICU))] <- 0
     
-    #Baseline
-    ccc19x$der_ICU[which((
-      ccc19x$hosp_status %in% c(0:1) | 
-        ccc19x$current_status %in% c(1,3,5) |
-        ccc19x$worst_status_clinical %in% 1:6) &
-        is.na(ccc19x$der_ICU))] <- 0
-    
-    #Follow-up
-    ccc19x$der_ICU[which((
-      ccc19x$hosp_status_fu %in% c(0:1) |
-        ccc19x$worst_complications_severity_fu %in% 0:2) &
-        is.na(ccc19x$der_ICU))] <- 0
+    #Yes
+    ccc19x$der_ICU[which(ccc19x$hosp_status %in% c(2:3) | 
+                           ccc19x$current_status %in% c(7,8) | 
+                           ccc19x$worst_status_clinical %in% c("7","8")| 
+                           ccc19x$current_status_clinical %in% c("7","8"))] <- 1
     
     #Unknown
-    
-    #Baseline
     ccc19x$der_ICU[which((ccc19x$hosp_status == 99 |
                             ccc19x$worst_status_clinical == 99) & 
                            is.na(ccc19x$der_ICU))] <- 99
     
-    #Follow-up
-    ccc19x$der_ICU[which((ccc19x$hosp_status_fu == 99) & 
+    #followup forms
+    
+    #No
+    ccc19x$der_ICU[which(ccc19x$hosp_status_fu %in% c(0:1) &
+                           is.na(ccc19x$der_ICU))] <- 0
+    
+    #Yes
+    ccc19x$der_ICU[which(ccc19x$hosp_status_fu %in% c(2:3) | 
+                           ccc19x$current_status_fu %in% c(7,8) | 
+                           ccc19x$current_status_clinical_fu %in% c("7","8"))] <- 1
+    
+    #Unknown
+    ccc19x$der_ICU[which((ccc19x$hosp_status_fu == 99 |
+                            ccc19x$current_status_fu == 99 |
+                            ccc19x$current_status_clinical_fu == 99) & 
                            is.na(ccc19x$der_ICU))] <- 99
     
     #Merge baseline and followup if discrepancy
@@ -465,46 +471,6 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     #ccc19x$der_severe3 <- relevel(ccc19x$der_severe3, ref = '1')
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
     
-    ##WHO Ordinal scale derived
-    #O11. WHO orginal scale
-    ccc19x$der_who <- NA
-    #1. Outpatient with no limitation of activity, must exclude ECOG > 1
-    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
-                            ccc19x$current_status == 1|
-                            ccc19x$worst_status_clinical == 1) 
-                         & !(ccc19x$ecog_status %in% c(1,2,3,4)))] <- 1 
-    #2. Outpatient with limitation of activities
-    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
-                            ccc19x$current_status == 1) & 
-                           (ccc19x$worst_status_clinical %in% c(2:3) |
-                              ccc19x$current_status_clinical_fu %in% c(2:3)| 
-                              ccc19x$current_status_clinical %in% c(2:3)))] <- 2
-    #2a. Recapture patients who only ruled out of 1 due to ECOG 1+
-    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
-                            ccc19x$current_status == 1|
-                            ccc19x$worst_status_clinical == 1) 
-                         & (ccc19x$ecog_status %in% c(1,2,3,4)))] <- 2
-    #3. Hospitalized, no oxygen
-    ccc19x$der_who[which(is.na(ccc19x$der_o2_ever) & ccc19x$der_hosp == 1)] <- 3
-    #4. Hospitalized, oxygen
-    ccc19x$der_who[which(ccc19x$der_o2_ever == 1 & 
-                           ccc19x$der_hosp == 1)] <- 4
-    #5. Hospitalized, oxygen or NIV
-    ccc19x$der_who[which((ccc19x$der_o2_ever == 1 & 
-                            ccc19x$der_hosp == 1) & 
-                           (ccc19x$resp_failure_tx %in% c(2:5) | 
-                              ccc19x$resp_failure_tx_fu %in% c(2:5)))] <- 5
-    #6 Intubated
-    ccc19x$der_who[ccc19x$der_mv == 1] <- 6
-    #7. Intubated + additional organ support such as pressors, RRT, or ECMO
-    ccc19x$der_who[ccc19x$der_mv == 1 & 
-                     (ccc19x$hotn_pressors_fu == 1 | 
-                        ccc19x$sepsis_pressors == 1 | 
-                        ccc19x$significant_comorbidities___236435004 == 1)] <- 7
-    #8. Dead
-    ccc19x$der_who[ccc19x$der_deadbinary == 1] <- 8
-    
-    ccc19x$der_who <- as.factor(ccc19x$der_who)
     
     #O12. PE complications
     ccc19x$der_PE_comp <- NA
@@ -1197,7 +1163,7 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
       query <- any(ccc19x$hosp_status_fu[temp.ref] == 3 |
                      (ccc19x$hosp_status_fu[temp.ref] == 2 & ccc19x$hosp_los_fu_2[temp.ref] <= 2))
       if(is.na(query)) query <- F
-      if(query) ccc19$der_early_icu[temp.ref] <- 1
+      if(query) ccc19x$der_early_icu[temp.ref] <- 1
       query <- all(ccc19x$hosp_status_fu[temp.ref] %in% 0:1 |
                      (ccc19x$hosp_status_fu[temp.ref] == 2 & ccc19x$hosp_los_fu_2[temp.ref] > 2))
       if(is.na(query)) query <- F
@@ -1231,6 +1197,108 @@ suffix <- 'data with derived variables for QA (thru 11-01-2020)'
     
     }
   
+  #Ordinal outcomes
+  {
+    ##WHO Ordinal scale derived
+    #O11. WHO orginal scale
+    ccc19x$der_who <- NA
+    #1. Outpatient with no limitation of activity, must exclude ECOG > 1
+    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
+                            ccc19x$current_status == 1|
+                            ccc19x$worst_status_clinical == 1) 
+                         & !(ccc19x$ecog_status %in% c(1,2,3,4)))] <- 1 
+    #2. Outpatient with limitation of activities
+    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
+                            ccc19x$current_status == 1) & 
+                           (ccc19x$worst_status_clinical %in% c(2:3) |
+                              ccc19x$current_status_clinical_fu %in% c(2:3)| 
+                              ccc19x$current_status_clinical %in% c(2:3)))] <- 2
+    #2a. Recapture patients who only ruled out of 1 due to ECOG 1+
+    ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
+                            ccc19x$current_status == 1|
+                            ccc19x$worst_status_clinical == 1) 
+                         & (ccc19x$ecog_status %in% c(1,2,3,4)))] <- 2
+    #3. Hospitalized, no oxygen
+    ccc19x$der_who[which(is.na(ccc19x$der_o2_ever) & ccc19x$der_hosp == 1)] <- 3
+    #4. Hospitalized, oxygen
+    ccc19x$der_who[which(ccc19x$der_o2_ever == 1 & 
+                           ccc19x$der_hosp == 1)] <- 4
+    #5. Hospitalized, oxygen or NIV
+    ccc19x$der_who[which((ccc19x$der_o2_ever == 1 & 
+                            ccc19x$der_hosp == 1) & 
+                           (ccc19x$resp_failure_tx %in% c(2:5) | 
+                              ccc19x$resp_failure_tx_fu %in% c(2:5)))] <- 5
+    #6 Intubated
+    ccc19x$der_who[ccc19x$der_mv == 1] <- 6
+    #7. Intubated + additional organ support such as pressors, RRT, or ECMO
+    ccc19x$der_who[ccc19x$der_mv == 1 & 
+                     (ccc19x$hotn_pressors_fu == 1 | 
+                        ccc19x$sepsis_pressors == 1 | 
+                        ccc19x$significant_comorbidities___236435004 == 1)] <- 7
+    #8. Dead
+    ccc19x$der_who[ccc19x$der_deadbinary == 1] <- 8
+    
+    ccc19x$der_who <- as.factor(ccc19x$der_who)
+    
+    #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death)
+    
+    #Start with hospitalization status
+    ccc19x$der_ordinal_v1 <- NA
+    
+    #Hospital
+    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 0)] <- 0
+    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 1)] <- 1
+    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 99)] <- 99
+    
+    #ICU
+    #ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 1)] <- 2
+    ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 99)] <- 99
+    
+    #Mechanical ventilation
+    #ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 0)]
+    ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 1)] <- 3
+    ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 99)] <- 99
+    
+    #Death within 30 days
+    ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 1)] <- 4
+    ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 99)] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == '']))
+    
+    #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized no O2; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
+    
+    #Start with hospitalization status
+    ccc19x$der_ordinal_v2 <- NA
+    
+    #Hospitalized regardless of O2
+    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 0)] <- 0
+    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 1)] <- 1
+    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 99)] <- 99
+    
+    #O2 required
+    #ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 0)]
+    ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 1)] <- 2
+    ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 99)] <- 99
+      
+    #ICU
+    #ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 1)] <- 3
+    ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 99)] <- 99
+    
+    #Mechanical ventilation
+    #ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 0)]
+    ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 99)] <- 99
+    
+    #Death within 30 days
+    ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 1)] <- 5
+    ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 99)] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == '']))
+    
+    
+  }
   #Treatments
   {
     "hca" 
