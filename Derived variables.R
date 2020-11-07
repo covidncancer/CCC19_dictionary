@@ -136,7 +136,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 99
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 99
+        }
       }
     }
     
@@ -232,7 +235,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 99
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 99
+        }
       }
     }
     
@@ -294,7 +300,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 99
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 99
+        }
       }
     }
     
@@ -384,7 +393,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 99
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever[temp.ref] <- 99
+        }
       }
     }
     
@@ -1023,35 +1035,42 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
-    # #2. 30-day mortality flag is set
+    #2. 30-day mortality flag is set (baseline)
     temp.ref2 <- which(ccc19x$mortality[temp.ref] == 0)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
-    #3. 30-day follow-up form is filled out as death
+    #3. 30-day mortality flag is set (follow-up)
+    temp.ref2 <- which(ccc19x$d30_vital_status[temp.ref] == 1)
+    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+    ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
+    
+    #4. 30-day follow-up form is filled out as death
     temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 30 & (
       ccc19x$fu_reason == 3 |
         ccc19x$covid_19_status_fu == 3 |
         ccc19x$current_status_fu == 9 ))]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
-    #4. Follow-up form filled out as other and timing <= 4 weeks
+    #5. Follow-up form filled out as other and timing <= 4 weeks
     temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks <= 4 & (
       ccc19x$fu_reason == 3 |
         ccc19x$covid_19_status_fu == 3 |
         ccc19x$current_status_fu == 9 ))]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
-    #5. Days to death <= 30
+    #6. Days to death <= 30
     temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 30)]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
-    #6. Rescind status if days to death > 30
+    #7. Rescind status if days to death > 30
     temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30)]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
     
-    #7. Declare unknown if days to death cannot be calculated
+    #8. Declare unknown if days to death cannot be calculated and mortality flag not set
     temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead30 == 0 &
+                                     (is.na(ccc19x$mortality)|ccc19x$mortality == 99) & 
+                                     (is.na(ccc19x$d30_vital_status)|ccc19x$d30_vital_status == 99) & #Mortality flags
             (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
     flag <- rep(T, length(temp))
     for(i in 1:length(temp))
@@ -1064,11 +1083,15 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
                  ccc19x$icu_los[temp.ref],
                  ccc19x$icu_los_fu[temp.ref])
       temp2 <- temp2[!is.na(temp2)]
+      temp3 <- ccc19x$mortality[temp.ref] == 1
+      temp3 <- temp3[!is.na(temp3)]
       if(length(temp2) > 0)
       {
         temp2 <- sum(temp2)
         if(temp2 > 30) flag[i] <- F
       }
+      if(length(temp3) > 0)
+        if(any(temp3)) flag[i] <- F
     }
     temp <- temp[flag]
     
@@ -1299,6 +1322,7 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     
     
   }
+  
   #Treatments
   {
     "hca" 
@@ -2710,7 +2734,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       {
         if(any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 1
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 99
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card[temp.ref] <- 99
+        }
       }
     }
     
