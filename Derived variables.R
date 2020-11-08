@@ -1508,15 +1508,15 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     summary(ccc19x$der_hcq[ccc19x$redcap_repeat_instrument == ''])
     
     #Rx4. High-dose steroids as COVID-19 treatment ever (dose > 20 mg/d)
-    ccc19x$der_steroids <- NA
-    ccc19x$der_steroids[which(ccc19x$steroid_specific %in% 2:3|
+    ccc19x$der_steroids_hd_c19 <- NA
+    ccc19x$der_steroids_hd_c19[which(ccc19x$steroid_specific %in% 2:3|
                                 ccc19x$steroid_specific_fu %in% 2:3)] <- 1
     
     #Never or less than 20 mg/d
-    ccc19x$der_steroids[which((ccc19x$covid_19_treatment___ho_45523 == 1 & ccc19x$steroid_specific %in% c('1','1a','1b') & is.na(ccc19x$der_steroids))|
-                                (ccc19x$covid_19_treatment_fu___ho_45523 == 1 & ccc19x$steroid_specific_fu %in% c('1','1a','1b') & is.na(ccc19x$der_steroids))|
-                                (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids))|
-                                (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids)))] <- 0
+    ccc19x$der_steroids_hd_c19[which((ccc19x$covid_19_treatment___ho_45523 == 1 & ccc19x$steroid_specific %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
+                                (ccc19x$covid_19_treatment_fu___ho_45523 == 1 & ccc19x$steroid_specific_fu %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
+                                (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19))|
+                                (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19)))] <- 0
     
     
     #Unknown
@@ -1524,42 +1524,92 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
                         !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment___unk[i] == 1 &
-         (ccc19x$der_steroids[i] == 0 | is.na(ccc19x$der_steroids[i]))) ccc19x$der_steroids[i] <- 99
+         (ccc19x$der_steroids_hd_c19[i] == 0 | is.na(ccc19x$der_steroids_hd_c19[i]))) ccc19x$der_steroids_hd_c19[i] <- 99
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
                         !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment_fu___unk[i] == 1 &
-         (ccc19x$der_steroids[i] == 0 | is.na(ccc19x$der_steroids[i]))) ccc19x$der_steroids[i] <- 99
+         (ccc19x$der_steroids_hd_c19[i] == 0 | is.na(ccc19x$der_steroids_hd_c19[i]))) ccc19x$der_steroids_hd_c19[i] <- 99
     
-    ccc19x$der_steroids[which(ccc19x$steroid_specific == 99 & is.na(ccc19x$der_steroids)|
-                                ccc19x$steroid_specific_fu == 99 & is.na(ccc19x$der_steroids))] <- 99
+    ccc19x$der_steroids_hd_c19[which(ccc19x$steroid_specific == 99 & is.na(ccc19x$der_steroids_hd_c19)|
+                                ccc19x$steroid_specific_fu == 99 & is.na(ccc19x$der_steroids_hd_c19))] <- 99
     
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids[i] == 0) ccc19x$der_steroids[i] <- NA
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_hd_c19[i] == 0) ccc19x$der_steroids_hd_c19[i] <- NA
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids[i] == 0) ccc19x$der_steroids[i] <- NA
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_hd_c19[i] == 0) ccc19x$der_steroids_hd_c19[i] <- NA
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
       temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_steroids[temp.ref]
+      temp <- ccc19x$der_steroids_hd_c19[temp.ref]
       temp <- as.numeric(unique(temp[!is.na(temp)]))
       if(length(temp) > 0)
       {
-        if(any(temp == 1)) ccc19x$der_steroids[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_steroids[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_steroids[temp.ref] <- 0
+        if(any(temp == 1)) ccc19x$der_steroids_hd_c19[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_steroids_hd_c19[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_steroids_hd_c19[temp.ref] <- 0
       }
     }
     
-    ccc19x$der_steroids <- factor(ccc19x$der_steroids)
-    summary(ccc19x$der_steroids[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_steroids_hd_c19 <- factor(ccc19x$der_steroids_hd_c19)
+    summary(ccc19x$der_steroids_hd_c19[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx4a. Steroids ever used for TREATMENT of COVID-19
+    ccc19x$der_steroids_c19 <- NA
+    ccc19x$der_steroids_c19[which(ccc19x$covid_19_treatment___ho_45523 == 1|
+                                    ccc19x$covid_19_trial_tx___ho_45523 == 1|
+                                    ccc19x$covid_19_treatment_fu___ho_45523 == 1|
+                                    ccc19x$covid_19_trial_tx_fu___ho_45523 == 1)] <- 1
+    
+    #Never
+    ccc19x$der_steroids_c19[which((ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_c19))|
+                                    (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_c19)))] <- 0
+    
+    #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment___unk[i] == 1 &
+         (ccc19x$der_steroids_c19[i] == 0 | is.na(ccc19x$der_steroids_c19[i]))) ccc19x$der_steroids_c19[i] <- 99
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0)& ccc19x$covid_19_treatment_fu___unk[i] == 1 &
+         (ccc19x$der_steroids_c19[i] == 0 | is.na(ccc19x$der_steroids_c19[i]))) ccc19x$der_steroids_c19[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_c19[i] == 0) ccc19x$der_steroids_c19[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_c19[i] == 0) ccc19x$der_steroids_c19[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_steroids_c19[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_steroids_c19[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_steroids_c19[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_steroids_c19[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_steroids_c19 <- factor(ccc19x$der_steroids_c19)
+    summary(ccc19x$der_steroids_c19[ccc19x$redcap_repeat_instrument == ''])
     
     #Rx5. Azithromycin ever used for TREATMENT of COVID-19
     ccc19x$der_azithro <- NA
@@ -3479,7 +3529,7 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     ccc19x$der_neg_control[which(   ccc19x$der_other_tx_c19 == 0 &
                                       ccc19x$der_hcq == 0 &
                                       ccc19x$der_azithro == 0 &
-                                      ccc19x$der_steroids == 0 &
+                                      ccc19x$der_steroids_hd_c19 == 0 &
                                       ccc19x$der_rem == 0 &
                                       ccc19x$der_toci == 0)] <- 1
     
