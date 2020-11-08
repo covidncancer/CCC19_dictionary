@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for QA (thru 11-06-2020)'
+suffix <- 'data with derived variables for QA (thru 11-08-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -2420,7 +2420,7 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
                         ccc19x$significant_comorbidities___414916001 == 0)
     
     #removing rows that are missing height or weight
-    temp <- ccc19x[temp.ref,c('height','weight')]
+    temp <- ccc19x[temp.ref,c('record_id','height','weight')]
     temp$height <- trimws(temp$height)
     temp$weight <- trimws(temp$weight)
     
@@ -2461,6 +2461,7 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     #temp$height <- gsub(temp$height, pattern = 'C$', replacement = 'cm')
     temp$mheight <- temp$height
     temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
+    err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
     temp$mheight <- as.numeric(temp$mheight)
     
     #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
@@ -2475,7 +2476,8 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     
     #converting weight value strings to double values and entering them into a new column
     temp$kgweight <- temp$weight
-    temp$kgweight <- gsub(temp$kgweight, pattern = 'lbs|lb|pounds|kg| |', replacement = '', ignore.case = T)
+    temp$kgweight <- gsub(temp$kgweight, pattern = 'lbs[.]?|lb|pounds|kg| |', replacement = '', ignore.case = T)
+    err <- temp[grepl(temp$kgweight, pattern = '[a-z]'),]
     temp$kgweight <- as.double(temp$kgweight)
     
     #Convert lbs into kg (assume that any value without a unit is already in kg)
