@@ -246,7 +246,7 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     ccc19x$der_ICU <- as.factor(ccc19x$der_ICU)
     summary(ccc19x$der_ICU[ccc19x$redcap_repeat_instrument == ''])
     
-    "intubated"
+    "mv"
     #O4. derived variable indicating if patients were intubated or not
     ccc19x$der_mv <- NA
     
@@ -261,7 +261,6 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     ccc19x$der_mv[which(ccc19x$resp_failure_tx_fu ==6 | 
                                  ccc19x$current_status_clinical_fu == 8 | 
                                  ccc19x$who_ordinal_scale %in% 6:7)] <- 1
-    
     
     #No
     
@@ -289,6 +288,18 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
                                   ccc19x$resp_failure_tx_fu == 99) &
                                  is.na(ccc19x$der_mv))] <- 99
     
+    #Revert unknowns if no pulmonary complications and no respiratory failure
+    
+    #Baseline
+    ccc19x$der_mv[which(ccc19x$c19_complications_pulm___409622000 == 0 &
+                          ccc19x$c19_complications_pulm___none == 1 &
+                          (is.na(ccc19x$der_mv)|ccc19x$der_mv ==99))] <- 0
+    
+    #Followup
+    ccc19x$der_mv[which(ccc19x$c19_complications_pulm_fu___409622000 == 0 &
+                          ccc19x$c19_complications_pulm_fu___none == 1 &
+                          (is.na(ccc19x$der_mv)|ccc19x$der_mv ==99))] <- 0
+    
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
@@ -306,6 +317,10 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
         }
       }
     }
+    
+    #Revert patients with unknown status who were on hospice
+    temp <- ccc19x$record_id[which(ccc19x$der_mv == 99 & ccc19x$hospice == 1)]
+    ccc19x$der_mv[ccc19x$record_id %in% temp] <- 0
     
     #Factor
     ccc19x$der_mv <- as.factor(ccc19x$der_mv)
@@ -344,6 +359,8 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
       if(length(temp2) > 0)
         ccc19x$der_days_to_death_combined[temp.ref] <- min(temp2)
     }
+    
+    summary(factor(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1)]))
     
     #O7. supplemental O2
     ccc19x$der_o2_ever <- NA
@@ -1097,7 +1114,21 @@ suffix <- 'data with derived variables for QA (thru 11-06-2020)'
     
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 99
     
-    #8. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
+    #9. Recover some patients with unknown or missing days to death
+    #Estimate days to death for patients with missing/unknown days and retrospective reporting (baseline form only)
+    #Estimate as the maximum length of time possible based on the interval
+    temp <- ccc19x$record_id[which(ccc19x$der_dead30 %in% c(0,99) &
+                                     (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
+                                     ccc19x$current_status_retro == 3)]
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i])
+      temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+      temp2 <- temp2[!is.na(temp2)]
+      if(temp2 %in% 1:3) ccc19x$der_dead30[temp.ref] <- 1
+    }
+    
+    #10. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
     temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180) & 
                                      ccc19x$redcap_repeat_instance > 1 &
                                      (ccc19x$fu_reason == 3 |
