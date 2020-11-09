@@ -2768,6 +2768,24 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_pulm[i] <- 99
     }
     
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pulm[temp.ref]
+      temp2 <- ccc19x$der_pulm[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_pulm[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_pulm[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_pulm[temp.ref] <- 99
+        }
+      }
+    }
+    
     ccc19x$der_pulm <- factor(ccc19x$der_pulm)
     summary(ccc19x$der_pulm[ccc19x$redcap_repeat_instrument == ''])
     
@@ -2853,6 +2871,24 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_renal[i] <- 99
+    }
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_renal[temp.ref]
+      temp2 <- ccc19x$der_renal[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_renal[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_renal[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_renal[temp.ref] <- 99
+        }
+      }
     }
     
     ccc19x$der_renal <- factor(ccc19x$der_renal)
@@ -3723,7 +3759,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; Baseline COVID-19 severity missing or unknown', sep = '')
     
-    #30-day f/u is 60+ days overdue
+    #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
     temp.diff <- Sys.time() - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
     if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
@@ -3767,9 +3803,10 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; Cancer status unknown', sep = '')
     
-    #Mets status unknown
+    #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
     temp.ref <- which((ccc19x$mets_yn == 99|is.na(ccc19x$mets_yn)) &
                         ccc19x$cancer_status != '1' &
+                        !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
                         ccc19x$redcap_repeat_instrument == '')
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
@@ -3818,7 +3855,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; Days to death missing or unknown', sep = '')
     
-    #30-day f/u is 30+ days overdue
+    #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
     temp.diff <- Sys.time() - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
     if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
