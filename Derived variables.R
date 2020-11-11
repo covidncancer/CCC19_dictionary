@@ -1274,6 +1274,36 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_early_icu <- factor(ccc19x$der_early_icu)
     summary(ccc19x$der_early_icu[ccc19x$redcap_repeat_instrument == ''])
     
+    #############################
+    #T13. Cancer treatment timing - do not allow overwrite
+    #############################
+    ccc19x$der_cancer_tx_timing <- NA
+    
+    #Less than 2 weeks
+    ccc19x$der_cancer_tx_timing[which(ccc19x$recent_treatment == 1)] <- 1
+    
+    #2-4 weeks
+    ccc19x$der_cancer_tx_timing[which(ccc19x$recent_treatment == 2 & is.na(ccc19x$der_cancer_tx_timing))] <- 2
+    
+    #1-3 months, including the hx_treatment = within 3 months
+    ccc19x$der_cancer_tx_timing[which((ccc19x$hx_treatment == 1|ccc19x$recent_treatment == 3) & 
+                                        is.na(ccc19x$der_cancer_tx_timing))] <- 3
+    
+    #More than 3 months (referent)
+    ccc19x$der_cancer_tx_timing[which((ccc19x$hx_treatment %in% 2:3|ccc19x$recent_treatment == 88) & 
+                                  is.na(ccc19x$der_cancer_tx_timing))] <- 0
+    
+    #Never, including treatment starting AFTER the COVID-19 diagnosis
+    ccc19x$der_cancer_tx_timing[which((ccc19x$hx_treatment == 88|ccc19x$recent_treatment == 98) & 
+                                  is.na(ccc19x$der_cancer_tx_timing))] <- 88
+    
+    #Unknown
+    ccc19x$der_cancer_tx_timing[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
+                                        is.na(ccc19x$der_cancer_tx_timing))] <- 99
+    
+    ccc19x$der_cancer_tx_timing <- as.factor(ccc19x$der_cancer_tx_timing)
+    summary(ccc19x$der_cancer_tx_timing[ccc19x$redcap_repeat_instrument == ''])
+    
     }
   
   #Ordinal outcomes
