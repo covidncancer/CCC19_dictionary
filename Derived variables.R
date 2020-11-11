@@ -3131,6 +3131,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_comorbid_combined[which(ccc19x$der_card == 99|ccc19x$der_pulm == 99|ccc19x$der_renal == 99|ccc19x$der_dm2 == 99)] <- 'Unknown'
     
     ccc19x$der_comorbid_combined <- as.factor(ccc19x$der_comorbid_combined)
+    ccc19x$der_comorbid_combined <- relevel(ccc19x$der_comorbid_combined, ref = 'None')
     summary(ccc19x$der_comorbid_combined[ccc19x$redcap_repeat_instrument == ''])
     
     #######################
@@ -3272,7 +3273,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_activetx <- relevel(ccc19x$der_activetx, ref = 'None')
     summary(ccc19x$der_activetx)
     
-    #Ca1a. Derived variable for what type of active cancer therapy within 3 months
+    #Ca1a. Derived variable for what type of active cancer therapy within 3 months - 4 levels with overwriting
     ccc19x$der_activetx3mo <- NA
     
     ccc19x$der_activetx3mo[which(ccc19x$on_treatment == 0 |
@@ -3317,6 +3318,123 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_activetx3mo <- as.factor(ccc19x$der_activetx3mo)
     ccc19x$der_activetx3mo <- relevel(ccc19x$der_activetx3mo, ref = 'None')
     summary(ccc19x$der_activetx3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca1b. Derived variable for what type of active cancer therapy within 3 months - 11 levels, mutually exclusive
+    ccc19x$der_activetx3mo_v2 <- NA
+    
+    ccc19x$der_activetx3mo_v2[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
+                                      (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% c(88) & ccc19x$hx_treatment != 1))] <- 'None'
+    
+    temp.ref <- which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
+                        ccc19x$hx_treatment == 1)
+    
+    #Chemotherapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which((ccc19x$treatment_modality___685[temp.ref] == 1|
+                                                (ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] == 1)) &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               !(ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] %in% c(10,2,3,4,5,6)) &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Cytotoxic chemotherapy'
+    
+    #Immunotherapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                               !(ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] == 1) &
+                                               (ccc19x$treatment_modality___694[temp.ref] == 1|
+                                                  (ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] %in% c(10,2,3,4,5,6))) &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Immunotherapy'
+    
+    #Targeted therapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 1 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45186[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Targeted therapy'
+    
+    #Endocrine therapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 1 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45186[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Endocrine therapy'
+    
+    #Radiotherapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 1 &
+                                               ccc19x$treatment_modality___45186[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Radiotherapy'
+    
+    #Surgery
+    ccc19x$der_activetx3mo_v2[temp.ref[which(ccc19x$treatment_modality___685[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45186[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 1 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Surgery'
+    
+    #Chemoradiotherapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which((ccc19x$treatment_modality___685[temp.ref] == 1|
+                                                (ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] == 1)) &
+                                               ccc19x$treatment_modality___694[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 1 &
+                                               !(ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] %in% c(10,2,3,4,5,6)) &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Chemoradiotherapy'
+    
+    #Chemoimmunotherapy
+    ccc19x$der_activetx3mo_v2[temp.ref[which((ccc19x$treatment_modality___685[temp.ref] == 1|
+                                                (ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] == 1)) &
+                                               (ccc19x$treatment_modality___694[temp.ref] == 1|
+                                                  (ccc19x$treatment_modality___45186[temp.ref] == 1 & ccc19x$transplant_cellular_therapy[temp.ref] %in% c(10,2,3,4,5,6))) &
+                                               ccc19x$treatment_modality___58229[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___691[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___695[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___14051[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___oth[temp.ref] == 0 &
+                                               ccc19x$treatment_modality___45215[temp.ref] == 0)]] <- 'Chemoimmunotherapy'
+    
+    #Other
+    temp.ref2 <- which(is.na(ccc19x$der_activetx3mo_v2[temp.ref]))
+    ccc19x$der_activetx3mo_v2[temp.ref[temp.ref2]] <- 'Other'
+    
+    #Unknown (do not allow overwriting)
+    ccc19x$der_activetx3mo_v2[which((ccc19x$on_treatment == 99 | 
+                                       ccc19x$recent_treatment == 99 |
+                                       ccc19x$hx_treatment == 99 |
+                                       (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))) &
+                                      is.na(ccc19x$der_activetx3mo_v2))] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_activetx3mo_v2 <- as.factor(ccc19x$der_activetx3mo_v2)
+    ccc19x$der_activetx3mo_v2 <- relevel(ccc19x$der_activetx3mo_v2, ref = 'None')
+    summary(ccc19x$der_activetx3mo_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10. Any treatment in past 3 months
     ccc19x$der_anytx <- NA
