@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis (thru 11-08-2020)'
+suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -2801,12 +2801,11 @@ suffix <- 'data with derived variables for analysis (thru 11-08-2020)'
                            ccc19x$significant_comorbidities___190388001 == 1)] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___73211009|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___73211009|significant_comorbidities___190388001|significant_comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___73211009[i] == 0 &
-         ccc19x$significant_comorbidities___190388001 == 0) ccc19x$der_dm2[i] <- 0
+         ccc19x$significant_comorbidities___190388001[i] == 0) ccc19x$der_dm2[i] <- 0
     }
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
