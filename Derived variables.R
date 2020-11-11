@@ -3439,27 +3439,65 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     #Ca10. Any treatment in past 3 months
     ccc19x$der_anytx <- NA
     
-    ccc19x$der_anytx[which(ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1)] <- 'Yes'
+    ccc19x$der_anytx[which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
+                             ccc19x$hx_treatment == 1)] <- 1
     
-    ccc19x$der_anytx[which((ccc19x$recent_treatment %in% 88|ccc19x$hx_treatment %in% 2:88) &
-                             is.na(ccc19x$der_anytx))] <- 'No'
+    ccc19x$der_anytx[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
+                             (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% c(88) & ccc19x$hx_treatment != 1))] <- 0
     
-    ccc19x$der_anytx[which((ccc19x$recent_treatment %in% 99|ccc19x$hx_treatment %in% 99) &
-                             is.na(ccc19x$der_anytx))] <- 'Unknown'
+    ccc19x$der_anytx[which((ccc19x$on_treatment == 99 | 
+                              ccc19x$recent_treatment == 99 |
+                              ccc19x$hx_treatment == 99 |
+                              (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))) &
+                             is.na(ccc19x$der_anytx))] <- 99
     
     ccc19x$der_anytx <- factor(ccc19x$der_anytx)
     summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10a. Any cytotoxic within 3 months
-    ccc19x$der_any_cyto <- as.character(ccc19x$der_anytx)
-    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 'Yes' & ccc19x$treatment_modality___685 == 1)] <- 'Cytotoxic'
-    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 'Yes')] <- 'No'
-    
-    ccc19x$der_any_cyto <- factor(ccc19x$der_any_cyto)
-    ccc19x$der_any_cyto <- relevel(ccc19x$der_any_cyto, ref = 'No')
+    ccc19x$der_any_cyto <- ccc19x$der_anytx
+    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 1 & 
+                                ((ccc19x$treatment_modality___685 == 0 & ccc19x$treatment_modality___45186 == 0)|
+                                   (ccc19x$treatment_modality___694 == 0 &
+                                      ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
     summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca10b. Any targeted therapy or ICI within 3 months
+    #Ca10b. Any immunotherapy within 3 months
+    ccc19x$der_any_immuno <- ccc19x$der_anytx
+    ccc19x$der_any_immuno[which(ccc19x$der_any_immuno == 1 & 
+                                  ((ccc19x$treatment_modality___694 == 0 & ccc19x$treatment_modality___45186 == 0)|
+                                     (ccc19x$treatment_modality___694 == 0 &
+                                        ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy == 1)))] <- 0
+    summary(ccc19x$der_any_immuno[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10c. Any targeted therapy within 3 months
+    ccc19x$der_any_targeted <- ccc19x$der_anytx
+    ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+    summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10d. Any endocrine therapy within 3 months
+    ccc19x$der_any_endo <- ccc19x$der_anytx
+    ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+    summary(ccc19x$der_any_endo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10e. Any radiation therapy within 3 months
+    ccc19x$der_any_rt <- ccc19x$der_anytx
+    ccc19x$der_any_rt[which(ccc19x$der_any_rt == 1 & ccc19x$treatment_modality___695 == 0)] <- 0
+    summary(ccc19x$der_any_rt[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10f. Any cancer surgery within 3 months
+    ccc19x$der_any_surgery <- ccc19x$der_anytx
+    ccc19x$der_any_surgery[which(ccc19x$der_any_surgery == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
+    summary(ccc19x$der_any_surgery[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10g. Any other therapy within 3 months
+    ccc19x$der_any_other <- ccc19x$der_anytx
+    ccc19x$der_any_other[which(ccc19x$der_any_other == 1 & 
+                                 ccc19x$treatment_modality___45215 == 0 &
+                                 ccc19x$treatment_modality___oth == 0)] <- 0
+    summary(ccc19x$der_any_other[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10h. Any targeted therapy or ICI within 3 months
     ccc19x$der_any_targeted_ici <- as.character(ccc19x$der_anytx)
     ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes' & 
                                         (ccc19x$treatment_modality___58229 == 1|
@@ -3471,7 +3509,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_any_targeted_ici <- relevel(ccc19x$der_any_targeted_ici, ref = 'No')
     summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca10c. Any transplant or cellular therapy within 3 months
+    #Ca10i. Any transplant or cellular therapy within 3 months
     ccc19x$der_any_sct_cellular <- as.character(ccc19x$der_anytx)
     ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes' & ccc19x$treatment_modality___45186 == 1)] <- 'Exposed'
     ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes')] <- 'No'
