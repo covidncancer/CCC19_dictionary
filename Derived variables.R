@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for QA (thru 11-08-2020)'
+suffix <- 'data with derived variables for analysis (thru 11-08-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -835,7 +835,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
     ccc19x$der_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime[ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_3 != ''])
+    ccc19x$der_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -934,7 +934,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #T4 & T5 Median f/u in days anchored to actual dates
     ccc19x$der_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime2[ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_3 != ''])
+    ccc19x$der_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -989,7 +989,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #T7 & T8 Calculated time from diagnosis has to be at least 30 days
     ccc19x$der_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime3[ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_3 != ''])
+    ccc19x$der_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -1027,6 +1027,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     temp.diff <- ccc19x$der_righttime3 - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
+    if(attr(temp.diff, 'units') == 'hours') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/24 >= 30)]
     if(attr(temp.diff, 'units') == 'secs') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/(24*60*60) >= 30)]
     
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
@@ -1048,6 +1049,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #1. Calculated time to death is <= 30 days
     temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
     if(attr(temp.diff, 'units') == 'days') temp.ref2 <- which(temp.diff[temp.ref] <= 30)
+    if(attr(temp.diff, 'units') == 'hours') temp.ref2 <- which(temp.diff[temp.ref]/24 <= 30)
     if(attr(temp.diff, 'units') == 'secs') temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
@@ -1138,7 +1140,6 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
     
     ccc19x$der_dead30 <- as.factor(ccc19x$der_dead30)
-    #ccc19x$der_dead30 <- relevel(ccc19x$der_dead30, ref = '1')
     summary(ccc19x$der_dead30[ccc19x$redcap_repeat_instrument == ''])
     
     #T9 Month and year of diagnosis, accounting for interval bounds
@@ -1146,8 +1147,10 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     #First, extract month and year from the POSIXlt objects
     x1 <- months(ccc19x$der_lefttime[temp.ref])
+    xm <- months(ccc19x$der_lefttime2[temp.ref])
     x2 <- months(ccc19x$der_lefttime3[temp.ref])
     y1 <- format(ccc19x$der_lefttime[temp.ref], format = '%Y')
+    ym <- format(ccc19x$der_lefttime2[temp.ref], format = '%Y')
     y2 <- format(ccc19x$der_lefttime3[temp.ref], format = '%Y')
     
     ccc19x$der_month_dx <- NA
@@ -1182,6 +1185,28 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     ccc19x$der_quarter_dx <- factor(ccc19x$der_quarter_dx)
     summary(ccc19x$der_quarter_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T10a Quarter and year of diagnosis, using the right side of the interval as the anchor
+    ccc19x$der_quarter_median_dx <- NA
+    
+    #Q1
+    temp.ref2 <- which(x2 %in% c('January','February','March') & y2 != 2099)
+    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q1', y2[temp.ref2])
+    
+    #Q2
+    temp.ref2 <- which(x2 %in% c('April','May','June') & y2 != 2099)
+    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q2', y2[temp.ref2])
+    
+    #Q3
+    temp.ref2 <- which(x2 %in% c('July','August','September') & y2 != 2099)
+    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q3', y2[temp.ref2])
+    
+    #Q4
+    temp.ref2 <- which(x2 %in% c('October','November','December') & y2 != 2099)
+    
+    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q4', y2[temp.ref2])
+    ccc19x$der_quarter_median_dx <- factor(ccc19x$der_quarter_median_dx)
+    summary(ccc19x$der_quarter_median_dx[ccc19x$redcap_repeat_instrument == ''])
     
     #T11 Hemi-year of diagnosis, accounting for interval bounds
     ccc19x$der_hemi_dx <- NA
@@ -1299,17 +1324,17 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #Start with hospitalization status
     ccc19x$der_ordinal_v1 <- NA
     
-    #Hospital
+    #Hospital (ever/never)
     ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 0)] <- 0
     ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 1)] <- 1
     ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 99)] <- 99
     
-    #ICU
+    #ICU (ever/never)
     #ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 0)]
     ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 1)] <- 2
     ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 99)] <- 99
     
-    #Mechanical ventilation
+    #Mechanical ventilation (ever/never)
     #ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 0)]
     ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 1)] <- 3
     ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 99)] <- 99
@@ -1320,7 +1345,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     summary(factor(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == '']))
     
-    #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized no O2; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
+    #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized no O2; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
     
     #Start with hospitalization status
     ccc19x$der_ordinal_v2 <- NA
@@ -1717,7 +1742,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     ccc19x$der_toci <- factor(ccc19x$der_toci)
     summary(ccc19x$der_toci[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx7. COVID-19 treatments other than HCQ, AZ, high-dose steroids, remdesivir, or toci (excluding anticoag, ECMO, CRRT)
+    #Rx7. COVID-19 treatments other than HCQ, AZ, high-dose steroids, remdesivir, or toci (excluding oyxgen, anticoag, ECMO, CRRT)
     ccc19x$der_other_tx_c19 <- NA
     
     #Build the exclusion list
@@ -1809,6 +1834,92 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     ccc19x$der_other_tx_c19 <- factor(ccc19x$der_other_tx_c19)
     summary(ccc19x$der_other_tx_c19[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx7a. COVID-19 treatments other than HCQ, steroids, or remdesivir
+    ccc19x$der_other_tx_c19_v2 <- NA
+    
+    #Build the exclusion list
+    x <- c('b01a','n02ba', #Anticoag, Aspirin, APA
+           '233573008','714749008', #ECMO, CRRT
+           'rxcui_5521','omop4873974', #HCQ, Rem
+           'ho_44995','rxcui_260101', #Antivirals NOS, oseltamivir
+           'ho_45523', #Steroids
+           'atc_c10aa', #Statins
+           '19_treatment___oth','19_treatment_fu___oth','trial_tx___oth','tx_fu___oth', #"Other" treatments (usually antibiotics)
+           '19_treatment___unk','19_treatment_fu___unk','trial_tx___unk','tx_fu___unk',
+           'treatment___none','treatment_fu___none')
+    x <- paste(x, collapse = '|')
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment__|19_treatment_fu_|covid_19_trial_tx|covid_19_tx') & 
+                        !grepl(colnames(ccc19x), pattern = x))
+    
+    #Exposure to any of the above
+    for(i in 1:nrow(ccc19x))
+    {
+      temp <- ccc19x[i, temp.ref]
+      temp <- temp[!is.na(temp)]
+      if(length(temp) > 0) 
+      {
+        if(any(temp))
+        {
+          ccc19x$der_other_tx_c19_v2[i] <- 1
+        } else ccc19x$der_other_tx_c19_v2[i] <- 0
+      }
+    }
+    
+    #Exposure to a clinical trial drug
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'covid_19_trial_tx|covid_19_tx') & 
+                        !grepl(colnames(ccc19x), pattern = 'rxcui_5521|omop4873974|ho_45523|unk'))
+    
+    for(i in 1:nrow(ccc19x))
+    {
+      temp <- ccc19x[i, temp.ref]
+      temp <- temp[!is.na(temp)]
+      if(length(temp) > 0) 
+      {
+        if(any(temp))
+        {
+          ccc19x$der_other_tx_c19_v2[i] <- 1
+        }
+      }
+    }
+    
+    #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment___unk[i] == 1) ccc19x$der_other_tx_c19_v2[i] <- 99
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment_fu___unk[i] == 1) ccc19x$der_other_tx_c19_v2[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_other_tx_c19_v2[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_other_tx_c19_v2[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_other_tx_c19_v2[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_other_tx_c19_v2[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_other_tx_c19_v2[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_other_tx_c19_v2[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_other_tx_c19_v2 <- factor(ccc19x$der_other_tx_c19_v2)
+    summary(ccc19x$der_other_tx_c19_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Rx8. Statins ever (treatment or baseline)
     ccc19x$der_statins <- NA
@@ -2542,7 +2653,6 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #fixed the height entries in the format "x foot y inches"
     temp[grepl("foot", temp$height, fixed = TRUE), "height"] <- "61 inches"
     temp$height[which(temp$height == '5 ft 2.5 in')] <- '62.5 inches'
-    temp$height[which(temp$height == '5 feet')] <- '60 inches'
     temp$height[which(temp$height == '5 feet 1 inch')] <- '61 inches'
     temp$height[which(temp$height == '5 feet 3 inches')] <- '63 inches'
     temp$height[which(temp$height == '5 feet 4 inches')] <- '64 inches'
@@ -2556,10 +2666,9 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     temp$height[which(temp$height == '6 feet 2 inches')] <- '74 inches'
     
     #converted height strings into double values and put them in a new column
-    #temp$height <- gsub(temp$height, pattern = 'C$', replacement = 'cm')
     temp$mheight <- temp$height
     temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
-    if(any(grepl(temp$mheight, pattern = '[a-z]', ignore.case = T))) err <- temp$mheight[grepl(temp$mheight, pattern = '[a-z]', ignore.case = T)]
+    err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
     temp$mheight <- as.numeric(temp$mheight)
     
     #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
@@ -2688,14 +2797,16 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     
     #D9. Diabetes mellitus
     ccc19x$der_dm2 <- NA
-    ccc19x$der_dm2[which(ccc19x$significant_comorbidities___73211009 == 1)] <- 1
+    ccc19x$der_dm2[which(ccc19x$significant_comorbidities___73211009 == 1|
+                           ccc19x$significant_comorbidities___190388001 == 1)] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___73211009|
                              significant_comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
-      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___73211009[i] == 0) ccc19x$der_dm2[i] <- 0
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___73211009[i] == 0 &
+         ccc19x$significant_comorbidities___190388001 == 0) ccc19x$der_dm2[i] <- 0
     }
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
@@ -3762,6 +3873,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
     temp.diff <- Sys.time() - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
+    if(attr(temp.diff, 'units') == 'hours') temp <- as.numeric(temp.diff/24)
     if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
     
     temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
@@ -3858,6 +3970,7 @@ suffix <- 'data with derived variables for QA (thru 11-08-2020)'
     #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
     temp.diff <- Sys.time() - ccc19x$der_lefttime3
     if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
+    if(attr(temp.diff, 'units') == 'hours') temp <- as.numeric(temp.diff/24)
     if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
     
     temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
