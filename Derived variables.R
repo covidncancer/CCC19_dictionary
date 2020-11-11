@@ -2510,9 +2510,133 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     
     summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
     
+    #surgery
+    #D6. derived variable indicating if there has been surgery within 4 weeks
+    ccc19x$der_surgery <- NA
+    ccc19x$der_surgery[which((ccc19x$recent_treatment %in% 1:2 & ccc19x$treatment_modality___14051 == 1)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == '1'))] <- 'Recent surgery'
+    ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(3,88))|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% c('2','3'))|
+                               ccc19x$recent_surgery == 0
+    )] <- 'None'
+    ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == 'UNK')|
+                               ccc19x$recent_surgery == 99
+    )] <- 'Unknown'
     
+    #Factor
+    ccc19x$der_surgery <- as.factor(ccc19x$der_surgery)
+    ccc19x$der_surgery <- relevel(ccc19x$der_surgery, ref = 'None')
+    summary(ccc19x$der_surgery[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D18. derived variable indicating if there has been surgery within 3 months
+    ccc19x$der_surgery2 <- NA
+    
+    ccc19x$der_surgery2[which(((ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1) & 
+                                 ccc19x$treatment_modality___14051 == 1)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 1:2))] <- 'Recent surgery'
+    
+    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(88))|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 3)|
+                               ccc19x$recent_surgery == 0) & is.na(ccc19x$der_surgery2)
+    )] <- 'None'
+    
+    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == 'UNK')|
+                               ccc19x$recent_surgery == 99) & is.na(ccc19x$der_surgery2)
+    )] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_surgery2 <- as.factor(ccc19x$der_surgery2)
+    ccc19x$der_surgery2 <- relevel(ccc19x$der_surgery2, ref = 'None')
+    summary(ccc19x$der_surgery2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D19. Baseline VTE
+    ccc19x$der_VTE_baseline <- NA
+    
+    #Present
+    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___128053003 ==1|
+                                    ccc19x$significant_comorbidities___59282003 == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '128053003|59282003|unk'))
+    for(i in which(is.na(ccc19x$der_VTE_baseline)))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_VTE_baseline[i] <- 0
+    
+    #Unknown
+    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___unk ==1 &
+                                    is.na(ccc19x$der_VTE_baseline))] <- 99
+    
+    ccc19x$der_VTE_baseline <- as.factor(ccc19x$der_VTE_baseline)
+    summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    ############
+    #D14. Region
+    ccc19x$der_region <- NA
+    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT", 
+                                                                     "PA", "NY", "NJ"))] <- "US Northeast"
+    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH", "MO", "ND", 
+                                                                     "SD", "NE", "KS", "MN", "IA"))] <- "US Midwest"
+    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
+                                                                     "SC", "GA", "FL", "TN", "KY", "MS", "AL", 
+                                                                     "OK", "TX", "LA", "AR"))] <- "US South"
+    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
+                                                                     "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
+    ccc19x$der_region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
+    ccc19x$der_region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
+    ccc19x$der_region[is.na(ccc19x$der_region) & ccc19x$redcap_repeat_instrument == ''] <- 'Other'
+    
+    #Factor
+    ccc19x$der_region <- as.factor(ccc19x$der_region)
+    
+    summary(ccc19x$der_region[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D14a. Region with ex-US collapsed
+    ccc19x$der_region_v2 <- as.character(ccc19x$der_region)
+    ccc19x$der_region_v2[ccc19x$country_of_patient_residen != 1 & ccc19x$redcap_repeat_instrument == ''] <- 'Non-US'
+    ccc19x$der_region_v2[ccc19x$country_of_patient_residen == 1 & ccc19x$der_region_v2 == 'Other'] <- 'Undesignated US'
+    
+    #Factor
+    ccc19x$der_region_v2 <- as.factor(ccc19x$der_region_v2)
+    summary(ccc19x$der_region_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D15. US Census Division
+    ccc19x$der_division <- NA
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT"))] <- "New England"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("PA", "NY", "NJ"))] <- "Middle Atlantic"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH"))] <- "East North Central"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("MO", "ND", "SD", "NE", "KS", "MN", "IA"))] <- "West North Central"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
+                                                                       "SC", "GA", "FL"))] <- "South Atlantic"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("TN", "KY", "MS", "AL"))] <- "East South Central"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("OK", "TX", "LA", "AR"))] <- "West South Central"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
+                                                                       "NM"))] <- "Mountain"
+    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("AK", "WA", "OR", "CA", "HI"))] <- "Pacific"
+    
+    #Factor
+    ccc19x$der_division <- as.factor(ccc19x$der_division)
+    
+    summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D17. Derived variable for smoking status collapsing the current/former smoker variables
+    ccc19x$der_smoking2 <- NA
+    ccc19x$der_smoking2[which(ccc19x$smoking_status == 3)] <- 'Never'
+    ccc19x$der_smoking2[which(ccc19x$smoking_status %in% c("1","2", "2b", "2c", "2d", "2a"))] <- "Current or Former"
+    ccc19x$der_smoking2[which(ccc19x$smoking_status == 99)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_smoking2 <- as.factor(ccc19x$der_smoking2)
+    ccc19x$der_smoking2 <- relevel(ccc19x$der_smoking2, ref = 'Never')
+    
+    summary(ccc19x$der_smoking2[ccc19x$redcap_repeat_instrument == ''])
+    
+  }
+  
+  #Comorbidities
+  {
     "obesity"
-    ##D5. derived variable coding the obesity status (binary)
+    ##C01. derived variable coding the obesity status (binary)
     
     ccc19x$der_obesity <- NA
     
@@ -2619,7 +2743,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_obesity <- relevel(ccc19x$der_obesity, ref = 'Not obese')
     summary(ccc19x$der_obesity[ccc19x$redcap_repeat_instrument == ''])
     
-    #D5a. Derived BMI for records that have height and weight recorded and not BMI
+    #C02. Derived BMI for records that have height and weight recorded and not BMI
     ccc19x$der_bmi <- ccc19x$bmi
     
     #Records with height/weight recorded, no BMI
@@ -2700,102 +2824,24 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     
     ccc19x$der_bmi[temp.ref] <- temp$bmi
     
-    #surgery
-    #D6. derived variable indicating if there has been surgery within 4 weeks
-    ccc19x$der_surgery <- NA
-    ccc19x$der_surgery[which((ccc19x$recent_treatment %in% 1:2 & ccc19x$treatment_modality___14051 == 1)|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == '1'))] <- 'Recent surgery'
-    ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(3,88))|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% c('2','3'))|
-                               ccc19x$recent_surgery == 0
-    )] <- 'None'
-    ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == 'UNK')|
-                               ccc19x$recent_surgery == 99
-    )] <- 'Unknown'
-    
-    #Factor
-    ccc19x$der_surgery <- as.factor(ccc19x$der_surgery)
-    ccc19x$der_surgery <- relevel(ccc19x$der_surgery, ref = 'None')
-    summary(ccc19x$der_surgery[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D18. derived variable indicating if there has been surgery within 3 months
-    ccc19x$der_surgery2 <- NA
-    
-    ccc19x$der_surgery2[which(((ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1) & 
-                                 ccc19x$treatment_modality___14051 == 1)|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 1:2))] <- 'Recent surgery'
-    
-    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(88))|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% 3)|
-                               ccc19x$recent_surgery == 0) & is.na(ccc19x$der_surgery2)
-    )] <- 'None'
-    
-    ccc19x$der_surgery2[which(((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == 'UNK')|
-                               ccc19x$recent_surgery == 99) & is.na(ccc19x$der_surgery2)
-    )] <- 'Unknown'
-    
-    #Factor
-    ccc19x$der_surgery2 <- as.factor(ccc19x$der_surgery2)
-    ccc19x$der_surgery2 <- relevel(ccc19x$der_surgery2, ref = 'None')
-    summary(ccc19x$der_surgery2[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D19. Baseline VTE
-    ccc19x$der_VTE_baseline <- NA
-    
-    #Present
-    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___128053003 ==1|
-                                    ccc19x$significant_comorbidities___59282003 == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '128053003|59282003|unk'))
-    for(i in which(is.na(ccc19x$der_VTE_baseline)))
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_VTE_baseline[i] <- 0
-    
-    #Unknown
-    ccc19x$der_VTE_baseline[which(ccc19x$significant_comorbidities___unk ==1 &
-                                    is.na(ccc19x$der_VTE_baseline))] <- 99
-    
-    ccc19x$der_VTE_baseline <- as.factor(ccc19x$der_VTE_baseline)
-    summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D20. Baseline dementia
-    ccc19x$der_dementia <- NA
-    
-    #Present
-    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___52448006 ==1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '52448006|unk'))
-    for(i in which(is.na(ccc19x$der_dementia)))
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_dementia[i] <- 0
-    
-    #Unknown
-    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___unk ==1 &
-                                is.na(ccc19x$der_dementia))] <- 99
-    
-    ccc19x$der_dementia <- as.factor(ccc19x$der_dementia)
-    summary(ccc19x$der_dementia[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D7. Number of comorbidities (just factor)
+    #C03. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
     summary(ccc19x$der_comorbid_no)
     
-    #D8. Simplified # of comorbidities
+    #C03a. Simplified # of comorbidities
     ccc19x$der_comorbid_no_collapsed <- as.character(ccc19x$der_comorbid_no)
     ccc19x$der_comorbid_no_collapsed[which(ccc19x$der_comorbid_no %in% c('2','3','4'))] <- 2
     ccc19x$der_comorbid_no_collapsed <- factor(ccc19x$der_comorbid_no_collapsed)
     summary(ccc19x$der_comorbid_no_collapsed[ccc19x$redcap_repeat_instrument == ''])
     
-    #D8b. Simplified # of comorbidities 2
+    #C03b. Simplified # of comorbidities 2
     ccc19x$der_comorbid_no_collapsed2 <- as.character(ccc19x$der_comorbid_no)
     ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('1','2'))] <- '1 to 2'
     ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('3','4'))] <- '3+'
     ccc19x$der_comorbid_no_collapsed2 <- factor(ccc19x$der_comorbid_no_collapsed2)
     summary(ccc19x$der_comorbid_no_collapsed2[ccc19x$redcap_repeat_instrument == ''])
     
-    #D9. Diabetes mellitus
+    #C04. Diabetes mellitus
     ccc19x$der_dm2 <- NA
     ccc19x$der_dm2[which(ccc19x$significant_comorbidities___73211009 == 1|
                            ccc19x$significant_comorbidities___190388001 == 1)] <- 1
@@ -2818,7 +2864,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_dm2 <- factor(ccc19x$der_dm2)
     summary(ccc19x$der_dm2[ccc19x$redcap_repeat_instrument == ''])
     
-    #D10. Immunosuppressed
+    #C05. Immunosuppressed
     ccc19x$der_immunosuppressed <- NA
     
     #First, determine NOT immunosuppressed per comorbidity variable
@@ -2847,7 +2893,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_immunosuppressed <- factor(ccc19x$der_immunosuppressed)
     summary(ccc19x$der_immunosuppressed[ccc19x$redcap_repeat_instrument == ''])
     
-    #D11. Pulmonary comorbidities
+    #C06. Pulmonary comorbidities
     ccc19x$der_pulm <- NA
     ccc19x$der_pulm[which(ccc19x$significant_comorbidities___13645005 == 1|
                             ccc19x$significant_comorbidities___19829001 == 1|
@@ -2899,7 +2945,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_pulm <- factor(ccc19x$der_pulm)
     summary(ccc19x$der_pulm[ccc19x$redcap_repeat_instrument == ''])
     
-    #D12. Cardiovascular comorbidity (CAD, CHF, Afib, arrhythmia NOS, PVD, CVA, cardiac disease NOS)
+    #C07. Cardiovascular comorbidity (CAD, CHF, Afib, arrhythmia NOS, PVD, CVA, cardiac disease NOS)
     ccc19x$der_card <- NA
     ccc19x$der_card[which( ccc19x$significant_comorbidities___53741008 == 1|
                              ccc19x$significant_comorbidities___56265001 == 1|
@@ -2955,7 +3001,7 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_card <- factor(ccc19x$der_card)
     summary(ccc19x$der_card[ccc19x$redcap_repeat_instrument == ''])
     
-    #D13. Renal comorbidity
+    #C08. Renal comorbidity
     ccc19x$der_renal <- NA
     ccc19x$der_renal[which( ccc19x$significant_comorbidities___90708001 == 1|
                               ccc19x$significant_comorbidities___723190009 == 1|
@@ -3004,55 +3050,8 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_renal <- factor(ccc19x$der_renal)
     summary(ccc19x$der_renal[ccc19x$redcap_repeat_instrument == ''])
     
-    #D14. Region
-    ccc19x$der_region <- NA
-    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT", 
-                                                                     "PA", "NY", "NJ"))] <- "US Northeast"
-    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH", "MO", "ND", 
-                                                                     "SD", "NE", "KS", "MN", "IA"))] <- "US Midwest"
-    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
-                                                                     "SC", "GA", "FL", "TN", "KY", "MS", "AL", 
-                                                                     "OK", "TX", "LA", "AR"))] <- "US South"
-    ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
-                                                                     "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
-    ccc19x$der_region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
-    ccc19x$der_region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
-    ccc19x$der_region[is.na(ccc19x$der_region) & ccc19x$redcap_repeat_instrument == ''] <- 'Other'
     
-    #Factor
-    ccc19x$der_region <- as.factor(ccc19x$der_region)
-    
-    summary(ccc19x$der_region[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D14a. Region with ex-US collapsed
-    ccc19x$der_region_v2 <- as.character(ccc19x$der_region)
-    ccc19x$der_region_v2[ccc19x$country_of_patient_residen != 1 & ccc19x$redcap_repeat_instrument == ''] <- 'Non-US'
-    ccc19x$der_region_v2[ccc19x$country_of_patient_residen == 1 & ccc19x$der_region_v2 == 'Other'] <- 'Undesignated US'
-    
-    #Factor
-    ccc19x$der_region_v2 <- as.factor(ccc19x$der_region_v2)
-    summary(ccc19x$der_region_v2[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D15. US Census Division
-    ccc19x$der_division <- NA
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT"))] <- "New England"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("PA", "NY", "NJ"))] <- "Middle Atlantic"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH"))] <- "East North Central"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("MO", "ND", "SD", "NE", "KS", "MN", "IA"))] <- "West North Central"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("DE","MD", "DC", "VA", "WV", "NC", 
-                                                                       "SC", "GA", "FL"))] <- "South Atlantic"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("TN", "KY", "MS", "AL"))] <- "East South Central"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("OK", "TX", "LA", "AR"))] <- "West South Central"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
-                                                                       "NM"))] <- "Mountain"
-    ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("AK", "WA", "OR", "CA", "HI"))] <- "Pacific"
-    
-    #Factor
-    ccc19x$der_division <- as.factor(ccc19x$der_division)
-    
-    summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
-    
-    #D16. Hypertension
+    #C09. Hypertension
     ccc19x$der_htn <- NA
     ccc19x$der_htn[which(ccc19x$significant_comorbidities___38341003 == 1)] <- 1
     
@@ -3074,19 +3073,29 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_htn <- factor(ccc19x$der_htn)
     summary(ccc19x$der_htn[ccc19x$redcap_repeat_instrument == ''])
     
-    #D17. Derived variable for smoking status collapsing the current/former smoker variables
-    ccc19x$der_smoking2 <- NA
-    ccc19x$der_smoking2[which(ccc19x$smoking_status == 3)] <- 'Never'
-    ccc19x$der_smoking2[which(ccc19x$smoking_status %in% c("1","2", "2b", "2c", "2d", "2a"))] <- "Current or Former"
-    ccc19x$der_smoking2[which(ccc19x$smoking_status == 99)] <- 'Unknown'
+    #######################
+    #C10. Baseline dementia
+    #######################
+    ccc19x$der_dementia <- NA
     
-    #Factor
-    ccc19x$der_smoking2 <- as.factor(ccc19x$der_smoking2)
-    ccc19x$der_smoking2 <- relevel(ccc19x$der_smoking2, ref = 'Never')
+    #Present
+    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___52448006 ==1)] <- 1
     
-    summary(ccc19x$der_smoking2[ccc19x$redcap_repeat_instrument == ''])
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_com') & !grepl(colnames(ccc19x), pattern = '52448006|unk'))
+    for(i in which(is.na(ccc19x$der_dementia)))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1))) ccc19x$der_dementia[i] <- 0
     
-  }
+    #Unknown
+    ccc19x$der_dementia[which(ccc19x$significant_comorbidities___unk ==1 &
+                                is.na(ccc19x$der_dementia))] <- 99
+    
+    ccc19x$der_dementia <- as.factor(ccc19x$der_dementia)
+    summary(ccc19x$der_dementia[ccc19x$redcap_repeat_instrument == ''])
+    
+    [xx]
+    
+    }
   
   #Cancer treatment and related variables
   {
