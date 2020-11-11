@@ -3093,7 +3093,47 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_dementia <- as.factor(ccc19x$der_dementia)
     summary(ccc19x$der_dementia[ccc19x$redcap_repeat_instrument == ''])
     
-    [xx]
+    ############################
+    #C11. Combined comorbidities
+    ############################
+    ccc19x$der_comorbid_combined <- NA
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 0 &
+                                         ccc19x$der_pulm == 0 &
+                                         ccc19x$der_renal == 0 &
+                                         ccc19x$der_dm2 == 0)] <- 'None'
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 1 &
+                                         ccc19x$der_pulm == 0 &
+                                         ccc19x$der_renal == 0 &
+                                         ccc19x$der_dm2 == 0)] <- 'Cardiovascular'
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 0 &
+                                         ccc19x$der_pulm == 1 &
+                                         ccc19x$der_renal == 0 &
+                                         ccc19x$der_dm2 == 0)] <- 'Pulmonary'
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 0 &
+                                         ccc19x$der_pulm == 0 &
+                                         ccc19x$der_renal == 1 &
+                                         ccc19x$der_dm2 == 0)] <- 'Renal'
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 0 &
+                                         ccc19x$der_pulm == 0 &
+                                         ccc19x$der_renal == 0 &
+                                         ccc19x$der_dm2 == 1)] <- 'Diabetes'
+    
+    ccc19x$der_comorbid_combined[which((ccc19x$der_card == 1 & (ccc19x$der_pulm == 1|ccc19x$der_renal == 1|ccc19x$der_dm2 == 1))|
+                                         (ccc19x$der_pulm == 1 & (ccc19x$der_card == 1|ccc19x$der_renal == 1|ccc19x$der_dm2 == 1))|
+                                         (ccc19x$der_renal == 1 & (ccc19x$der_pulm == 1|ccc19x$der_card == 1|ccc19x$der_dm2 == 1))|
+                                         (ccc19x$der_dm2 == 1 & (ccc19x$der_pulm == 1|ccc19x$der_renal == 1|ccc19x$der_card == 1)))] <- 'Multiple'
+    
+    ccc19x$der_comorbid_combined[which(ccc19x$der_card == 99|ccc19x$der_pulm == 99|ccc19x$der_renal == 99|ccc19x$der_dm2 == 99)] <- 'Unknown'
+    
+    ccc19x$der_comorbid_combined <- as.factor(ccc19x$der_comorbid_combined)
+    summary(ccc19x$der_comorbid_combined[ccc19x$redcap_repeat_instrument == ''])
+    
+    #[xx]
     
     }
   
