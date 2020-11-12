@@ -3674,7 +3674,20 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     #Factor
     ccc19x$der_cancer_status <- as.factor(ccc19x$der_cancer_status)
     ccc19x$der_cancer_status <- relevel(ccc19x$der_cancer_status, ref = 'Remission/NED')
-    summary(ccc19x$der_cancer_status)
+    summary(ccc19x$der_cancer_status[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca7a. Cancer status without combining stable and responding
+    ccc19x$der_cancer_status_v2 <- ccc19x$cancer_status
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 1)] <- 'Remission/NED'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 2)] <- 'Active, responding'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 3)] <- 'Active, stable'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 4)] <- 'Active, progressing'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 %in% c(5,99))] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_cancer_status_v2 <- as.factor(ccc19x$der_cancer_status_v2)
+    ccc19x$der_cancer_status_v2 <- relevel(ccc19x$der_cancer_status_v2, ref = 'Remission/NED')
+    summary(ccc19x$der_cancer_status_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4. Number of anti-cancer drugs
     
