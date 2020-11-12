@@ -2630,6 +2630,15 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     ccc19x$der_region_v2 <- as.factor(ccc19x$der_region_v2)
     summary(ccc19x$der_region_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    #D14b. Region with US collapsed
+    ccc19x$der_region_v3 <- as.character(ccc19x$der_region)
+    ccc19x$der_region_v3[ccc19x$country_of_patient_residen != 1 & ccc19x$redcap_repeat_instrument == ''] <- 'Non-US'
+    ccc19x$der_region_v3[ccc19x$country_of_patient_residen == 1 & ccc19x$redcap_repeat_instrument == ''] <- 'US'
+    
+    #Factor
+    ccc19x$der_region_v3 <- as.factor(ccc19x$der_region_v3)
+    summary(ccc19x$der_region_v3[ccc19x$redcap_repeat_instrument == ''])
+    
     #D15. US Census Division
     ccc19x$der_division <- NA
     ccc19x$der_division[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT"))] <- "New England"
