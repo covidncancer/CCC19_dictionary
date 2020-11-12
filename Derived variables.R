@@ -1187,26 +1187,26 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     summary(ccc19x$der_quarter_dx[ccc19x$redcap_repeat_instrument == ''])
     
     #T10a Quarter and year of diagnosis, using the right side of the interval as the anchor
-    ccc19x$der_quarter_median_dx <- NA
+    ccc19x$der_quarter_rt_dx <- NA
     
     #Q1
     temp.ref2 <- which(x2 %in% c('January','February','March') & y2 != 2099)
-    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q1', y2[temp.ref2])
+    ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q1', y2[temp.ref2])
     
     #Q2
     temp.ref2 <- which(x2 %in% c('April','May','June') & y2 != 2099)
-    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q2', y2[temp.ref2])
+    ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q2', y2[temp.ref2])
     
     #Q3
     temp.ref2 <- which(x2 %in% c('July','August','September') & y2 != 2099)
-    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q3', y2[temp.ref2])
+    ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q3', y2[temp.ref2])
     
     #Q4
     temp.ref2 <- which(x2 %in% c('October','November','December') & y2 != 2099)
     
-    ccc19x$der_quarter_median_dx[temp.ref[temp.ref2]] <- paste('Q4', y2[temp.ref2])
-    ccc19x$der_quarter_median_dx <- factor(ccc19x$der_quarter_median_dx)
-    summary(ccc19x$der_quarter_median_dx[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q4', y2[temp.ref2])
+    ccc19x$der_quarter_rt_dx <- factor(ccc19x$der_quarter_rt_dx)
+    summary(ccc19x$der_quarter_rt_dx[ccc19x$redcap_repeat_instrument == ''])
     
     #T11 Hemi-year of diagnosis, accounting for interval bounds
     ccc19x$der_hemi_dx <- NA
@@ -3996,6 +3996,26 @@ suffix <- 'data with derived variables for analysis (thru 11-10-2020)'
     
     ccc19x$der_lnpenia <- factor(ccc19x$der_lnpenia)
     summary(ccc19x$der_lnpenia[ccc19x$redcap_repeat_instrument == ''])
+    
+    #L19. Combined troponin and hs-troponin
+    ccc19x$der_trop_combined <- NA
+    
+    ccc19x$der_trop_combined[which(ccc19x$der_tni == 'Abnormal'|ccc19x$der_hs_trop == 'Abnormal')] <- 'Abnormal'
+    ccc19x$der_trop_combined[which((ccc19x$der_tni == 'Normal' & ccc19x$der_hs_trop != 'Abnormal')|
+                                     (ccc19x$der_tni != 'Abnormal' & ccc19x$der_hs_trop == 'Normal'))] <- 'Normal'
+    
+    temp.ref <- which(ccc19x$der_tni == ccc19x$der_hs_trop)
+    ccc19x$der_trop_combined[temp.ref] <- as.character(ccc19x$der_tni[temp.ref])
+    
+    #If one not drawn, take the other
+    temp.ref <- which(ccc19x$der_tni == 'Not drawn/Not available' & ccc19x$der_hs_trop != 'Not drawn/Not available')
+    ccc19x$der_trop_combined[temp.ref] <- as.character(ccc19x$der_hs_trop[temp.ref])
+    temp.ref <- which(ccc19x$der_tni != 'Not drawn/Not available' & ccc19x$der_hs_trop == 'Not drawn/Not available')
+    ccc19x$der_trop_combined[temp.ref] <- as.character(ccc19x$der_tni[temp.ref])
+    
+    ccc19x$der_trop_combined <- factor(ccc19x$der_trop_combined)
+    summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
+    
   }
   
   #Other
