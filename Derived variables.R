@@ -4167,9 +4167,13 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     colnames(dict)[1] <- 'name'
     
     ccc19x$missing <- 0
+    ref <- c(which(colnames(ccc19x) == 'timing_of_report'),
+             which(colnames(ccc19x) == 'dx_year'),
+             which(colnames(ccc19x) == 'covid_19_dx_interval'),
+             which(colnames(ccc19x) == 'ts_1'):which(colnames(ccc19x) == 'cancer_details_complete'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
-      ccc19x$missing[i] <- sum(is.na(ccc19x[i,which(colnames(ccc19x) == 'ts_1'):which(colnames(ccc19x) == 'cancer_details_complete')]))
+      ccc19x$missing[i] <- sum(is.na(ccc19x[i,ref]))
       for(j in which(dict$Field.Type == 'checkbox' & dict$Form.Name != 'followup'))
       {
         temp.ref <- grep(colnames(ccc19x), pattern = paste(dict$name[j], '___', sep = ''))
@@ -4177,8 +4181,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
       }
     }
     
-    ccc19x$der_quality[which(ccc19x$missing > 77)] <- ccc19x$der_quality[which(ccc19x$missing > 77)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > 77)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 77)],
+    ccc19x$der_quality[which(ccc19x$missing > 85)] <- ccc19x$der_quality[which(ccc19x$missing > 85)] + 5
+    ccc19x$der_problems[which(ccc19x$missing > 85)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 85)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
