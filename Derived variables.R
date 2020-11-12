@@ -3537,25 +3537,28 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     summary(ccc19x$der_any_other[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10h. Any targeted therapy or ICI within 3 months
-    ccc19x$der_any_targeted_ici <- as.character(ccc19x$der_anytx)
-    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes' & 
+    ccc19x$der_any_targeted_ici <- ccc19x$der_anytx
+    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & 
                                         (ccc19x$treatment_modality___58229 == 1|
                                            ccc19x$what_immunotherapy %in% c('45838','45446',
-                                                                            '45170','45838-45446')))] <- 'Exposed'
-    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 'Yes')] <- 'No'
+                                                                            '45170','45838-45446')))] <- 1
+    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1)] <- 0
     
     ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
-    ccc19x$der_any_targeted_ici <- relevel(ccc19x$der_any_targeted_ici, ref = 'No')
     summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10i. Any transplant or cellular therapy within 3 months
-    ccc19x$der_any_sct_cellular <- as.character(ccc19x$der_anytx)
-    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes' & ccc19x$treatment_modality___45186 == 1)] <- 'Exposed'
-    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 'Yes')] <- 'No'
+    ccc19x$der_any_sct_cellular <- ccc19x$der_anytx
+    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1 & ccc19x$treatment_modality___45186 == 1)] <- 1
+    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1)] <- 0
     
     ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
-    ccc19x$der_any_sct_cellular <- relevel(ccc19x$der_any_sct_cellular, ref = 'No')
     summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10j. Any local therapy within 3 months (surgery or radiation)
+    ccc19x$der_any_local <- ccc19x$der_any_surgery
+    ccc19x$der_any_local[which(ccc19x$der_any_rt == 1)] <- 1
+    summary(ccc19x$der_any_local[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca12. Allogeneic transplant within one year (default is no)
     ccc19x$der_allo365 <- 0
