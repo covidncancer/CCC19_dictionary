@@ -1304,6 +1304,33 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_cancer_tx_timing <- as.factor(ccc19x$der_cancer_tx_timing)
     summary(ccc19x$der_cancer_tx_timing[ccc19x$redcap_repeat_instrument == ''])
     
+    #############################
+    #T13. Cancer treatment timing - collapse 0-2 and 2-4 weeks
+    #############################
+    ccc19x$der_cancer_tx_timing_v2 <- NA
+    
+    #0-4 weeks
+    ccc19x$der_cancer_tx_timing_v2[which(ccc19x$recent_treatment %in% 1:2)] <- 1
+    
+    #1-3 months, including the hx_treatment = within 3 months
+    ccc19x$der_cancer_tx_timing_v2[which((ccc19x$hx_treatment == 1|ccc19x$recent_treatment == 3) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v2))] <- 2
+    
+    #More than 3 months (referent)
+    ccc19x$der_cancer_tx_timing_v2[which((ccc19x$hx_treatment %in% 2:3|ccc19x$recent_treatment == 88) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v2))] <- 0
+    
+    #Never, including treatment starting AFTER the COVID-19 diagnosis
+    ccc19x$der_cancer_tx_timing_v2[which((ccc19x$hx_treatment == 88|ccc19x$recent_treatment == 98) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v2))] <- 88
+    
+    #Unknown
+    ccc19x$der_cancer_tx_timing_v2[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v2))] <- 99
+    
+    ccc19x$der_cancer_tx_timing_v2 <- as.factor(ccc19x$der_cancer_tx_timing_v2)
+    summary(ccc19x$der_cancer_tx_timing_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     }
   
   #Ordinal outcomes
@@ -3674,10 +3701,10 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_heme_type <- NA
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3171"))] <- 'Acute myeloid malignances'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C4345","C3174","C3247"))] <- 'Chronic myeloid malignancies'
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908"))] <- 'Aggressive lymphoid malignancies'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167"))] <- 'Aggressive lymphoid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3163","C3209","C8504","C4341","C4337","C9308","C3106"))] <- 'Indolent lymphoid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% PCDs)] <- 'Plasma cell neoplasms'
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C27134","OTH_H"))] <- 'Other'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9300","C27134","OTH_H"))] <- 'Other'
     ccc19x$der_heme_type <- factor(ccc19x$der_heme_type)
     summary(ccc19x$der_heme_type[ccc19x$redcap_repeat_instrument == ''])
       
