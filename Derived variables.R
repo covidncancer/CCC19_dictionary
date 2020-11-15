@@ -77,8 +77,6 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
                             ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
                             ccc19x$worst_status_clinical %in% c(1:3))] <- 0
     
-    summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
-    
     #Yes
     ccc19x$der_hosp[which(ccc19x$hosp_status %in% c(1:3) | 
                             ccc19x$current_status %in% c(5:8)|
@@ -87,20 +85,13 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
                             ccc19x$labs == '2a'| #Labs drawn at time of hospitalization
                             ccc19x$current_status_clinical %in% c(4:8))] <- 1
     
-    summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
-    
     #Interventions that could only happen in a hospital
-    ccc19x$der_hosp[which(ccc19x$resp_failure_tx %in% 2:6 |
-                            ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
-    
-    summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
+    ccc19x$der_hosp[which(ccc19x$resp_failure_tx %in% 2:6)] <- 1
     
     #Unknown
     ccc19x$der_hosp[which((ccc19x$hosp_status == 99 |
                             ccc19x$worst_status_clinical == 99) & 
                            is.na(ccc19x$der_hosp))] <- 99
-    
-    summary(factor(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == '']))
     
     #followup forms
     
@@ -134,7 +125,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 1
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 1 else
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
         {
           if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_hosp[temp.ref] <- 0
@@ -153,7 +144,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     #Initial form
     
     #No
-    ccc19x$der_hosp[which(ccc19x$hosp_status == 0| 
+    ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 0| 
                             ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
                             ccc19x$worst_status_clinical %in% c(1:3))] <- 0
     
@@ -233,7 +224,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 1
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 1 else
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
         {
           if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_ICU[temp.ref] <- 0
@@ -309,7 +300,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1 else
         if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
         {
           if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 0
