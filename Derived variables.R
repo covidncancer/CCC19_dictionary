@@ -1016,10 +1016,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
       ccc19x$der_righttime3[temp.ref] <- temp.time
     }
     
-    temp.diff <- ccc19x$der_righttime3 - ccc19x$der_lefttime3
-    if(attr(temp.diff, 'units') == 'days') temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
-    if(attr(temp.diff, 'units') == 'hours') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/24 >= 30)]
-    if(attr(temp.diff, 'units') == 'secs') temp <- ccc19x$record_id[which(as.numeric(temp.diff)/(24*60*60) >= 30)]
+    temp.diff <- difftime(ccc19x$der_righttime3, ccc19x$der_lefttime3, units = 'days')
+    temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
     
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
     
@@ -1038,10 +1036,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- ccc19x$der_righttime - ccc19x$der_lefttime
-    if(attr(temp.diff, 'units') == 'days') temp.ref2 <- which(temp.diff[temp.ref] <= 30)
-    if(attr(temp.diff, 'units') == 'hours') temp.ref2 <- which(temp.diff[temp.ref]/24 <= 30)
-    if(attr(temp.diff, 'units') == 'secs') temp.ref2 <- which(temp.diff[temp.ref]/(24*60*60) <= 30)
+    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
     
@@ -4305,10 +4301,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
                                            '; Baseline COVID-19 severity missing or unknown', sep = '')
     
     #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- Sys.time() - ccc19x$der_lefttime3
-    if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
-    if(attr(temp.diff, 'units') == 'hours') temp <- as.numeric(temp.diff/24)
-    if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
+    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp <- as.numeric(temp.diff)
     
     temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
@@ -4402,10 +4396,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
                                            '; Days to death missing or unknown', sep = '')
     
     #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- Sys.time() - ccc19x$der_lefttime3
-    if(attr(temp.diff, 'units') == 'days') temp <- as.numeric(temp.diff)
-    if(attr(temp.diff, 'units') == 'hours') temp <- as.numeric(temp.diff/24)
-    if(attr(temp.diff, 'units') == 'secs') temp <- as.numeric(temp.diff/(24*60*60))
+    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp <- as.numeric(temp.diff)
     
     temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
