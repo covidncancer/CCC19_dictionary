@@ -1195,7 +1195,25 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_quarter_rt_dx <- factor(ccc19x$der_quarter_rt_dx)
     summary(ccc19x$der_quarter_rt_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T11 Hemi-year of diagnosis, accounting for interval bounds
+    #T11 Trimester and year of diagnosis, using the right side of the interval as the anchor
+    ccc19x$der_tri_rt_dx <- NA
+    
+    #T1
+    temp.ref2 <- which(x2 %in% c('January','February','March','April') & y2 != 2099)
+    ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T1', y2[temp.ref2])
+    
+    #T2
+    temp.ref2 <- which(x2 %in% c('May','June','July','August') & y2 != 2099)
+    ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T2', y2[temp.ref2])
+    
+    #T3
+    temp.ref2 <- which(x2 %in% c('September','October','November','December') & y2 != 2099)
+    
+    ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T3', y2[temp.ref2])
+    ccc19x$der_tri_rt_dx <- factor(ccc19x$der_tri_rt_dx)
+    summary(ccc19x$der_tri_rt_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T12 Hemi-year of diagnosis, accounting for interval bounds
     ccc19x$der_hemi_dx <- NA
     
     #H1
@@ -1211,7 +1229,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
     summary(ccc19x$der_hemi_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T12 Early ICU admission (within 48 hours)
+    #T13 Early ICU admission (within 48 hours)
     ccc19x$der_early_icu <- NA
     
     #Baseline
@@ -2972,8 +2990,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     
     #First, determine NOT immunosuppressed per comorbidity variable
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|significant_comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38013005[i] == 0) ccc19x$der_immunosuppressed[i] <- 0
@@ -3006,10 +3023,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
                             ccc19x$o2_requirement == 1)] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___13645005|
-                             significant_comorbidities___19829001|significant_comorbidities___195967001|
-                             significant_comorbidities___84004001|significant_comorbidities___427046006|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), 
+                        pattern = 'comorbidities___13645005|comorbidities___19829001|comorbidities___195967001|comorbidities___84004001|comorbidities___427046006|comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___13645005[i] == 0,
@@ -3060,10 +3075,7 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     )] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___53741008|significant_comorbidities___42343007|
-                             significant_comorbidities___698247007|significant_comorbidities___49436004|significant_comorbidities___56265001|
-                             significant_comorbidities___400047006|significant_comorbidities___275526006|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___53741008|comorbidities___42343007|comorbidities___698247007|comorbidities___49436004|comorbidities___56265001|comorbidities___400047006|comorbidities___275526006|comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___53741008[i] == 0,
@@ -3113,9 +3125,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     )] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___90708001|significant_comorbidities___723190009|
-                             significant_comorbidities___46177005|significant_comorbidities___236435004|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), 
+                        pattern = 'comorbidities___90708001|comorbidities___723190009|comorbidities___46177005|comorbidities___236435004|comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___90708001[i] == 0,
@@ -3159,8 +3170,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_htn[which(ccc19x$significant_comorbidities___38341003 == 1)] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38341003|
-                             significant_comorbidities___unk'))
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38341003|significant_comorbidities___unk'))
+    
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
       if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38341003[i] == 0) ccc19x$der_htn[i] <- 0
@@ -3321,6 +3332,58 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     
     ccc19x$der_ccc19cci <- factor(ccc19x$der_ccc19cci)
     summary(ccc19x$der_ccc19cci[ccc19x$redcap_repeat_instrument == ''])
+    
+    ##############################
+    #C13. CVD risk factor (binary)
+    ##############################
+    ccc19x$der_CVD_risk <- NA
+    
+    #CVD present at baseline
+    ccc19x$der_CVD_risk[which(ccc19x$significant_comorbidities___53741008 == 1|
+                                ccc19x$significant_comorbidities___42343007 == 1|
+                                ccc19x$significant_comorbidities___400047006 == 1|
+                                ccc19x$significant_comorbidities___275526006 == 1)] <- 1
+    
+    #Two or more risk factors
+    temp <- rep(0, nrow(ccc19x))
+    #Sex and age
+    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    #Obesity
+    temp[which(ccc19x$der_obesity == 'Obese')] <- temp[which(ccc19x$der_obesity == 'Obese')] + 1
+    #Hypertension
+    temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
+    #Hyperlipidemia
+    temp[which(ccc19x$significant_comorbidities___55822004 == 1)] <- temp[which(ccc19x$significant_comorbidities___55822004 == 1)] + 1
+    #Diabetes
+    temp[which(ccc19x$der_dm2 == 1)] <- temp[which(ccc19x$der_dm2 == 1)] + 1
+    #Tobacco use
+    temp[which(ccc19x$der_smoking == 'Current')] <- temp[which(ccc19x$der_smoking == 'Current')] + 1
+    
+    ccc19x$der_CVD_risk[which(temp >= 2)] <- 1
+    
+    #1 risk factor
+    ccc19x$der_CVD_risk[which(temp == 1 & is.na(ccc19x$der_CVD_risk) & ccc19x$redcap_repeat_instrument == '')] <- 0
+    
+    #No CVD comorbidities
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), 
+                               pattern = 'comorbidities___53741008|comorbidities___42343007|comorbidities___400047006|comorbidities___275526006|significant_comorbidities___unk'))
+    
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & is.na(ccc19x$der_CVD_risk[i])) ccc19x$der_CVD_risk[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CVD_risk[i] <- 99
+    }
+    
+    ccc19x$der_CVD_risk <- factor(ccc19x$der_CVD_risk)
+    summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
     
     }
   
