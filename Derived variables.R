@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
+suffix <- 'data with derived variables for analysis (thru 12-05-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -4244,6 +4244,8 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     summary(ccc19x$der_neg_control[ccc19x$redcap_repeat_instrument == ''])
     
     #X2. IMWG frailty index
+    #Frailty scored using adapted simplified IMWG frailty score (Palumbo et al, Blood, 2015; Facon et al, Leukemia, 2019)
+    #Patients will be categorized as nonfrail (0-1 pt), frail (≥2)  
     ccc19x$der_imwg <- NA
     
     #Age
@@ -4251,22 +4253,62 @@ suffix <- 'data with derived variables for analysis (thru 11-11-2020)'
     ccc19x$der_imwg[which(ccc19x$der_age > 75 & ccc19x$der_age <= 80)] <- 1
     ccc19x$der_imwg[which(ccc19x$der_age > 80)] <- 2
     
-    #Number of comorbidities
-    ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('1','2'))] <- ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('1','2'))] + 1
-    ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('3','4'))] <- ccc19x$der_imwg[which(ccc19x$der_comorbid_no %in% c('3','4'))] + 2
-    ccc19x$der_imwg[which(ccc19x$der_comorbid_no == '99'|is.na(ccc19x$der_comorbid_no))] <- NA
+    #Charlson comorbidity score
+    ccc19x$der_imwg[which(ccc19x$der_ccc19cci %in% 1:2)] <- ccc19x$der_imwg[which(ccc19x$der_ccc19cci %in% 1:2)] + 1
+    ccc19x$der_imwg[which(ccc19x$der_ccc19cci %in% 3:20)] <- ccc19x$der_imwg[which(ccc19x$der_ccc19cci %in% 3:20)] + 2
     
     #ECOG
     ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 1)] <- ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 1)] + 1
     ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] <- ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == '2+')] + 2
-    ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown'|is.na(ccc19x$der_ecogcat2))] <- NA
     
-    #Recast unknowns
-    ccc19x$der_imwg[which(ccc19x$der_comorbid_no == '99')] <- 99
-    ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown')] <- 99
+    #Recast unknowns and missing (partial missing) as unknown
+    ccc19x$der_imwg[which((ccc19x$der_ccc19cci == '99'|is.na(ccc19x$der_ccc19cci)) & ccc19x$der_imwg < 2)] <- 99
+    ccc19x$der_imwg[which(is.na(ccc19x$der_ecogcat2) & ccc19x$der_imwg < 2)] <- 99
+    
+    #Recast ECOG unknowns as "at least"
+    ccc19x$der_imwg[which(ccc19x$der_ecogcat2 == 'Unknown' & ccc19x$der_imwg %in% 0:1)] <- 'At least non-frail'
+    
+    #Recast scores to frailty
+    ccc19x$der_imwg[which(ccc19x$der_imwg %in% 0:1)] <- 'Non-frail'
+    ccc19x$der_imwg[which(ccc19x$der_imwg %in% 2:6)] <- 'Frail'
+    ccc19x$der_imwg[which(ccc19x$der_imwg == 99)] <- 'Unknown'
     
     ccc19x$der_imwg <- factor(ccc19x$der_imwg)
     summary(ccc19x$der_imwg[ccc19x$redcap_repeat_instrument == ''])
+    
+    #X2a. Modified IMWG frailty index
+    #Patients will be categorized as nonfrail (0-1 pt), prefrail/intermediate (2-3 pts) or frail (4-6 pts)
+    ccc19x$der_imwg_mod <- NA
+    
+    #Age
+    ccc19x$der_imwg_mod[which(ccc19x$der_age <= 75)] <- 0
+    ccc19x$der_imwg_mod[which(ccc19x$der_age > 75 & ccc19x$der_age <= 80)] <- 1
+    ccc19x$der_imwg_mod[which(ccc19x$der_age > 80)] <- 2
+    
+    #Charlson comorbidity score
+    ccc19x$der_imwg_mod[which(ccc19x$der_ccc19cci %in% 1:2)] <- ccc19x$der_imwg_mod[which(ccc19x$der_ccc19cci %in% 1:2)] + 1
+    ccc19x$der_imwg_mod[which(ccc19x$der_ccc19cci %in% 3:20)] <- ccc19x$der_imwg_mod[which(ccc19x$der_ccc19cci %in% 3:20)] + 2
+    
+    #ECOG
+    ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == 1)] <- ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == 1)] + 1
+    ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == '2+')] <- ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == '2+')] + 2
+    
+    #Recast unknowns and missing (partial missing) as unknown
+    ccc19x$der_imwg_mod[which((ccc19x$der_ccc19cci == '99'|is.na(ccc19x$der_ccc19cci)) & ccc19x$der_imwg_mod < 2)] <- 99
+    ccc19x$der_imwg_mod[which(is.na(ccc19x$der_ecogcat2) & ccc19x$der_imwg_mod < 2)] <- 99
+    
+    #Recast ECOG unknowns as "at least"
+    ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == 'Unknown' & ccc19x$der_imwg_mod %in% 0:1)] <- 'At least non-frail'
+    ccc19x$der_imwg_mod[which(ccc19x$der_ecogcat2 == 'Unknown' & ccc19x$der_imwg_mod %in% 2:3)] <- 'At least prefrail'
+    
+    #Recast scores to frailty
+    ccc19x$der_imwg_mod[which(ccc19x$der_imwg_mod %in% 0:1)] <- 'Non-frail'
+    ccc19x$der_imwg_mod[which(ccc19x$der_imwg_mod %in% 2:3)] <- 'Prefrail'
+    ccc19x$der_imwg_mod[which(ccc19x$der_imwg_mod %in% 4:6)] <- 'Frail'
+    ccc19x$der_imwg_mod[which(ccc19x$der_imwg_mod == 99)] <- 'Unknown'
+    
+    ccc19x$der_imwg_mod <- factor(ccc19x$der_imwg_mod)
+    summary(ccc19x$der_imwg_mod[ccc19x$redcap_repeat_instrument == ''])
     
     #X3. Modified Khorana
     ccc19x$der_VTE_risk <- NA
