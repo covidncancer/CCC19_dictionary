@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis (thru 12-05-2020)'
+suffix <- 'data with derived variables (thru 12-10-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -660,7 +660,7 @@ suffix <- 'data with derived variables for analysis (thru 12-05-2020)'
     ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
     summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
     
-    #Combined VTE indicator (excluding SVT)
+    #O19. Combined VTE indicator (excluding SVT)
     ccc19x$der_VTE_comp <- NA
     
     #Any complication
@@ -680,6 +680,27 @@ suffix <- 'data with derived variables for analysis (thru 12-05-2020)'
     
     ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
     summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #O19a. Combined VTE indicator (excluding SVT and thrombosis NOS)
+    ccc19x$der_VTE_comp_v2 <- NA
+    
+    #Any complication
+    temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
+    for(i in temp.ref)
+      ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
+    
+    for(i in which(is.na(ccc19x$der_VTE_comp_v2)))
+    {
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      temp <- unique(temp)
+      if(length(temp) >= 1)
+        if(length(temp) == 1)
+          if(temp == 0) ccc19x$der_VTE_comp_v2[i] <- 0 else ccc19x$der_VTE_comp_v2[i] <- 99
+    }
+    
+    ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
+    summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #O20. ATE complications (MI, CVA)
     ccc19x$der_ATE_comp <- NA
