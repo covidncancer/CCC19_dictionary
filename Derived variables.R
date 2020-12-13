@@ -3492,7 +3492,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C4345","C3174","C3247"))] <- 'Chronic myeloid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167"))] <- 'Aggressive lymphoid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3163","C3209","C8504","C4341","C4337","C9308","C3106"))] <- 'Indolent lymphoid malignancies'
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% PCDs)] <- 'Plasma cell neoplasms'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3242","C4665","C3819"))] <- 'Plasma cell neoplasms'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9300","C27134","OTH_H"))] <- 'Other'
     ccc19x$der_heme_type <- factor(ccc19x$der_heme_type)
     summary(ccc19x$der_heme_type[ccc19x$redcap_repeat_instrument == ''])
@@ -3506,8 +3506,10 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     
     #GU
     ccc19x$der_GU <- 0
-    ccc19x$der_GU[which(ccc19x$cancer_type %in% c("C4863","C9061","C9063","C4912","C3708","C9385")|
-                          ccc19x$cancer_type_2 %in% c("C4863","C9061","C9063","C4912","C3708","C9385"))] <- 1
+    ccc19x$der_GU[which(ccc19x$cancer_type %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                  "C7355","C9385","C3267")|
+                          ccc19x$cancer_type_2 %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                      "C7355","C9385","C3267"))] <- 1
     ccc19x$der_GU <- factor(ccc19x$der_GU)
     summary(ccc19x$der_GU[ccc19x$redcap_repeat_instrument == ''])
     
