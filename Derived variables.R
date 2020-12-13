@@ -4499,6 +4499,17 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     # ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
     # summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
     
+    #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
+    ccc19x$der_30d_due <- NA
+    ccc19x$der_90d_due <- NA
+    ccc19x$der_180d_due <- NA
+    
+    temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
+    ccc19x$der_30d_due[temp.ref] <- as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 30*24*60*60
+    ccc19x$der_90d_due[temp.ref] <- as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 90*24*60*60
+    ccc19x$der_180d_due[temp.ref] <- as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 180*24*60*60
+    
+    
     #X4. Quality score and X5. Enumerated problems
     #Calculate a quality score for each case
     ccc19x$der_quality <- 0
