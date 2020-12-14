@@ -4509,6 +4509,46 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_90d_due[temp.ref] <- as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 90*24*60*60
     ccc19x$der_180d_due[temp.ref] <- as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 180*24*60*60
     
+    #X8a-c. Completion of 30d, 90d, 180d forms
+    ccc19x$der_30d_complete <- NA
+    ccc19x$der_90d_complete <- NA
+    ccc19x$der_180d_complete <- NA
+    
+    #Yes - named f/u form is completed
+    ccc19x$der_30d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$fu_weeks == 30)] & ccc19x$redcap_repeat_instrument == '')] <- 'Yes'
+    ccc19x$der_90d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$fu_weeks == 90)] & ccc19x$redcap_repeat_instrument == '')] <- 'Yes'
+    ccc19x$der_180d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$fu_weeks == 180)] & ccc19x$redcap_repeat_instrument == '')] <- 'Yes'
+    
+    #Yes - other time interval f/u form is completed on or after the due date
+    ccc19x$der_30d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$timing_of_report_weeks > 4)] 
+                                  & ccc19x$redcap_repeat_instrument == '')] <- 'Yes, through an "other time interval" follow-up form'
+    ccc19x$der_90d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$timing_of_report_weeks > 12)] 
+                                  & ccc19x$redcap_repeat_instrument == '')] <- 'Yes, through an "other time interval" follow-up form'
+    ccc19x$der_180d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$timing_of_report_weeks > 25)] 
+                                   & ccc19x$redcap_repeat_instrument == '')] <- 'Yes, through an "other time interval" follow-up form'
+    
+    #NA - patient is deceased prior to the due date
+    temp.ref <- which(ccc19x$der_days_to_death_combined %in% 0:9998 & ccc19x$redcap_repeat_instrument == '')
+    ccc19x$der_30d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 30 & is.na(ccc19x$der_30d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
+    ccc19x$der_90d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 90 & is.na(ccc19x$der_90d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
+    ccc19x$der_180d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 180 & is.na(ccc19x$der_180d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
+    
+    #NA - baseline diagnostic interval exceed the required follow-up timeframe
+    ccc19x$der_30d_complete[which(ccc19x$covid_19_dx_interval %in% 4:10 & is.na(ccc19x$der_30d_complete))] <- "N/A - Baseline diagnostic interval exceeds the follow-up period"
+    ccc19x$der_90d_complete[which(ccc19x$covid_19_dx_interval %in% 6:10 & is.na(ccc19x$der_90d_complete))] <- "N/A - Baseline diagnostic interval exceeds the follow-up period"
+    ccc19x$der_180d_complete[which(ccc19x$covid_19_dx_interval %in% 7:10 & is.na(ccc19x$der_180d_complete))] <- "N/A - Baseline diagnostic interval exceeds the follow-up period"
+    
+    #All others default to No
+    ccc19x$der_30d_complete[which(is.na(ccc19x$der_30d_complete) & ccc19x$redcap_repeat_instrument == '')] <- 'No'
+    ccc19x$der_90d_complete[which(is.na(ccc19x$der_90d_complete) & ccc19x$redcap_repeat_instrument == '')] <- 'No'
+    ccc19x$der_180d_complete[which(is.na(ccc19x$der_180d_complete) & ccc19x$redcap_repeat_instrument == '')] <- 'No'
+    
+    ccc19x$der_30d_complete <- factor(ccc19x$der_30d_complete)
+    ccc19x$der_90d_complete <- factor(ccc19x$der_90d_complete)
+    ccc19x$der_180d_complete <- factor(ccc19x$der_180d_complete)
+    summary(ccc19x$der_30d_complete[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$der_90d_complete[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$der_180d_complete[ccc19x$redcap_repeat_instrument == ''])
     
     #X4. Quality score and X5. Enumerated problems
     #Calculate a quality score for each case
@@ -4597,10 +4637,19 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
+    temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; 30-day f/u is at least 60 days overdue', sep = '')
+    
+    #90-day f/u is 60+ days overdue (if applicable)
+    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp <- as.numeric(temp.diff)
+    
+    temp.ref <- which(temp >= 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+                                           '; 90-day f/u is at least 60 days overdue', sep = '')
     
     ###############
     #Minor problems
@@ -4692,10 +4741,19 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_dead30 != 1)
+    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; 30-day f/u is at least 30 days overdue', sep = '')
+    
+    #90-day f/u is 30+ days overdue (if applicable)
+    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp <- as.numeric(temp.diff)
+    
+    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+                                           '; 90-day f/u is at least 30 days overdue', sep = '')
     
     #Remove leading semicolon
     ccc19x$der_problems <- gsub(ccc19x$der_problems, pattern = '^; ', replacement = '')
