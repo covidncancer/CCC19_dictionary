@@ -2642,8 +2642,11 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_sex <- as.factor(ccc19x$der_sex)
     summary(ccc19x$der_sex[ccc19x$redcap_repeat_instrument == ''])
     
-    "smoking"
-    #D3. Derived variable for smoking status collapsing the former smoker variable
+    ###############
+    #Smoking status
+    ###############
+    
+    #D03a. Derived variable for smoking status collapsing the former smoker variable
     ccc19x$der_smoking <- NA
     ccc19x$der_smoking[which(ccc19x$smoking_status == 3)] <- 'Never'
     ccc19x$der_smoking[which(ccc19x$smoking_status == 1)] <- 'Current'
@@ -2656,8 +2659,23 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     
     summary(ccc19x$der_smoking[ccc19x$redcap_repeat_instrument == ''])
     
-    "race"
-    #D4. Derived variable for race/ethnicity
+    #D03b. Derived variable for smoking status collapsing the current/former smoker variables
+    ccc19x$der_smoking2 <- NA
+    ccc19x$der_smoking2[which(ccc19x$smoking_status == 3)] <- 'Never'
+    ccc19x$der_smoking2[which(ccc19x$smoking_status %in% c("1","2", "2b", "2c", "2d", "2a"))] <- "Current or Former"
+    ccc19x$der_smoking2[which(ccc19x$smoking_status == 99)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_smoking2 <- as.factor(ccc19x$der_smoking2)
+    ccc19x$der_smoking2 <- relevel(ccc19x$der_smoking2, ref = 'Never')
+    
+    summary(ccc19x$der_smoking2[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###############
+    #Race/Ethnicity
+    ###############
+    
+    #D04a. Derived variable for race/ethnicity
     ccc19x$der_race <- NA
     
     ccc19x$der_race[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
@@ -2678,12 +2696,21 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_race <- relevel(ccc19x$der_race, ref = 'Non-Hispanic White')
     summary(ccc19x$der_race[ccc19x$redcap_repeat_instrument == ''])
     
-    #D4A. Collapse all but NHW
+    #D04b. Collapse all but NHW
     ccc19x$der_race_collapsed <- ccc19x$der_race
     ccc19x$der_race_collapsed[ccc19x$der_race_collapsed %in% c('Hispanic','Non-Hispanic Black')] <- 'Other'
     ccc19x$der_race_collapsed <- droplevels(ccc19x$der_race_collapsed)
     
     summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D05. Ethnicity (simply factor and redefine levels, declare blanks as missing)
+    ccc19x$der_ethnicity <- ccc19x$ethnicity
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latino'
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2186-5")] <- 'Not Hispanic/Latino'
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "UNK")] <- 'Unknown'
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "")] <- NA
+    ccc19x$der_ethnicity <- factor(ccc19x$der_ethnicity)
+    summary(ccc19x$der_ethnicity[ccc19x$redcap_repeat_instrument == ''])
     
     #surgery
     #D6. derived variable indicating if there has been surgery within 4 weeks
@@ -2803,17 +2830,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     
     summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
     
-    #D17. Derived variable for smoking status collapsing the current/former smoker variables
-    ccc19x$der_smoking2 <- NA
-    ccc19x$der_smoking2[which(ccc19x$smoking_status == 3)] <- 'Never'
-    ccc19x$der_smoking2[which(ccc19x$smoking_status %in% c("1","2", "2b", "2c", "2d", "2a"))] <- "Current or Former"
-    ccc19x$der_smoking2[which(ccc19x$smoking_status == 99)] <- 'Unknown'
     
-    #Factor
-    ccc19x$der_smoking2 <- as.factor(ccc19x$der_smoking2)
-    ccc19x$der_smoking2 <- relevel(ccc19x$der_smoking2, ref = 'Never')
-    
-    summary(ccc19x$der_smoking2[ccc19x$redcap_repeat_instrument == ''])
     
   }
   
@@ -3954,7 +3971,137 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
     summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca3. ecogcat
+    #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
+    ccc19x$der_ARA_1st_gen <- NA
+    
+    temp.ref <- which(ccc19x$der_Prostate == 1)
+    ccc19x$der_ARA_1st_gen[temp.ref] <- 0
+    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___83008 == 1|ccc19x$prostate_tx___4508 == 1|ccc19x$prostate_tx___31805 == 1)] <- 1
+    ccc19x$der_ARA_1st_gen[which(ccc19x$drug1 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug2 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug3 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug4 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug5 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug6 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug7 %in% c('Bicalutamide','Flutamide','Nilutamide'))] <- 1
+    
+    #Unknown
+    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_1st_gen == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_ARA_1st_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_1st_gen[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_ARA_1st_gen <- factor(ccc19x$der_ARA_1st_gen)
+    summary(ccc19x$der_ARA_1st_gen[ccc19x$der_Prostate == 1])
+    
+    #Ca15. 2nd generation ARA (only fill for prostate cancer patients, for now)
+    ccc19x$der_ARA_2nd_gen <- NA
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___1307298 == 1|ccc19x$prostate_tx___1999574 ==1|ccc19x$prostate_tx___2180325 == 1)] <- 1
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$drug1 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug2 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug3 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug4 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug5 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug6 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug7 %in% c('Apalutamide','Enzalutamide','Darolutamide'))] <- 1
+    
+    #Unknown
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_2nd_gen == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_ARA_2nd_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_2nd_gen[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_ARA_2nd_gen <- factor(ccc19x$der_ARA_2nd_gen)
+    summary(ccc19x$der_ARA_2nd_gen[ccc19x$der_Prostate == 1])
+    
+    #Ca16. Abiraterone (only fill for prostate cancer patients, for now)
+    ccc19x$der_abi <- NA
+    ccc19x$der_abi[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_abi[which(ccc19x$prostate_tx___1100072 == 1)] <- 1
+    ccc19x$der_abi[which(ccc19x$drug1 %in% c('Abiraterone')|
+                           ccc19x$drug2 %in% c('Abiraterone')|
+                           ccc19x$drug3 %in% c('Abiraterone')|
+                           ccc19x$drug4 %in% c('Abiraterone')|
+                           ccc19x$drug5 %in% c('Abiraterone')|
+                           ccc19x$drug6 %in% c('Abiraterone')|
+                           ccc19x$drug7 %in% c('Abiraterone'))] <- 1
+    
+    #Unknown
+    ccc19x$der_abi[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_abi == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_abi[temp.ref][which(temp == 0 & ccc19x$der_abi[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_abi <- factor(ccc19x$der_abi)
+    summary(ccc19x$der_abi[ccc19x$der_Prostate == 1])
+    
+    #Ca17. Chemotherapy for prostate cancer (only fill for prostate cancer patients, for now)
+    ccc19x$der_chemo_prca <- NA
+    ccc19x$der_chemo_prca[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___996051 == 1|ccc19x$prostate_tx___40048 == 1|ccc19x$prostate_tx___72962 == 1)] <- 1
+    ccc19x$der_chemo_prca[which(ccc19x$drug1 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug2 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug3 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug4 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug5 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug6 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug7 %in% c('Cabazitaxel','Carboplatin','Docetaxel'))] <- 1
+    
+    #Unknown
+    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_chemo_prca == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_chemo_prca[temp.ref][which(temp == 0 & ccc19x$der_chemo_prca[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_chemo_prca <- factor(ccc19x$der_chemo_prca)
+    summary(ccc19x$der_chemo_prca[ccc19x$der_Prostate == 1])
+    
+    #Ca18. ADT (only fill for prostate cancer patients, for now)
+    ccc19x$der_adt <- NA
+    
+    #Yes
+    ccc19x$der_adt[which(ccc19x$adt == 1)] <- 1
+    ccc19x$der_adt[which(is.na(ccc19x$adt) & ccc19x$treatment_modality___691 == 1 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 1
+    
+    ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug2 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug3 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug4 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug5 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug6 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug7 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin'))
+                         & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 2
+    
+    #No
+    ccc19x$der_adt[which(ccc19x$adt == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    ccc19x$der_adt[which(ccc19x$treatment_modality___691 == 0 &
+                           (ccc19x$treatment_modality___685 == 1|
+                              ccc19x$treatment_modality___694 == 1|
+                              ccc19x$treatment_modality___58229 == 1|
+                              ccc19x$treatment_modality___695 == 1|
+                              ccc19x$treatment_modality___14051 == 1|
+                              ccc19x$treatment_modality___45186 == 1|
+                              ccc19x$treatment_modality___45215 == 1|
+                              ccc19x$treatment_modality___oth == 1) &
+                           ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    ccc19x$der_adt[which(ccc19x$on_treatment == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    
+    #Unknown
+    ccc19x$der_adt[which(ccc19x$prostate_tx___unk == 1 & is.na(ccc19x$der_adt))] <- 99
+    
+    ccc19x$der_adt <- factor(ccc19x$der_adt)
+    summary(ccc19x$der_adt[ccc19x$der_Prostate == 1])
+    
+    #Ca3a. ecogcat
     #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
     ccc19x$der_ecogcat <- NA
     ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(0,1))] <- '0 or 1'
@@ -3966,7 +4113,18 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_ecogcat <- as.factor(ccc19x$der_ecogcat)
     summary(ccc19x$der_ecogcat)
     
-    #Ca7. cancer_status
+    #Ca3b. ECOG 0, 1, 2+
+    ccc19x$der_ecogcat2 <- ccc19x$ecog_status
+    ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 2:4)] <- '2+'
+    ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 88:99)] <- 'Unknown'
+    ccc19x$der_ecogcat2 <- factor(ccc19x$der_ecogcat2)
+    summary(ccc19x$der_ecogcat2[ccc19x$redcap_repeat_instrument == ''])
+    
+    ##############
+    #Cancer status
+    ##############
+    
+    #Ca07a. cancer_status
     ##Recode to add "NA/unknowns, combining stable and responding into one category
     ccc19x$der_cancer_status <- ccc19x$cancer_status
     ccc19x$der_cancer_status[which(ccc19x$der_cancer_status == 1)] <- 'Remission/NED'
@@ -3979,7 +4137,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_cancer_status <- relevel(ccc19x$der_cancer_status, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca7a. Cancer status without combining stable and responding
+    #Ca07b. Cancer status without combining stable and responding
     ccc19x$der_cancer_status_v2 <- ccc19x$cancer_status
     ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 1)] <- 'Remission/NED'
     ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 2)] <- 'Active, responding'
@@ -3992,7 +4150,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_cancer_status_v2 <- relevel(ccc19x$der_cancer_status_v2, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v2[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca7b. Cancer status without combining active unknown and unknown
+    #Ca07c. Cancer status without combining active unknown and unknown
     ccc19x$der_cancer_status_v3 <- ccc19x$cancer_status
     ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 1)] <- 'Remission/NED'
     ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 %in% c(2,3))] <- 'Active, stable/responding'
@@ -4008,7 +4166,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2020-08-29.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2020-11-25.csv', header = T, stringsAsFactors = F)
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
@@ -4069,13 +4227,6 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     #Merge the drugs into the main data table
     drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
     ccc19x <- merge(ccc19x, drugs, all.x = T)
-    
-    #Ca5. ECOG 0, 1, 2+
-    ccc19x$der_ecogcat2 <- ccc19x$ecog_status
-    ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 2:4)] <- '2+'
-    ccc19x$der_ecogcat2[which(ccc19x$der_ecogcat2 %in% 88:99)] <- 'Unknown'
-    ccc19x$der_ecogcat2 <- factor(ccc19x$der_ecogcat2)
-    summary(ccc19x$der_ecogcat2[ccc19x$redcap_repeat_instrument == ''])
     
     
     #Ca6: Center type
@@ -4762,9 +4913,9 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     #Remove leading semicolon
     ccc19x$der_problems <- gsub(ccc19x$der_problems, pattern = '^; ', replacement = '')
     
-    ######################
-    #X7. Breast biomarkers
-    ######################
+    #######################
+    #X07. Breast biomarkers
+    #######################
     ccc19x$der_breast_biomarkers <- NA
     
     #HR+, HER2-
@@ -4783,7 +4934,16 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___99 == 1 & is.na(ccc19x$der_breast_biomarkers))] <- 99
     
     ccc19x$der_breast_biomarkers <- factor(ccc19x$der_breast_biomarkers)
-    summary(ccc19x$der_breast_biomarkers[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$der_breast_biomarkers[ccc19x$der_Breast == 1])
+    
+    #############
+    #X08. Gleason
+    #############
+    ccc19x$der_gleason <- ccc19x$gleason
+    ccc19x$der_gleason[which(ccc19x$der_gleason %in% c('X7','X8','X9'))] <- 'Unknown'
+    ccc19x$der_gleason[ccc19x$der_gleason == ''] <- NA
+    ccc19x$der_gleason <- factor(ccc19x$der_gleason)
+    summary(ccc19x$der_gleason[ccc19x$der_Prostate == 1])
     
     }
 }
