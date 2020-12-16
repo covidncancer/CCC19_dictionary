@@ -4096,6 +4096,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     
     #Yes
     ccc19x$der_adt[which(ccc19x$adt == 1)] <- 1
+    ccc19x$der_adt[which(ccc19x$orchiectomy == 1)] <- 1
     ccc19x$der_adt[which(is.na(ccc19x$adt) & ccc19x$treatment_modality___691 == 1 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 1
     
     ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
@@ -4188,6 +4189,25 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_cancer_status_v3 <- as.factor(ccc19x$der_cancer_status_v3)
     ccc19x$der_cancer_status_v3 <- relevel(ccc19x$der_cancer_status_v3, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca19. Metastatic status (only applicable to solid tumors)
+    ccc19x$der_metastatic <- NA
+    
+    #Yes
+    ccc19x$der_metastatic[which(ccc19x$stage %in% c(4,'764-7'))] <- 1
+    ccc19x$der_metastatic[which(ccc19x$mets_yn == 1)] <- 1
+  
+    #No
+    ccc19x$der_metastatic[which(ccc19x$mets_yn == 0)] <- 0
+    ccc19x$der_metastatic[which(ccc19x$cancer_status == 1)] <- 0
+    
+    #Unknown
+    ccc19x$der_metastatic[which(ccc19x$cancer_status == 99 & is.na(ccc19x$der_metastatic))] <- 99
+    ccc19x$der_metastatic[which(ccc19x$stage == 99 & is.na(ccc19x$der_metastatic))] <- 99
+    ccc19x$der_metastatic[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_metastatic))] <- 99
+    
+    ccc19x$der_metastatic <- as.factor(ccc19x$der_metastatic)
+    summary(ccc19x$der_metastatic[which(ccc19x$der_solid == 1)])
     
     #Ca4. Number of anti-cancer drugs
     
