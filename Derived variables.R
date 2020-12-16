@@ -1444,7 +1444,7 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     
     ccc19x$der_who <- as.factor(ccc19x$der_who)
     
-    #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death)
+    #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
     
     #Start with hospitalization status
     ccc19x$der_ordinal_v1 <- NA
@@ -1469,6 +1469,32 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 99)] <- 99
     
     summary(factor(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == '']))
+    
+    #O22a. ordinal_v1a (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death EVER)
+    
+    #Start with hospitalization status
+    ccc19x$der_ordinal_v1a <- NA
+    
+    #Hospital (ever/never)
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 0)] <- 0
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 1)] <- 1
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 99)] <- 99
+    
+    #ICU (ever/never)
+    #ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 1)] <- 2
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 99)] <- 99
+    
+    #Mechanical ventilation (ever/never)
+    #ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 0)]
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 1)] <- 3
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 99)] <- 99
+    
+    #Death at any time
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 1)] <- 4
+    ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99)] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
     
     #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized no O2; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
     
