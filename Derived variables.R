@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 12-10-2020)'
+suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -1890,14 +1890,13 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
     #Rx6. Tocilizumab ever used for TREATMENT of COVID-19
     ccc19x$der_toci <- NA
     ccc19x$der_toci[which(ccc19x$covid_19_treatment___rxcui_612865 == 1|
-                            ccc19x$covid_19_tx_interleukin___l04ac07 == 1|
                             ccc19x$covid_19_trial_tx___l04ac07 == 1|
                             ccc19x$covid_19_treatment_fu___rxcui_612865 == 1|
                             ccc19x$covid_19_tx_interleukin_fu___l04ac07 == 1|
                             ccc19x$covid_19_trial_tx_fu___l04ac07 == 1)] <- 1
     
     #Never
-    ccc19x$der_toci[which((ccc19x$covid_19_treatment___rxcui_612865 == 0 & (is.na(ccc19x$covid_19_tx_interleukin___l04ac07) | ccc19x$covid_19_tx_interleukin___l04ac07 == 0)) &
+    ccc19x$der_toci[which(ccc19x$covid_19_treatment___rxcui_612865 == 0  &
                             (is.na(ccc19x$covid_19_trial_tx___l04ac07) | ccc19x$covid_19_trial_tx___l04ac07 == 0) &
                             ((is.na(ccc19x$covid_19_treatment_fu___rxcui_612865) | ccc19x$covid_19_treatment_fu___rxcui_612865 == 0) & 
                                (is.na(ccc19x$covid_19_tx_interleukin_fu___l04ac07) | ccc19x$covid_19_tx_interleukin_fu___l04ac07 == 0))
@@ -4779,8 +4778,8 @@ suffix <- 'data with derived variables (thru 12-10-2020)'
       }
     }
     
-    ccc19x$der_quality[which(ccc19x$missing > 85)] <- ccc19x$der_quality[which(ccc19x$missing > 85)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > 85)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 85)],
+    ccc19x$der_quality[which(ccc19x$missing > 89)] <- ccc19x$der_quality[which(ccc19x$missing > 89)] + 5
+    ccc19x$der_problems[which(ccc19x$missing > 89)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 89)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
