@@ -4564,6 +4564,22 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_metastatic <- as.factor(ccc19x$der_metastatic)
     summary(ccc19x$der_metastatic[which(ccc19x$der_solid == 1)])
     
+    #Ca20. Stage at cancer diagnosis, simplified
+    ccc19x$der_stage <- NA
+    
+    #Localized
+    ccc19x$der_stage[which(ccc19x$stage %in% c(1:3,'764-1'))] <- 'Localized'
+    
+    #Disseminated
+    ccc19x$der_stage[which(ccc19x$stage %in% c(4,'764-7'))] <- 'Disseminated'
+    
+    #Unknown
+    ccc19x$der_stage[which(ccc19x$stage == 99)] <- 'Unknown'
+    
+    ccc19x$der_stage <- as.factor(ccc19x$der_stage)
+    summary(ccc19x$der_stage[ccc19x$redcap_repeat_instrument == ''])
+    
+    
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
