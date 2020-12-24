@@ -1818,6 +1818,46 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     
     summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
     
+    #O22b. ordinal_v1bb -- including "at least"
+    #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
+    
+    #Declare as missing
+    ccc19x$der_ordinal_v1b <- NA
+    
+    #Start with none of the below
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 0 & 
+                                   ccc19x$der_ICU == 0 &
+                                   ccc19x$der_mv == 0 &
+                                   ccc19x$der_dead30 == 0)] <- 0
+    
+    #Hospital (ever/never)
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 1)] <- 1
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    
+    #ICU (ever/never)
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 1)] <- 2
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    
+    #Mechanical ventilation (ever/never)
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 1)] <- 3
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    
+    #Death within 30 days
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 1)] <- 4
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == '']))
+    
     #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
     
     #Declare as missing
