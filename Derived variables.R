@@ -4579,6 +4579,34 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_stage <- as.factor(ccc19x$der_stage)
     summary(ccc19x$der_stage[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca21. Active versus inactive cancer
+    ccc19x$der_active <- NA
+    
+    #Active
+    ccc19x$der_active[which(ccc19x$on_treatment == 1|
+                              ccc19x$hx_treatment %in% 1:2|
+                              ccc19x$cancer_status %in% 2:5|
+                              ccc19x$mets_yn == 1|
+                              ccc19x$cancer_timing %in% c(0,1,88)
+                              )] <- 'Active'
+    
+    #Inactive
+    ccc19x$der_active[which(ccc19x$on_treatment == 0 &
+                              ccc19x$hx_treatment %in% 3:88 &
+                              ccc19x$cancer_status == 1 &
+                              ccc19x$cancer_timing %in% 2:3 &
+                              is.na(ccc19x$der_active))] <- 'Inactive'
+    
+    #Unknown
+    ccc19x$der_active[which((ccc19x$on_treatment == 99|
+                              ccc19x$hx_treatment == 99|
+                              ccc19x$cancer_status == 99|
+                              ccc19x$mets_yn == 99|
+                              ccc19x$cancer_timing == 99) &
+                              is.na(ccc19x$der_active))] <- 'Unknown'
+    
+    ccc19x$der_active <- as.factor(ccc19x$der_active)
+    summary(ccc19x$der_active[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4. Number of anti-cancer drugs
     
