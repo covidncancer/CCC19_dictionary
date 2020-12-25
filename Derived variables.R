@@ -237,6 +237,11 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_ICU <- as.factor(ccc19x$der_ICU)
     summary(ccc19x$der_ICU[ccc19x$redcap_repeat_instrument == ''])
     
+    #O3a. Direct admission to ICU at baseline
+    ccc19x$der_ICU_direct <- ccc19x$der_ICU
+    ccc19x$der_ICU_direct[which(ccc19x$hosp_status != 3 & ccc19x$der_ICU_direct == 1)] <- 0
+    summary(ccc19x$der_ICU_direct[ccc19x$redcap_repeat_instrument == ''])
+    
     "mv"
     #O4. derived variable indicating if patients were intubated or not
     ccc19x$der_mv <- NA
@@ -3649,6 +3654,33 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_morbid_obesity <- as.factor(ccc19x$der_morbid_obesity)
     summary(ccc19x$der_morbid_obesity[ccc19x$redcap_repeat_instrument == ''])
     
+    ##C02c. derived variable coding the morbid obesity status (binary, cutoff BMI 35)
+    ccc19x$der_morbid_obesity_v2 <- NA
+    
+    ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+    
+    #Records with numeric BMI recorded or derived as >= 35
+    ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi >= 35)] <- 1
+    
+    #Records with numeric BMI recorded or derived as < 35 (do not overwrite, for now)
+    ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi < 35 & is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+    
+    #Not specified
+    ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 0 &
+                                         is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+    
+    #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
+    temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity_v2[i] == 0) ccc19x$der_morbid_obesity_v2[i] <- NA
+    
+    #Unknown
+    ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_morbid_obesity_v2))] <- 99
+    
+    #Factor
+    ccc19x$der_morbid_obesity_v2 <- as.factor(ccc19x$der_morbid_obesity_v2)
+    summary(ccc19x$der_morbid_obesity_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     #C03. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
     summary(ccc19x$der_comorbid_no)
@@ -4523,6 +4555,36 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_activetx3mo_v2 <- relevel(ccc19x$der_activetx3mo_v2, ref = 'None')
     summary(ccc19x$der_activetx3mo_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca02. Line of active therapy
+    ccc19x$der_txline<- NA
+    
+    #Untreated in last 12 months (context variable only triggers for treatment within 12 months)
+    ccc19x$der_txline[which(ccc19x$hx_treatment %in% c(3,88)|
+                              (ccc19x$on_treatment == 0 & !ccc19x$hx_treatment %in% 1:2))] <- 'Untreated in last 12 months'
+    
+    #First-line
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(5250,2618,3175,813,1526,1901))] <- 'First line'
+    
+    #Second-line or later
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(14900,1874))] <- 'Second line or greater'
+    
+    #Curative NOS
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(46235))] <- 'Curative NOS'
+    
+    #Non-curative NOS
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(2648))] <- 'Non-curative NOS'
+    
+    #Other
+    ccc19x$der_txline[which(ccc19x$treatment_context == 'OTH')] <- 'Other'
+    
+    #Unknown
+    ccc19x$der_txline[which(ccc19x$treatment_context == 'UNK')] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_txline <- as.factor(ccc19x$der_txline)
+    ccc19x$der_txline <- relevel(ccc19x$der_txline, ref = 'Untreated in last 12 months')
+    summary(ccc19x$der_txline[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca10. Any treatment in past 3 months
     ccc19x$der_anytx <- NA
     
@@ -4541,13 +4603,58 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_anytx <- factor(ccc19x$der_anytx)
     summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
     
+    #####################################
     #Ca10a. Any cytotoxic within 3 months
+    #####################################
     ccc19x$der_any_cyto <- ccc19x$der_anytx
     ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 1 & 
                                 ((ccc19x$treatment_modality___685 == 0 & ccc19x$treatment_modality___45186 == 0)|
                                    (ccc19x$treatment_modality___694 == 0 &
                                       ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
     summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###################################
+    #Ca22. Recency of cytotoxic therapy
+    ###################################
+    ccc19x$der_cyto_timing<- NA
+    
+    #Within 4 weeks
+    ccc19x$der_cyto_timing[which(ccc19x$recent_treatment %in% 1:2 & ccc19x$treatment_modality___685 == 1)] <- "Within 4 weeks"
+    
+    #4 weeks - 3 months
+    ccc19x$der_cyto_timing[which(ccc19x$recent_treatment %in% 3 & ccc19x$treatment_modality___685 == 1)] <- '4 weeks to 3 months'
+    
+    #Within 3 months (special case)
+    ccc19x$der_cyto_timing[which(ccc19x$hx_treatment == 1 & ccc19x$treatment_modality___685 == 1 &
+                                   is.na(ccc19x$der_cyto_timing))] <- 'Within 3 months'
+    
+    #3 - 12 mo
+    ccc19x$der_cyto_timing[which(ccc19x$hx_treatment %in% 2 & ccc19x$treatment_modality___685 == 1)] <- '3 to 12 months'
+    
+    #More than 3 months (special case)
+    ccc19x$der_cyto_timing[which(ccc19x$recent_treatment == 88 & ccc19x$treatment_modality___685 == 1 &
+                                   is.na(ccc19x$der_cyto_timing))] <- 'More than 3 months'
+    
+    #Treatment initiated after COVID-19
+    ccc19x$der_cyto_timing[which(ccc19x$recent_treatment == 98 & ccc19x$treatment_modality___685 == 1 &
+                                   is.na(ccc19x$der_cyto_timing))] <- 'After COVID-19 diagnosis'
+    
+    #12 mo or greater
+    ccc19x$der_cyto_timing[which(ccc19x$hx_treatment %in% c(3,88))] <- 'None within a year'
+    
+    #Unknown (masked)
+    ccc19x$der_cyto_timing[which((ccc19x$recent_treatment %in% 1:88|ccc19x$hx_treatment %in% c(1,2)) & 
+                                   ccc19x$treatment_modality___685 == 0 &
+                                   is.na(ccc19x$der_cyto_timing))] <- 'Unknown (masked)'
+    
+    #Unknown
+    ccc19x$der_cyto_timing[which(ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_cyto_timing <- as.factor(ccc19x$der_cyto_timing)
+    ccc19x$der_cyto_timing <- relevel(ccc19x$der_cyto_timing, ref = 'None within a year')
+    summary(ccc19x$der_cyto_timing[ccc19x$redcap_repeat_instrument == ''])
+    
     
     #Ca10b. Any immunotherapy within 3 months
     ccc19x$der_any_immuno <- ccc19x$der_anytx
@@ -4607,6 +4714,13 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     ccc19x$der_any_local <- ccc19x$der_any_surgery
     ccc19x$der_any_local[which(ccc19x$der_any_rt == 1)] <- 1
     summary(ccc19x$der_any_local[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10k. Any systemic therapy within 3 months
+    ccc19x$der_any_systemic <- ccc19x$der_any_cyto
+    ccc19x$der_any_systemic[which(ccc19x$der_any_endo == 1|
+                                      ccc19x$der_any_immuno == 1|
+                                      ccc19x$der_any_targeted == 1)] <- 1
+    summary(ccc19x$der_any_systemic[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca12. Allogeneic transplant within one year (default is no)
     ccc19x$der_allo365 <- 0
