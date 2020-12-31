@@ -350,13 +350,16 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     for(i in 1:length(temp))
     {
       temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- c(ccc19x$days_to_death[temp.ref], ccc19x$days_to_death_fu[temp.ref])
+      temp2 <- c(ccc19x$days_to_death[temp.ref], 
+                 ccc19x$days_to_death_2[temp.ref],
+                 ccc19x$days_to_death_fu[temp.ref],
+                 ccc19x$days_to_death_fu_2[temp.ref])
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp2) > 0)
         ccc19x$der_days_to_death_combined[temp.ref] <- min(temp2)
     }
     
-    summary(factor(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1)]))
+    summary(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1)])
     
     #O7. supplemental O2
     ccc19x$der_o2_ever <- NA
@@ -2285,7 +2288,9 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     #T3. Median f/u
     ccc19x$der_median_fu <- NA
     pts <- unique(ccc19x$record_id)
-    fu <- c(7/2, (7+14)/2, (14+28)/2, (28+56)/2, (56+84)/2, (90+180)/2, 180)
+    
+    #Middle of follow-up intervals (from covid_19_dx_interval)
+    fu <- c(7/2, (7+14)/2, (14+28)/2, (28+56)/2, (56+84)/2, (90+180)/2, 180, (180+270)/2, (270+360)/2, 365)
     
     for(i in 1:length(pts))
     {
@@ -2295,13 +2300,14 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
       temp.ref <- temp.ref[which(is.na(temp) | temp == 2)]
       if(length(temp.ref) == 1) #No follow-up forms
       {
-        #Check if days_to_death has data, if so use it
-        if(!is.na(ccc19x$days_to_death[temp.ref])) 
+        #Check if days to death has data, if so use it
+        if(!is.na(ccc19x$der_days_to_death_combined[temp.ref])) 
         {
-          if(ccc19x$days_to_death[temp.ref] != 9999) 
+          if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
           {
-            ccc19x$der_median_fu[temp.ref] <- ccc19x$days_to_death[temp.ref]
-          }
+            ccc19x$der_median_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
+          } else #Default is the median of the time interval of diagnosis
+            ccc19x$der_median_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
         } else
         {
           #Default is the median of the time interval of diagnosis
@@ -2315,15 +2321,25 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
           #   if(temp > ccc19x$der_median_fu[temp.ref]) ccc19x$der_median_fu[temp.ref] <- temp
           # }
           
-          #If patient is deceased and days are missing, check the 30-day mortality variable
-          if(ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
-             (!is.na(ccc19x$mortality[temp.ref]) & ccc19x$mortality[temp.ref] == 0)) ccc19x$der_median_fu[temp.ref] <- 30
+          #If patient is deceased and days are missing, check the mortality variables for floor adjustment
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
+            ccc19x$mortality[temp.ref] == 0
+          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+          
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 90 & 
+            ccc19x$mortality_90[temp.ref] == 0
+          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+          
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 180 & 
+            ccc19x$mortality_180[temp.ref] == 0
+          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
+          
         }
       } else
       {
-        temp <- ccc19x$days_to_death_fu[temp.ref]
+        temp <- unique(ccc19x$der_days_to_death_combined[temp.ref])
         temp <- temp[!is.na(temp)]
-        #Check if days_to_death has data, if so use it
+        #Check if days to death has data, if so use it
         if(length(temp) == 1) 
         {
           if(temp != 9999) 
@@ -2339,8 +2355,23 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
           }
           if(length(temp[temp != '']) > 0) ccc19x$der_median_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
         }
+        
+        #If patient is deceased and days are missing, check the mortality variables for floor adjustment
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 30) & 
+          any(ccc19x$d30_vital_status[temp.ref] == 1)
+        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+        
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 90) & 
+          any(ccc19x$d90_vital_status[temp.ref] == 1)
+        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+        
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 180) & 
+          any(ccc19x$d180_vital_status[temp.ref] == 1)
+        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
       }
     }
+    
+    summary(ccc19x$der_median_fu[ccc19x$redcap_repeat_instrument == ''])
     
     #T4 & T5 Median f/u in days anchored to actual dates
     ccc19x$der_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
@@ -3175,7 +3206,7 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     
     summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
     
-    #O22b. ordinal_v1bb -- including "at least"
+    #O22b. ordinal_v1b -- including "at least"
     #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
     
     #Declare as missing
