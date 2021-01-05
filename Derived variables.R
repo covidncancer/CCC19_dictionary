@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
+suffix <- 'data with derived variables for analysis (thru 12-15-2020)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -4694,7 +4694,12 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     #converted height strings into double values and put them in a new column
     temp$mheight <- temp$height
     temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
-    err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
+    if(any(grepl(temp$mheight, pattern = '[a-z]')))
+    {
+      err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
+      out <- ccc19x$record_id[temp.ref[grep(temp$mheight, pattern = '[a-z]')]]
+    }
+    
     temp$mheight <- as.numeric(temp$mheight)
     
     #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
@@ -4888,6 +4893,10 @@ suffix <- 'data with derived variables for data cleaning (thru 12-16-2020)'
     
     #4. Receiving cytotoxic chemotherapy (turned off at the moment)
     #ccc19x$der_immunosuppressed[which(ccc19x$der_activetx == 'Cytotoxic')] <- 1
+    
+    #Unknown
+    ccc19x$der_immunosuppressed[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
+                                        is.na(ccc19x$der_immunosuppressed))] <- 99
     
     ccc19x$der_immunosuppressed <- factor(ccc19x$der_immunosuppressed)
     summary(ccc19x$der_immunosuppressed[ccc19x$redcap_repeat_instrument == ''])
