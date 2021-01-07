@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis (thru 12-15-2020)'
+suffix <- 'data with derived variables (thru 1-5-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -5375,11 +5375,19 @@ suffix <- 'data with derived variables for analysis (thru 12-15-2020)'
     ccc19x$der_GU <- factor(ccc19x$der_GU)
     summary(ccc19x$der_GU[ccc19x$redcap_repeat_instrument == ''])
     
+    #Prostate
     ccc19x$der_Prostate <- 0
     ccc19x$der_Prostate[which(ccc19x$cancer_type %in% c("C4863")|
                                 ccc19x$cancer_type_2 %in% c("C4863"))] <- 1
     ccc19x$der_Prostate <- factor(ccc19x$der_Prostate)
     summary(ccc19x$der_Prostate[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Bladder
+    ccc19x$der_Bladder <- 0
+    ccc19x$der_Bladder[which(ccc19x$cancer_type %in% c("C4912")|
+                                ccc19x$cancer_type_2 %in% c("C4912"))] <- 1
+    ccc19x$der_Bladder <- factor(ccc19x$der_Bladder)
+    summary(ccc19x$der_Bladder[ccc19x$redcap_repeat_instrument == ''])
     
     #Other GU (except prostate)
     ccc19x$der_Other_GU <- 0
