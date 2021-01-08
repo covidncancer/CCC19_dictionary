@@ -4891,9 +4891,6 @@ suffix <- 'data with derived variables (thru 1-5-2021)'
     #3. Receiving "immunuosuppressants" at baseline
     ccc19x$der_immunosuppressed[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
     
-    #4. Receiving cytotoxic chemotherapy (turned off at the moment)
-    #ccc19x$der_immunosuppressed[which(ccc19x$der_activetx == 'Cytotoxic')] <- 1
-    
     #Unknown
     ccc19x$der_immunosuppressed[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
                                         is.na(ccc19x$der_immunosuppressed))] <- 99
@@ -5773,6 +5770,40 @@ suffix <- 'data with derived variables (thru 1-5-2021)'
                                       ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
     summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
     
+    ###############################################################
+    #C05a. Immunosuppressed version 2 - with cytotoxic chemotherapy
+    ###############################################################
+    ccc19x$der_immunosuppressed_v2 <- NA
+    
+    #First, determine NOT immunosuppressed per comorbidity variable
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38013005[i] == 0) ccc19x$der_immunosuppressed_v2[i] <- 0
+    }
+    
+    #Next, rule in immunosuppression
+    
+    #1. Immunosuppression comorbidity checked
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$significant_comorbidities___38013005 == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Receiving "immunuosuppressants" at baseline
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #4. Receiving cytotoxic chemotherapy within 3 months
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$der_any_cyto == 1)] <- 1
+    
+    #Unknown
+    ccc19x$der_immunosuppressed_v2[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
+                                           is.na(ccc19x$der_immunosuppressed_v2))] <- 99
+    
+    ccc19x$der_immunosuppressed_v2 <- factor(ccc19x$der_immunosuppressed_v2)
+    summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     ###################################
     #Ca22. Recency of cytotoxic therapy
     ###################################
@@ -5881,6 +5912,16 @@ suffix <- 'data with derived variables (thru 1-5-2021)'
                                       ccc19x$der_any_immuno == 1|
                                       ccc19x$der_any_targeted == 1)] <- 1
     summary(ccc19x$der_any_systemic[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10l. Any intravesicular BCG therapy (no time restriction) - declare as none
+    ccc19x$der_any_intravesicular_bcg <- 0
+    ccc19x$der_any_intravesicular_bcg[which(ccc19x$intravesicular_bcg == 1|
+                                    ccc19x$bcg_intraves_ever == 1)] <- 1
+    ccc19x$der_any_intravesicular_bcg[which((ccc19x$intravesicular_bcg == 99|
+                                              ccc19x$bcg_intraves_ever == 99) &
+                                              ccc19x$der_any_intravesicular_bcg == 0)] <- 99
+    ccc19x$der_any_intravesicular_bcg <- factor(ccc19x$der_any_intravesicular_bcg)
+    summary(ccc19x$der_any_intravesicular_bcg[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca12. Allogeneic transplant within one year (default is no)
     ccc19x$der_allo365 <- 0
