@@ -6833,8 +6833,8 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
       }
     }
     
-    ccc19x$der_quality[which(ccc19x$missing > 90)] <- ccc19x$der_quality[which(ccc19x$missing > 90)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > 90)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 90)],
+    ccc19x$der_quality[which(ccc19x$missing > 94)] <- ccc19x$der_quality[which(ccc19x$missing > 94)] + 5
+    ccc19x$der_problems[which(ccc19x$missing > 94)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 94)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
