@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 1-6-2021)'
+suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -1226,6 +1226,51 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
   ccc19x$der_sepsis_comp <- as.factor(ccc19x$der_sepsis_comp)
   summary(ccc19x$der_sepsis_comp[ccc19x$redcap_repeat_instrument == ''])
   
+  #Comp12a Sepsis including hypotension that required pressors
+  
+  ccc19x$der_sepsis_comp_v2 <- NA
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
+  
+  #Present
+  for(i in temp.ref)
+    ccc19x$der_sepsis_comp_v2[which(ccc19x[,i] == 1)] <- 1
+  
+  ccc19x$der_sepsis_comp_v2[which((ccc19x$c19_complications_card___45007003 == 1 & ccc19x$sepsis_pressors == 1)|
+                                    (ccc19x$c19_complications_card_fu___45007003 == 1 & ccc19x$hotn_pressors_fu == 1))] <- 1
+  
+  #Not present, something else checked besides unknown
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '91302008|unk'))
+  for(i in 1:nrow(ccc19x))
+    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_sepsis_comp_v2[i])) ccc19x$der_sepsis_comp_v2[i] <- 0
+  
+  #Unknown
+  
+  #Baseline
+  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+  for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == ''))
+    if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
+  
+  #Followup
+  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+  for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == 'followup'))
+    if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
+  
+  #Merge baseline and followup if discrepancy
+  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+  {
+    temp.ref <- which(ccc19x$record_id == i)
+    temp <- ccc19x$der_sepsis_comp_v2[temp.ref]
+    temp <- as.numeric(unique(temp[!is.na(temp)]))
+    if(length(temp) > 0)
+    {
+      if(any(temp == 1)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 1
+      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 99
+      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 0
+    }
+  }
+  
+  ccc19x$der_sepsis_comp_v2 <- as.factor(ccc19x$der_sepsis_comp_v2)
+  summary(ccc19x$der_sepsis_comp_v2[ccc19x$redcap_repeat_instrument == ''])
   
   #Comp13 Bleeding: 50960005 (der_bleeding_comp)
   
@@ -2246,6 +2291,9 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
   #Time measurements
   ##################
   {
+    #Data fix
+    ccc19x$ts_5 <- gsub(ccc19x$ts_5, pattern = '/20 ', replacement = '/2020 ')
+    
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
     ccc19x$der_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
@@ -2280,9 +2328,13 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
       temp.ref <- which(ccc19x$record_id == temp[i])
       temp.time <- unique(ccc19x$ts_5[temp.ref])
       temp.time <- temp.time[temp.time != '']
-      temp.time <- as.POSIXlt(temp.time)
-      temp.time <- temp.time[which(temp.time == max(temp.time))]
-      ccc19x$der_righttime[temp.ref] <- temp.time
+      if(length(temp.time) > 0)
+      {
+        temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
+                                                          '%Y-%m-%d %H:%M'))
+        temp.time <- temp.time[which(temp.time == max(temp.time))]
+        ccc19x$der_righttime[temp.ref] <- temp.time
+      }
     }
     
     #T3. Median f/u
@@ -2407,9 +2459,13 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
       temp.ref <- which(ccc19x$record_id == temp[i])
       temp.time <- unique(ccc19x$ts_5[temp.ref])
       temp.time <- temp.time[temp.time != '']
-      temp.time <- as.POSIXlt(temp.time)
-      temp.time <- temp.time[which(temp.time == max(temp.time))]
-      ccc19x$der_righttime2[temp.ref] <- temp.time
+      if(length(temp.time) > 0)
+      {
+        temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
+                                                          '%Y-%m-%d %H:%M'))
+        temp.time <- temp.time[which(temp.time == max(temp.time))]
+        ccc19x$der_righttime2[temp.ref] <- temp.time
+      }
     }
     
     #T6. 30-day follow-up available (0 = no; 1 = yes; 99 = unknown)
@@ -2462,9 +2518,13 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
       temp.ref <- which(ccc19x$record_id == temp[i])
       temp.time <- unique(ccc19x$ts_5[temp.ref])
       temp.time <- temp.time[temp.time != '']
-      temp.time <- as.POSIXlt(temp.time)
-      temp.time <- temp.time[which(temp.time == max(temp.time))]
-      ccc19x$der_righttime3[temp.ref] <- temp.time
+      if(length(temp.time) > 0)
+      {
+        temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
+                                                          '%Y-%m-%d %H:%M'))
+        temp.time <- temp.time[which(temp.time == max(temp.time))]
+        ccc19x$der_righttime3[temp.ref] <- temp.time
+      }
     }
     
     temp.diff <- difftime(ccc19x$der_righttime3, ccc19x$der_lefttime3, units = 'days')
@@ -3402,7 +3462,7 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
       if(length(temp) > 0)
       {
         if((any(temp == 'AZ alone') & any(temp=='HCQ alone'))|any(temp == 'AZ+HCQ')) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- 'AZ+HCQ'
-        if(any(temp %in% c('Neither HCQ nor AZ','Unknown')) & any(!temp %in% c('Neither HCQ nor AZ','Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ','Unknown')])
+        else if(any(temp %in% c('Neither HCQ nor AZ','Unknown')) & any(!temp %in% c('Neither HCQ nor AZ','Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ','Unknown')])
       }
     }
     
@@ -4735,7 +4795,7 @@ suffix <- 'data with derived variables (thru 1-6-2021)'
     
     #No units, magnitude of height >3 and <100
     temp.ref2 <- which(!grepl(temp$weight, pattern = 'lb|pound|kg') &
-                         as.numeric(temp$height) > 3 & as.numeric(temp$height) < 100)
+                         as.numeric(temp$mheight) > 3 & as.numeric(temp$mheight) < 100)
     temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
     
     #calculating bmi and storing final result into a new copy
