@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
+suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -2623,12 +2623,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     temp <- ccc19x$record_id[which(ccc19x$der_dead30 %in% c(0,99) &
                                      (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
                                      ccc19x$current_status_retro == 3)]
-    for(i in 1:length(temp))
+    if(length(temp) > 0)
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
-      temp2 <- temp2[!is.na(temp2)]
-      if(temp2 %in% 1:3) ccc19x$der_dead30[temp.ref] <- 1
+      for(i in 1:length(temp))
+      {
+        temp.ref <- which(ccc19x$record_id == temp[i])
+        temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+        temp2 <- temp2[!is.na(temp2)]
+        if(temp2 %in% 1:3) ccc19x$der_dead30[temp.ref] <- 1
+      }
     }
     
     #10. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
@@ -2744,12 +2747,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     temp <- ccc19x$record_id[which(ccc19x$der_dead30a %in% c(0,99) &
                                      (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
                                      ccc19x$current_status_retro == 3)]
-    for(i in 1:length(temp))
+    if(length(temp) > 0)
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
-      temp2 <- temp2[!is.na(temp2)]
-      if(temp2 %in% 1:3) ccc19x$der_dead30a[temp.ref] <- 1
+      for(i in 1:length(temp))
+      {
+        temp.ref <- which(ccc19x$record_id == temp[i])
+        temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+        temp2 <- temp2[!is.na(temp2)]
+        if(temp2 %in% 1:3) ccc19x$der_dead30a[temp.ref] <- 1
+      }
     }
     
     #10. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
@@ -2845,12 +2851,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     temp <- ccc19x$record_id[which(ccc19x$der_dead90 %in% c(0,99) &
                                      (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
                                      ccc19x$current_status_retro == 3)]
-    for(i in 1:length(temp))
+    if(length(temp) > 0)
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
-      temp2 <- temp2[!is.na(temp2)]
-      if(temp2 %in% 1:5) ccc19x$der_dead90[temp.ref] <- 1
+      for(i in 1:length(temp))
+      {
+        temp.ref <- which(ccc19x$record_id == temp[i])
+        temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+        temp2 <- temp2[!is.na(temp2)]
+        if(temp2 %in% 1:5) ccc19x$der_dead90[temp.ref] <- 1
+      }
     }
     
     #10. Rescind unknown status if 180-day follow-up form is filled out as death and is not the first f/u form
@@ -2946,12 +2955,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     temp <- ccc19x$record_id[which(ccc19x$der_dead180 %in% c(0,99) &
                                      (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
                                      ccc19x$current_status_retro == 3)]
-    for(i in 1:length(temp))
+    if(length(temp) > 0)
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
-      temp2 <- temp2[!is.na(temp2)]
-      if(temp2 %in% 1:6) ccc19x$der_dead180[temp.ref] <- 1
+      for(i in 1:length(temp))
+      {
+        temp.ref <- which(ccc19x$record_id == temp[i])
+        temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+        temp2 <- temp2[!is.na(temp2)]
+        if(temp2 %in% 1:6) ccc19x$der_dead180[temp.ref] <- 1
+      }
     }
     
     ccc19x$der_dead180 <- as.factor(ccc19x$der_dead180)
