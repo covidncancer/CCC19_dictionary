@@ -2375,15 +2375,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
           
           #If patient is deceased and days are missing, check the mortality variables for floor adjustment
           temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
-            ccc19x$mortality[temp.ref] == 0
+            ccc19x$mortality[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
           if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
           
           temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 90 & 
-            ccc19x$mortality_90[temp.ref] == 0
+            ccc19x$mortality_90[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
           if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
           
           temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 180 & 
-            ccc19x$mortality_180[temp.ref] == 0
+            ccc19x$mortality_180[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
           if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
           
         }
@@ -2410,15 +2410,15 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
         
         #If patient is deceased and days are missing, check the mortality variables for floor adjustment
         temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 30) & 
-          any(ccc19x$d30_vital_status[temp.ref] == 1)
+          any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
         if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
         
         temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 90) & 
-          any(ccc19x$d90_vital_status[temp.ref] == 1)
+          any(ccc19x$d90_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
         if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
         
         temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 180) & 
-          any(ccc19x$d180_vital_status[temp.ref] == 1)
+          any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
         if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
       }
     }
@@ -5407,14 +5407,25 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     
     #Ca11 Primary heme type
     ccc19x$der_heme_type <- NA
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3171"))] <- 'Acute myeloid malignances'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3171"))] <- 'Acute myeloid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C4345","C3174","C3247"))] <- 'Chronic myeloid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167"))] <- 'Aggressive lymphoid malignancies'
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3163","C3209","C8504","C4341","C4337","C9308","C3106"))] <- 'Indolent lymphoid malignancies'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3163","C3209","C8504","C4341","C4337","C9308"))] <- 'Indolent lymphoid malignancies'
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3242","C4665","C3819"))] <- 'Plasma cell neoplasms'
-    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9300","C27134","OTH_H"))] <- 'Other'
+    ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C9300","C27134","C3106","OTH_H"))] <- 'Other'
     ccc19x$der_heme_type <- factor(ccc19x$der_heme_type)
     summary(ccc19x$der_heme_type[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca11b Secondary heme type
+    ccc19x$der_heme_type_secondary <- NA
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C3171"))] <- 'Acute myeloid malignancies'
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C4345","C3174","C3247"))] <- 'Chronic myeloid malignancies'
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167"))] <- 'Aggressive lymphoid malignancies'
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C3163","C3209","C8504","C4341","C4337","C9308"))] <- 'Indolent lymphoid malignancies'
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C3242","C4665","C3819"))] <- 'Plasma cell neoplasms'
+    ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C9300","C27134","C3106","OTH_H"))] <- 'Other'
+    ccc19x$der_heme_type_secondary <- factor(ccc19x$der_heme_type_secondary)
+    summary(ccc19x$der_heme_type_secondary[ccc19x$redcap_repeat_instrument == ''])
     
     #Dx10- Solid tumor binary indicators
     ccc19x$der_Breast <- 0
