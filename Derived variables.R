@@ -2319,7 +2319,10 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
     ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 180*24*60*60
     
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 7)
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
+    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 270*24*60*60
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
     ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
@@ -2451,8 +2454,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
     ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (90+180)*24*60*60/2
     
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 7)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - 360*24*60*60
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
+    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (180+270)*24*60*60/2
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
+    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (270+360)*24*60*60/2
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2511,8 +2517,14 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
     ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 90*24*60*60
     
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 7)
+    temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
     ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 180*24*60*60
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
+    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 270*24*60*60
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
+    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
