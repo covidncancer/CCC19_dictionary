@@ -2298,6 +2298,7 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     ccc19x$der_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$der_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -2429,6 +2430,7 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     ccc19x$der_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$der_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -2488,6 +2490,7 @@ suffix <- 'heme data with derived variables for analysis (thru 1-17-2021)'
     ccc19x$der_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$der_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$der_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
