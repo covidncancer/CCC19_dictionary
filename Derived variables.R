@@ -7083,6 +7083,68 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     ccc19x$der_gleason <- factor(ccc19x$der_gleason)
     summary(ccc19x$der_gleason[ccc19x$der_Prostate == 1])
     
+    ####################
+    #X09. Cytokine storm
+    ####################
+    ccc19x$der_cytokine_storm <- NA
+    
+    temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
+    
+    #Yes
+    
+    #At least one marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
+    x1 <- rep(F, length(temp.ref))
+    x1[which(ccc19x$der_il6[temp.ref] == 'Abnormal'|ccc19x$der_crp[temp.ref] == 'Abnormal'|ccc19x$der_ddimer[temp.ref] == 'Abnormal')] <- T
+    
+    #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS
+    x2 <- rep(F, length(temp.ref))
+    x2[which(ccc19x$der_hotn_comp[temp.ref] == 1|ccc19x$der_sepsis_comp[temp.ref] == 1|ccc19x$der_sepsis_comp_v2[temp.ref] == 1|
+               ccc19x$der_ARDS_comp[temp.ref] == 1|ccc19x$der_pneumonitis_comp[temp.ref] == 1)] <- T
+    
+    #At least one of fever, abnormal AST or ALT or creatinine
+    x3 <- rep(F, length(temp.ref))
+    x3[which(ccc19x$symptoms___386661006[temp.ref] == 1|ccc19x$ast[temp.ref] == 1|ccc19x$alt[temp.ref] == 1|ccc19x$der_creat[temp.ref] == 'Abnormal')] <- T
+    
+    ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 1
+    
+    #No
+    #No marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
+    x1 <- rep(F, length(temp.ref))
+    x1[which(ccc19x$der_il6[temp.ref] != 'Abnormal' & ccc19x$der_crp[temp.ref] != 'Abnormal' & ccc19x$der_ddimer[temp.ref] != 'Abnormal')] <- T
+    
+    #No hypotension/sepsis/pressors or pneumonitis/ARDS
+    x2 <- rep(F, length(temp.ref))
+    x2[which(ccc19x$der_hotn_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp_v2[temp.ref] == 0 &
+               ccc19x$der_ARDS_comp[temp.ref] == 0 & ccc19x$der_pneumonitis_comp[temp.ref] == 0)] <- T
+    
+    #No fever, abnormal AST or ALT or creatinine
+    x3 <- rep(F, length(temp.ref))
+    x3[which(ccc19x$symptoms___386661006[temp.ref] == 0 & ccc19x$ast[temp.ref] != 1 & ccc19x$alt[temp.ref] != 1 & ccc19x$der_creat[temp.ref] != 'Abnormal')] <- T
+    
+    ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 0
+    
+    #Unknown
+    #At least one marker of inflammation (IL-6, CRP, or D-dimer) is unknown
+    x1 <- rep(F, length(temp.ref))
+    x1[which((ccc19x$der_il6[temp.ref] == 'Unknown'|ccc19x$der_crp[temp.ref] == 'Unknown'|ccc19x$der_ddimer[temp.ref] == 'Unknown') &
+               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+    
+    #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS is unknown
+    x2 <- rep(F, length(temp.ref))
+    x2[which((ccc19x$der_hotn_comp[temp.ref] == 99|ccc19x$der_sepsis_comp[temp.ref] == 99|ccc19x$der_sepsis_comp_v2[temp.ref] == 99|
+               ccc19x$der_ARDS_comp[temp.ref] == 99|ccc19x$der_pneumonitis_comp[temp.ref] == 99) &
+               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+    
+    #At least one of unknown AST or ALT or creatinine
+    x3 <- rep(F, length(temp.ref))
+    x3[which((ccc19x$ast[temp.ref] == 99|ccc19x$alt[temp.ref] == 99|ccc19x$der_creat[temp.ref] == 'Unknown') &
+               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+    
+    ccc19x$der_cytokine_storm[temp.ref][x1|x2|x3] <- 99
+    
+    ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
+    summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+    
     }
 }
 
