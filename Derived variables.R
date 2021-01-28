@@ -2285,6 +2285,76 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
   ccc19x$der_AKI_comp <- as.factor(ccc19x$der_AKI_comp)
   summary(ccc19x$der_AKI_comp[ccc19x$redcap_repeat_instrument == ''])
   
+  #Comp37 Viral co-infection within +/- 2 weeks of COVID-19 diagnosis
+  ccc19x$der_coinfection_viral <- NA
+  
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+  
+  #Yes
+  ccc19x$der_coinfection_viral[which(ccc19x$coinfection___49872002 == 1|
+                                       ccc19x$coinfection___407479009 == 1|
+                                       ccc19x$coinfection___407480007 == 1|
+                                       ccc19x$coinfection___1838001 == 1|
+                                       ccc19x$coinfection___6415009 == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_viral[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_viral))] <- 0
+  for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_viral[i])) ccc19x$der_coinfection_viral[i] <- 0 
+  
+  #Unknown
+  ccc19x$der_coinfection_viral[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                       is.na(ccc19x$der_coinfection_viral))] <- 99
+  
+  ccc19x$der_coinfection_viral <- factor(ccc19x$der_coinfection_viral)
+  summary(ccc19x$der_coinfection_viral[ccc19x$redcap_repeat_instrument == ''])
+  
+  #Comp38 Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+  ccc19x$der_coinfection_bacterial <- NA
+  
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+  
+  #Yes
+  ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection___409822003 == 1|
+                                           ccc19x$coinfection___8745002 == 1|
+                                           ccc19x$coinfection___233607000 == 1|
+                                           ccc19x$coinfection___81325006 == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bacterial))] <- 0
+  for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bacterial[i])) ccc19x$der_coinfection_bacterial[i] <- 0 
+  
+  #Unknown
+  ccc19x$der_coinfection_bacterial[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                           is.na(ccc19x$der_coinfection_bacterial))] <- 99
+  
+  ccc19x$der_coinfection_bacterial <- factor(ccc19x$der_coinfection_bacterial)
+  summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
+  
+  #Comp39 Fungal co-infection within +/- 2 weeks of COVID-19 diagnosis
+  ccc19x$der_coinfection_fungal <- NA
+  
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+  
+  #Yes
+  ccc19x$der_coinfection_fungal[which(ccc19x$coinfection___414561005 == 1|
+                                        ccc19x$coinfection___2429008 == 1|
+                                        ccc19x$coinfection___709601002 == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_fungal[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_fungal))] <- 0
+  for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_fungal[i])) ccc19x$der_coinfection_fungal[i] <- 0 
+  
+  #Unknown
+  ccc19x$der_coinfection_fungal[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                        is.na(ccc19x$der_coinfection_fungal))] <- 99
+  
+  ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
+  summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
+  
+  
   }
   
   ##################
