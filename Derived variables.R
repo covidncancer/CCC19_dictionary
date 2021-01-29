@@ -6374,7 +6374,7 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2020-11-25.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-01-28.csv', header = T, stringsAsFactors = F)
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
@@ -6436,6 +6436,19 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
     ccc19x <- merge(ccc19x, drugs, all.x = T)
     
+    #Ca4a: CD20 drugs
+    ccc19x$der_cd20 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20[i] <- 1 else
+               ccc19x$der_cd20[i] <- 0
+    }
+    
+    ccc19x$der_cd20 <- factor(ccc19x$der_cd20)
+    summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
