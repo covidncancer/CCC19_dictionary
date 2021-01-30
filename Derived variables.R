@@ -5484,6 +5484,12 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_ALL <- factor(ccc19x$der_ALL)
     summary(ccc19x$der_ALL[ccc19x$redcap_repeat_instrument == ''])
     
+    ccc19x$der_CLL <- 0
+    ccc19x$der_CLL[which(ccc19x$cancer_type %in% c("C3163")|
+                           ccc19x$cancer_type_2 %in% c("C3163"))] <- 1
+    ccc19x$der_CLL <- factor(ccc19x$der_CLL)
+    summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
+    
     ccc19x$der_Lymph_Other <- 0
     ccc19x$der_Lymph_Other[which(ccc19x$cancer_type %in% c("C9308", "C3211")|
                                    ccc19x$cancer_type_2 %in% c("C9308", "C3211"))] <- 1
