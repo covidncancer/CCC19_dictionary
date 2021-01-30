@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
+suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -500,9 +500,10 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
    
   }
+  print('Outcomes completed')
   
   ##############
-  #Complications
+  #Complications - this can take a while!
   ##############
   {
   #Comp01. PE complications
@@ -2356,6 +2357,7 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
   
   
   }
+  print('Complications completed')
   
   ##################
   #Time measurements
@@ -3259,8 +3261,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_cancer_tx_timing_v2[ccc19x$redcap_repeat_instrument == ''])
     
     }
+  print('Time measurements completed')
   
+  #################
   #Ordinal outcomes
+  #################
   {
     ##WHO Ordinal scale derived
     #O11. WHO orginal scale
@@ -3470,8 +3475,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     
     
   }
+  print('Ordinal outcomes completed')
   
-  #Treatments
+  ###########
+  #Treatments - takes some time, not as much as complications
+  ###########
   {
     "hca" 
     #Rx1. Derived variable for hydroxychloroquine/azithro exposure used for TREATMENT of COVID-19
@@ -4575,8 +4583,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     ccc19x$der_rem <- factor(ccc19x$der_rem)
     summary(ccc19x$der_rem[ccc19x$redcap_repeat_instrument == ''])
   }
+  print('Treatments completed')
   
+  #############
   #Demographics
+  #############
   {
     #D1. age with estimation for categoricals
     ccc19x$der_age <- ccc19x$age_exact
@@ -4799,8 +4810,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     
     
   }
+  print('Demographics completed')
   
+  ##############
   #Comorbidities
+  ##############
   {
     #C01. BMI, with derived BMI for records that have height and weight recorded and not BMI
     ccc19x$der_bmi <- ccc19x$bmi
@@ -5428,8 +5442,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
     
     }
+  print('Comorbidities completed')
   
+  #############
   #Cancer types
+  #############
   {
     
     #Dx1-9. Binary indicators for heme types
@@ -5664,8 +5681,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_solid[ccc19x$redcap_repeat_instrument == ''])
     
   }
+  print('Cancer types completed')
   
+  #######################################
   #Cancer treatment and related variables
+  #######################################
   {
     "activetx" 
     #Ca1. Derived variable for whether a patient is on active cancer therapy
@@ -6443,12 +6463,41 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     for(i in 1:length(temp.ref))
     {
       if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20[i] <- 1 else
-               ccc19x$der_cd20[i] <- 0
+             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20[temp.ref[i]] <- 1 else
+               ccc19x$der_cd20[temp.ref[i]] <- 0
     }
     
     ccc19x$der_cd20 <- factor(ccc19x$der_cd20)
     summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4b: BTKi
+    ccc19x$der_btki <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Ibrutinib','Acalabrutinib','LOXO-305'))) ccc19x$der_btki[temp.ref[i]] <- 1 else
+               ccc19x$der_btki[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_btki <- factor(ccc19x$der_btki)
+    summary(ccc19x$der_btki[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4c: Venetoclax
+    ccc19x$der_venet <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Venetoclax'))) ccc19x$der_venet[temp.ref[i]] <- 1 else
+               ccc19x$der_venet[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_venet <- factor(ccc19x$der_venet)
+    summary(ccc19x$der_venet[ccc19x$redcap_repeat_instrument == ''])
+    
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
@@ -6481,8 +6530,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_site_type)
     
   }
+  print('Cancer treatment and related variables completed')
   
+  ##################
   #Laboratory values
+  ##################
   {
     #L1. Neutrophil:Lympocyte ratio, using categorical values
     ccc19x$der_nlr_cat <- NA
@@ -6705,8 +6757,11 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
     
   }
+  print('Laboratory values completed')
   
+  ######
   #Other
+  ######
   {
     
     #X1. Negative controls (partial variable)
@@ -7228,7 +7283,9 @@ suffix <- 'heme data with derived variables for analysis (thru 1-22-2021)'
     ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
     summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
     
-    }
+  }
+  print('Other derived variables completed')
+  
 }
 
 #Save here
