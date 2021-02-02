@@ -4648,6 +4648,17 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     summary(ccc19x$der_age[ccc19x$redcap_repeat_instrument == ''])
     
+    #D1a. Age re-categorized
+    ccc19x$der_age_cat <- ccc19x$der_age
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 18 & ccc19x$der_age < 40)] <- '18-39 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 40 & ccc19x$der_age < 60)] <- '40-59 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 60 & ccc19x$der_age < 70)] <- '60-69 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 70 & ccc19x$der_age < 80)] <- '70-79 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 80)] <- '80+ years'
+    
+    ccc19x$der_age_cat <- factor(ccc19x$der_age_cat)
+    summary(ccc19x$der_age_cat[ccc19x$redcap_repeat_instrument == ''])
+    
     "sex"
     #D2. Sex
     #recode other/prefer not to say as missing
