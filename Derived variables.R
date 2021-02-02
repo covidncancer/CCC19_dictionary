@@ -2333,6 +2333,47 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
   ccc19x$der_coinfection_bacterial <- factor(ccc19x$der_coinfection_bacterial)
   summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
   
+  #Comp38a Gram Positive Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+  ccc19x$der_coinfection_bact_gram_pos <- NA
+  
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+  
+  #Yes
+  ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection___8745002 == 1|
+                                               ccc19x$coinfection___233607000 == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 0
+  for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_pos[i])) ccc19x$der_coinfection_bact_gram_pos[i] <- 0 
+  
+  #Unknown
+  ccc19x$der_coinfection_bact_gram_pos[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                               is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 99
+  
+  ccc19x$der_coinfection_bact_gram_pos <- factor(ccc19x$der_coinfection_bact_gram_pos)
+  summary(ccc19x$der_coinfection_bact_gram_pos[ccc19x$redcap_repeat_instrument == ''])
+  
+  #Comp38b Gram Negative Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+  ccc19x$der_coinfection_bact_gram_neg <- NA
+  
+  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+  
+  #Yes
+  ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection___81325006 == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 0
+  for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_neg[i])) ccc19x$der_coinfection_bact_gram_neg[i] <- 0 
+  
+  #Unknown
+  ccc19x$der_coinfection_bact_gram_neg[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                               is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 99
+  
+  ccc19x$der_coinfection_bact_gram_neg <- factor(ccc19x$der_coinfection_bact_gram_neg)
+  summary(ccc19x$der_coinfection_bact_gram_neg[ccc19x$redcap_repeat_instrument == ''])
+  
   #Comp39 Fungal co-infection within +/- 2 weeks of COVID-19 diagnosis
   ccc19x$der_coinfection_fungal <- NA
   
