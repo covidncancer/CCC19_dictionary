@@ -2396,6 +2396,27 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
   ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
   summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
   
+  #Comp40 Any co-infection 
+  ccc19x$der_coinfection_any <- NA
+  
+  #Yes
+  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 1|
+                                        ccc19x$der_coinfection_fungal == 1|
+                                        ccc19x$der_coinfection_viral == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 0 &
+                                     ccc19x$der_coinfection_fungal == 0 &
+                                     ccc19x$der_coinfection_viral == 0)] <- 0
+  
+  #Unknown
+  ccc19x$der_coinfection_any[which((ccc19x$der_coinfection_bacterial == 99|
+                                     ccc19x$der_coinfection_fungal == 99|
+                                     ccc19x$der_coinfection_viral == 99) & is.na(ccc19x$der_coinfection_any))] <- 99
+  
+  ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
+  summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
+  
   
   }
   print('Complications completed')
@@ -5508,16 +5529,6 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_HemeNOS <- factor(ccc19x$der_HemeNOS)
     summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
     
-    ccc19x$der_Lymph <- 0
-    ccc19x$der_Lymph[which(ccc19x$cancer_type %in% c("C8851", "C3209", "C9244", "C3167", "C3163", 
-                                                     "C9308", "C4341", "C3211", "C9357", "C4337",
-                                                     "C2912", "C8504", "C27908")|
-                             ccc19x$cancer_type_2 %in% c("C8851", "C3209", "C9244", "C3167", "C3163", 
-                                                         "C9308", "C4341", "C3211", "C9357", "C4337",
-                                                         "C2912", "C8504", "C27908"))] <- 1
-    ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
-    summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
-    
     ccc19x$der_Lymph_HGNHL <- 0
     ccc19x$der_Lymph_HGNHL[which(ccc19x$cancer_type %in% c("C8851","C9244","C2912")|
                                    ccc19x$cancer_type_2 %in% c("C8851","C9244","C2912"))] <- 1
@@ -5547,12 +5558,6 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
                                    ccc19x$cancer_type_2 %in% c("C9308", "C3211"))] <- 1
     ccc19x$der_Lymph_Other <- factor(ccc19x$der_Lymph_Other)
     summary(ccc19x$der_Lymph_Other[ccc19x$redcap_repeat_instrument == ''])
-    
-    ccc19x$der_Myeloid <- 0
-    ccc19x$der_Myeloid[which(ccc19x$cancer_type %in% c("C3247", "C3171", "C4345", "C3106", "C3174")|
-                               ccc19x$cancer_type_2 %in% c("C3247", "C3171", "C4345", "C3106", "C3174"))] <- 1
-    ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
-    summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_AML <- 0
     ccc19x$der_AML[which(ccc19x$cancer_type %in% c("C3171")|
@@ -5598,6 +5603,20 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_heme_type_secondary[which(ccc19x$cancer_type_2 %in% c("C9300","C27134","C3106","OTH_H"))] <- 'Other'
     ccc19x$der_heme_type_secondary <- factor(ccc19x$der_heme_type_secondary)
     summary(ccc19x$der_heme_type_secondary[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Lymphoid malignancy
+    ccc19x$der_Lymph <- 0
+    ccc19x$der_Lymph[which(ccc19x$der_heme_type %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms")|
+                             ccc19x$der_heme_type_secondary %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms"))] <- 1
+    ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
+    summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Myeloid malignancy
+    ccc19x$der_Myeloid <- 0
+    ccc19x$der_Myeloid[which(ccc19x$der_heme_type %in% c("Acute myeloid malignancies","Chronic myeloid malignancies")|
+                               ccc19x$der_heme_type_secondary %in% c("Acute myeloid malignancies","Chronic myeloid malignancies"))] <- 1
+    ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
+    summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
     
     #Dx10- Solid tumor binary indicators
     ccc19x$der_Breast <- 0
