@@ -3215,7 +3215,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
     summary(ccc19x$der_hemi_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T13 Early ICU admission (within 48 hours)
+    #T14 Early ICU admission (within 48 hours)
     ccc19x$der_early_icu <- NA
     
     #Baseline
@@ -3296,7 +3296,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     summary(ccc19x$der_cancer_tx_timing[ccc19x$redcap_repeat_instrument == ''])
     
     #############################
-    #T13. Cancer treatment timing - collapse 0-2 and 2-4 weeks
+    #T13a. Cancer treatment timing - collapse 0-2 and 2-4 weeks
     #############################
     ccc19x$der_cancer_tx_timing_v2 <- NA
     
@@ -3321,6 +3321,30 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     ccc19x$der_cancer_tx_timing_v2 <- as.factor(ccc19x$der_cancer_tx_timing_v2)
     summary(ccc19x$der_cancer_tx_timing_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #############################
+    #T13b. Cancer treatment timing - collapse 0-3 months
+    #############################
+    ccc19x$der_cancer_tx_timing_v3 <- NA
+    
+    #0-3 months
+    ccc19x$der_cancer_tx_timing_v3[which((ccc19x$hx_treatment == 1|ccc19x$recent_treatment %in% 1:3) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v3))] <- 1
+    
+    #More than 3 months (referent)
+    ccc19x$der_cancer_tx_timing_v3[which((ccc19x$hx_treatment %in% 2:3|ccc19x$recent_treatment == 88) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v3))] <- 0
+    
+    #Never, including treatment starting AFTER the COVID-19 diagnosis
+    ccc19x$der_cancer_tx_timing_v3[which((ccc19x$hx_treatment == 88|ccc19x$recent_treatment == 98) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v3))] <- 88
+    
+    #Unknown
+    ccc19x$der_cancer_tx_timing_v3[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
+                                           is.na(ccc19x$der_cancer_tx_timing_v3))] <- 99
+    
+    ccc19x$der_cancer_tx_timing_v3 <- as.factor(ccc19x$der_cancer_tx_timing_v3)
+    summary(ccc19x$der_cancer_tx_timing_v3[ccc19x$redcap_repeat_instrument == ''])
     
     }
   print('Time measurements completed')
@@ -6255,6 +6279,34 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
                                       ccc19x$der_any_immuno == 1|
                                       ccc19x$der_any_targeted == 1)] <- 1
     summary(ccc19x$der_any_systemic[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10k1. Any systemic therapy within 12 months
+    ccc19x$der_any_systemic_v2 <- NA
+    
+    #Yes
+    ccc19x$der_any_systemic_v2[which((ccc19x$treatment_modality___685 == 1|
+                                    ccc19x$treatment_modality___694 == 1|
+                                    ccc19x$treatment_modality___58229 == 1|
+                                      ccc19x$treatment_modality___691 == 1|
+                                      ccc19x$treatment_modality___45186 == 1) &
+                                      (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))] <- 1
+    
+    #No
+    ccc19x$der_any_systemic_v2[which(ccc19x$hx_treatment %in% 3:88)] <- 0
+    ccc19x$der_any_systemic_v2[which(ccc19x$on_treatment == 1 & ccc19x$recent_treatment == 98)] <- 0
+    ccc19x$der_any_systemic_v2[which((ccc19x$treatment_modality___685 == 0 &
+                                        ccc19x$treatment_modality___694 == 0 &
+                                        ccc19x$treatment_modality___58229 == 0 &
+                                        ccc19x$treatment_modality___691 == 0 &
+                                        ccc19x$treatment_modality___45186 == 0) &
+                                       (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))] <- 0
+    #Unknown
+    ccc19x$der_any_systemic_v2[which((ccc19x$on_treatment == 99|
+                                        ccc19x$recent_treatment == 99|
+                                        ccc19x$hx_treatment == 99) & is.na(ccc19x$der_any_systemic_v2))] <- 99
+    
+    ccc19x$der_any_systemic_v2 <- factor(ccc19x$der_any_systemic_v2)
+    summary(ccc19x$der_any_systemic_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10l. Any intravesicular BCG therapy (no time restriction) - declare as none
     ccc19x$der_any_intravesicular_bcg <- 0
