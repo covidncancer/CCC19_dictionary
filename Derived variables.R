@@ -5571,17 +5571,6 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_PCDs <- factor(ccc19x$der_PCDs)
     summary(ccc19x$der_PCDs[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca8 Heme indicator
-    ccc19x$der_heme <- NA
-    ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
-    ccc19x$der_heme[which(ccc19x$der_HemeNOS == 1|
-                            ccc19x$der_Lymph == 1|
-                            ccc19x$der_Myeloid == 1|
-                            ccc19x$der_PCDs == 1)] <- 1
-    
-    ccc19x$der_heme <- factor(ccc19x$der_heme)
-    summary(ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''])
-    
     #Ca11 Primary heme type
     ccc19x$der_heme_type <- NA
     ccc19x$der_heme_type[which(ccc19x$cancer_type %in% c("C3171"))] <- 'Acute myeloid malignancies'
@@ -5617,6 +5606,17 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
                                ccc19x$der_heme_type_secondary %in% c("Acute myeloid malignancies","Chronic myeloid malignancies"))] <- 1
     ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
     summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca8 Heme indicator
+    ccc19x$der_heme <- NA
+    ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
+    ccc19x$der_heme[which(ccc19x$der_HemeNOS == 1|
+                            ccc19x$der_Lymph == 1|
+                            ccc19x$der_Myeloid == 1|
+                            ccc19x$der_PCDs == 1)] <- 1
+    
+    ccc19x$der_heme <- factor(ccc19x$der_heme)
+    summary(ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''])
     
     #Dx10- Solid tumor binary indicators
     ccc19x$der_Breast <- 0
