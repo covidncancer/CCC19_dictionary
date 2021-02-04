@@ -2396,6 +2396,27 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
   ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
   summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
   
+  #Comp40 Any co-infection 
+  ccc19x$der_coinfection_any <- NA
+  
+  #Yes
+  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 1|
+                                        ccc19x$der_coinfection_fungal == 1|
+                                        ccc19x$der_coinfection_viral == 1)] <- 1
+  
+  #No
+  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 0 &
+                                     ccc19x$der_coinfection_fungal == 0 &
+                                     ccc19x$der_coinfection_viral == 0)] <- 0
+  
+  #Unknown
+  ccc19x$der_coinfection_any[which((ccc19x$der_coinfection_bacterial == 99|
+                                     ccc19x$der_coinfection_fungal == 99|
+                                     ccc19x$der_coinfection_viral == 99) & is.na(ccc19x$der_coinfection_any))] <- 99
+  
+  ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
+  summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
+  
   
   }
   print('Complications completed')
@@ -4648,6 +4669,17 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     summary(ccc19x$der_age[ccc19x$redcap_repeat_instrument == ''])
     
+    #D1a. Age re-categorized
+    ccc19x$der_age_cat <- ccc19x$der_age
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 18 & ccc19x$der_age < 40)] <- '18-39 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 40 & ccc19x$der_age < 60)] <- '40-59 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 60 & ccc19x$der_age < 70)] <- '60-69 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 70 & ccc19x$der_age < 80)] <- '70-79 years'
+    ccc19x$der_age_cat[which(ccc19x$der_age >= 80)] <- '80+ years'
+    
+    ccc19x$der_age_cat <- factor(ccc19x$der_age_cat)
+    summary(ccc19x$der_age_cat[ccc19x$redcap_repeat_instrument == ''])
+    
     "sex"
     #D2. Sex
     #recode other/prefer not to say as missing
@@ -5493,78 +5525,75 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Dx1-9. Binary indicators for heme types
     ccc19x$der_HemeNOS <- 0
     ccc19x$der_HemeNOS[which(ccc19x$cancer_type %in% c("C27134", "C9300","OTH_H")|
-                               ccc19x$cancer_type_2 %in% c("C27134", "C9300","OTH_H"))] <- 1
+                               ccc19x$cancer_type_2 %in% c("C27134", "C9300","OTH_H")|
+                               ccc19x$cancer_type_3 %in% c("C27134", "C9300","OTH_H")|
+                               ccc19x$cancer_type_4 %in% c("C27134", "C9300","OTH_H")|
+                               ccc19x$cancer_type_5 %in% c("C27134", "C9300","OTH_H"))] <- 1
     ccc19x$der_HemeNOS <- factor(ccc19x$der_HemeNOS)
     summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
     
-    ccc19x$der_Lymph <- 0
-    ccc19x$der_Lymph[which(ccc19x$cancer_type %in% c("C8851", "C3209", "C9244", "C3167", "C3163", 
-                                                     "C9308", "C4341", "C3211", "C9357", "C4337",
-                                                     "C2912", "C8504", "C27908")|
-                             ccc19x$cancer_type_2 %in% c("C8851", "C3209", "C9244", "C3167", "C3163", 
-                                                         "C9308", "C4341", "C3211", "C9357", "C4337",
-                                                         "C2912", "C8504", "C27908"))] <- 1
-    ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
-    summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
-    
     ccc19x$der_Lymph_HGNHL <- 0
     ccc19x$der_Lymph_HGNHL[which(ccc19x$cancer_type %in% c("C8851","C9244","C2912")|
-                                   ccc19x$cancer_type_2 %in% c("C8851","C9244","C2912"))] <- 1
+                                   ccc19x$cancer_type_2 %in% c("C8851","C9244","C2912")|
+                                   ccc19x$cancer_type_3 %in% c("C8851","C9244","C2912")|
+                                   ccc19x$cancer_type_4 %in% c("C8851","C9244","C2912")|
+                                   ccc19x$cancer_type_5 %in% c("C8851","C9244","C2912"))] <- 1
     ccc19x$der_Lymph_HGNHL <- factor(ccc19x$der_Lymph_HGNHL)
     summary(ccc19x$der_Lymph_HGNHL[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_Lymph_LGNHL <- 0
     ccc19x$der_Lymph_LGNHL[which(ccc19x$cancer_type %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
-                                   ccc19x$cancer_type_2 %in% c("C3209", "C3163", "C4341", "C4337", "C8504"))] <- 1
+                                   ccc19x$cancer_type_2 %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
+                                   ccc19x$cancer_type_3 %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
+                                   ccc19x$cancer_type_4 %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
+                                   ccc19x$cancer_type_5 %in% c("C3209", "C3163", "C4341", "C4337", "C8504"))] <- 1
     ccc19x$der_Lymph_LGNHL <- factor(ccc19x$der_Lymph_LGNHL)
     summary(ccc19x$der_Lymph_LGNHL[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_ALL <- 0
     ccc19x$der_ALL[which(ccc19x$cancer_type %in% c("C3167")|
-                           ccc19x$cancer_type_2 %in% c("C3167"))] <- 1
+                           ccc19x$cancer_type_2 %in% c("C3167")|
+                           ccc19x$cancer_type_3 %in% c("C3167")|
+                           ccc19x$cancer_type_4 %in% c("C3167")|
+                           ccc19x$cancer_type_5 %in% c("C3167"))] <- 1
     ccc19x$der_ALL <- factor(ccc19x$der_ALL)
     summary(ccc19x$der_ALL[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_CLL <- 0
     ccc19x$der_CLL[which(ccc19x$cancer_type %in% c("C3163")|
-                           ccc19x$cancer_type_2 %in% c("C3163"))] <- 1
+                           ccc19x$cancer_type_2 %in% c("C3163")|
+                           ccc19x$cancer_type_3 %in% c("C3163")|
+                           ccc19x$cancer_type_4 %in% c("C3163")|
+                           ccc19x$cancer_type_5 %in% c("C3163"))] <- 1
     ccc19x$der_CLL <- factor(ccc19x$der_CLL)
     summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_Lymph_Other <- 0
     ccc19x$der_Lymph_Other[which(ccc19x$cancer_type %in% c("C9308", "C3211")|
-                                   ccc19x$cancer_type_2 %in% c("C9308", "C3211"))] <- 1
+                                   ccc19x$cancer_type_2 %in% c("C9308", "C3211")|
+                                   ccc19x$cancer_type_3 %in% c("C9308", "C3211")|
+                                   ccc19x$cancer_type_4 %in% c("C9308", "C3211")|
+                                   ccc19x$cancer_type_5 %in% c("C9308", "C3211"))] <- 1
     ccc19x$der_Lymph_Other <- factor(ccc19x$der_Lymph_Other)
     summary(ccc19x$der_Lymph_Other[ccc19x$redcap_repeat_instrument == ''])
     
-    ccc19x$der_Myeloid <- 0
-    ccc19x$der_Myeloid[which(ccc19x$cancer_type %in% c("C3247", "C3171", "C4345", "C3106", "C3174")|
-                               ccc19x$cancer_type_2 %in% c("C3247", "C3171", "C4345", "C3106", "C3174"))] <- 1
-    ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
-    summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
-    
     ccc19x$der_AML <- 0
     ccc19x$der_AML[which(ccc19x$cancer_type %in% c("C3171")|
-                           ccc19x$cancer_type_2 %in% c("C3171"))] <- 1
+                           ccc19x$cancer_type_2 %in% c("C3171")|
+                           ccc19x$cancer_type_3 %in% c("C3171")|
+                           ccc19x$cancer_type_4 %in% c("C3171")|
+                           ccc19x$cancer_type_5 %in% c("C3171"))] <- 1
     ccc19x$der_AML <- factor(ccc19x$der_AML)
     summary(ccc19x$der_AML[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_PCDs <- 0
     ccc19x$der_PCDs[which(ccc19x$cancer_type %in% c("C3242","C4665","C3819")|
-                            ccc19x$cancer_type_2 %in% c("C3242","C4665","C3819"))] <- 1
+                            ccc19x$cancer_type_2 %in% c("C3242","C4665","C3819")|
+                            ccc19x$cancer_type_3 %in% c("C3242","C4665","C3819")|
+                            ccc19x$cancer_type_4 %in% c("C3242","C4665","C3819")|
+                            ccc19x$cancer_type_5 %in% c("C3242","C4665","C3819"))] <- 1
     ccc19x$der_PCDs <- factor(ccc19x$der_PCDs)
     summary(ccc19x$der_PCDs[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Ca8 Heme indicator
-    ccc19x$der_heme <- NA
-    ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
-    ccc19x$der_heme[which(ccc19x$der_HemeNOS == 1|
-                            ccc19x$der_Lymph == 1|
-                            ccc19x$der_Myeloid == 1|
-                            ccc19x$der_PCDs == 1)] <- 1
-    
-    ccc19x$der_heme <- factor(ccc19x$der_heme)
-    summary(ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca11 Primary heme type
     ccc19x$der_heme_type <- NA
@@ -5588,10 +5617,38 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_heme_type_secondary <- factor(ccc19x$der_heme_type_secondary)
     summary(ccc19x$der_heme_type_secondary[ccc19x$redcap_repeat_instrument == ''])
     
+    #Lymphoid malignancy
+    ccc19x$der_Lymph <- 0
+    ccc19x$der_Lymph[which(ccc19x$der_heme_type %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms")|
+                             ccc19x$der_heme_type_secondary %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms"))] <- 1
+    ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
+    summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Myeloid malignancy
+    ccc19x$der_Myeloid <- 0
+    ccc19x$der_Myeloid[which(ccc19x$der_heme_type %in% c("Acute myeloid malignancies","Chronic myeloid malignancies")|
+                               ccc19x$der_heme_type_secondary %in% c("Acute myeloid malignancies","Chronic myeloid malignancies"))] <- 1
+    ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
+    summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca8 Heme indicator
+    ccc19x$der_heme <- NA
+    ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
+    ccc19x$der_heme[which(ccc19x$der_HemeNOS == 1|
+                            ccc19x$der_Lymph == 1|
+                            ccc19x$der_Myeloid == 1|
+                            ccc19x$der_PCDs == 1)] <- 1
+    
+    ccc19x$der_heme <- factor(ccc19x$der_heme)
+    summary(ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''])
+    
     #Dx10- Solid tumor binary indicators
     ccc19x$der_Breast <- 0
     ccc19x$der_Breast[which(ccc19x$cancer_type %in% c("C4872")|
-                              ccc19x$cancer_type_2 %in% c("C4872"))] <- 1
+                              ccc19x$cancer_type_2 %in% c("C4872")|
+                              ccc19x$cancer_type_3 %in% c("C4872")|
+                              ccc19x$cancer_type_4 %in% c("C4872")|
+                              ccc19x$cancer_type_5 %in% c("C4872"))] <- 1
     ccc19x$der_Breast <- factor(ccc19x$der_Breast)
     summary(ccc19x$der_Breast[ccc19x$redcap_repeat_instrument == ''])
     
@@ -5600,6 +5657,12 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_GU[which(ccc19x$cancer_type %in% c("C4863","C9061","C9063","C4912","C6389",
                                                   "C7355","C9385","C3267")|
                           ccc19x$cancer_type_2 %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                      "C7355","C9385","C3267")|
+                          ccc19x$cancer_type_3 %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                      "C7355","C9385","C3267")|
+                          ccc19x$cancer_type_4 %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                      "C7355","C9385","C3267")|
+                          ccc19x$cancer_type_5 %in% c("C4863","C9061","C9063","C4912","C6389",
                                                       "C7355","C9385","C3267"))] <- 1
     ccc19x$der_GU <- factor(ccc19x$der_GU)
     summary(ccc19x$der_GU[ccc19x$redcap_repeat_instrument == ''])
@@ -5607,14 +5670,20 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Prostate
     ccc19x$der_Prostate <- 0
     ccc19x$der_Prostate[which(ccc19x$cancer_type %in% c("C4863")|
-                                ccc19x$cancer_type_2 %in% c("C4863"))] <- 1
+                                ccc19x$cancer_type_2 %in% c("C4863")|
+                                ccc19x$cancer_type_3 %in% c("C4863")|
+                                ccc19x$cancer_type_4 %in% c("C4863")|
+                                ccc19x$cancer_type_5 %in% c("C4863"))] <- 1
     ccc19x$der_Prostate <- factor(ccc19x$der_Prostate)
     summary(ccc19x$der_Prostate[ccc19x$redcap_repeat_instrument == ''])
     
     #Bladder
     ccc19x$der_Bladder <- 0
     ccc19x$der_Bladder[which(ccc19x$cancer_type %in% c("C4912")|
-                                ccc19x$cancer_type_2 %in% c("C4912"))] <- 1
+                                ccc19x$cancer_type_2 %in% c("C4912")|
+                               ccc19x$cancer_type_3 %in% c("C4912")|
+                               ccc19x$cancer_type_4 %in% c("C4912")|
+                               ccc19x$cancer_type_5 %in% c("C4912"))] <- 1
     ccc19x$der_Bladder <- factor(ccc19x$der_Bladder)
     summary(ccc19x$der_Bladder[ccc19x$redcap_repeat_instrument == ''])
     
@@ -5623,6 +5692,12 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_Other_GU[which(ccc19x$cancer_type %in% c("C9061","C9063","C4912","C6389",
                                                         "C7355","C9385","C3267")|
                                 ccc19x$cancer_type_2 %in% c("C9061","C9063","C4912","C6389",
+                                                            "C7355","C9385","C3267")|
+                                ccc19x$cancer_type_3 %in% c("C9061","C9063","C4912","C6389",
+                                                            "C7355","C9385","C3267")|
+                                ccc19x$cancer_type_4 %in% c("C9061","C9063","C4912","C6389",
+                                                            "C7355","C9385","C3267")|
+                                ccc19x$cancer_type_5 %in% c("C9061","C9063","C4912","C6389",
                                                             "C7355","C9385","C3267"))] <- 1
     ccc19x$der_Other_GU <- factor(ccc19x$der_Other_GU)
     summary(ccc19x$der_Other_GU[ccc19x$redcap_repeat_instrument == ''])
@@ -5630,21 +5705,30 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Thoracic
     ccc19x$der_Thoracic <- 0
     ccc19x$der_Thoracic[which(ccc19x$cancer_type %in% c("C4917", "C2926", "C4878", "C3234","C3411")|
-                                ccc19x$cancer_type_2 %in% c("C4917", "C2926", "C4878", "C3234","C3411"))] <- 1
+                                ccc19x$cancer_type_2 %in% c("C4917", "C2926", "C4878", "C3234","C3411")|
+                                ccc19x$cancer_type_3 %in% c("C4917", "C2926", "C4878", "C3234","C3411")|
+                                ccc19x$cancer_type_4 %in% c("C4917", "C2926", "C4878", "C3234","C3411")|
+                                ccc19x$cancer_type_5 %in% c("C4917", "C2926", "C4878", "C3234","C3411"))] <- 1
     ccc19x$der_Thoracic <- factor(ccc19x$der_Thoracic)
     summary(ccc19x$der_Thoracic[ccc19x$redcap_repeat_instrument == ''])
     
     #GI cancers
     ccc19x$der_LowerGI <- 0
     ccc19x$der_LowerGI[which(ccc19x$cancer_type %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
-                               ccc19x$cancer_type_2 %in% c("C9291","C4910","C9330","C7724","C2955","C9382"))] <- 1
+                               ccc19x$cancer_type_2 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
+                               ccc19x$cancer_type_3 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
+                               ccc19x$cancer_type_4 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
+                               ccc19x$cancer_type_5 %in% c("C9291","C4910","C9330","C7724","C2955","C9382"))] <- 1
     ccc19x$der_LowerGI <- factor(ccc19x$der_LowerGI)
     summary(ccc19x$der_LowerGI[ccc19x$redcap_repeat_instrument == ''])
     
     #Upper GI including pancreaticohepatobiliary
     ccc19x$der_UpperGI <- 0
     ccc19x$der_UpperGI[which(ccc19x$cancer_type %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513")|
-                               ccc19x$cancer_type_2 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513"))] <- 1
+                               ccc19x$cancer_type_2 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513")|
+                               ccc19x$cancer_type_3 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513")|
+                               ccc19x$cancer_type_4 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513")|
+                               ccc19x$cancer_type_5 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513"))] <- 1
     ccc19x$der_UpperGI <- factor(ccc19x$der_UpperGI)
     summary(ccc19x$der_UpperGI[ccc19x$redcap_repeat_instrument == ''])
     
@@ -5657,55 +5741,79 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Gyn
     ccc19x$der_Gyn <- 0
     ccc19x$der_Gyn[which(ccc19x$cancer_type %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")|
-                           ccc19x$cancer_type_2 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866"))] <- 1
+                           ccc19x$cancer_type_2 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")|
+                           ccc19x$cancer_type_3 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")|
+                           ccc19x$cancer_type_4 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")|
+                           ccc19x$cancer_type_5 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866"))] <- 1
     ccc19x$der_Gyn <- factor(ccc19x$der_Gyn)
     summary(ccc19x$der_Gyn[ccc19x$redcap_repeat_instrument == ''])
     
     #Endocrine
     ccc19x$der_Endo <- 0
     ccc19x$der_Endo[which(ccc19x$cancer_type %in% c("C4815", "C9325", "C3809", "C4906")|
-                            ccc19x$cancer_type_2 %in% c("C4815", "C9325", "C3809", "C4906"))] <- 1
+                            ccc19x$cancer_type_2 %in% c("C4815", "C9325", "C3809", "C4906")|
+                            ccc19x$cancer_type_3 %in% c("C4815", "C9325", "C3809", "C4906")|
+                            ccc19x$cancer_type_4 %in% c("C4815", "C9325", "C3809", "C4906")|
+                            ccc19x$cancer_type_5 %in% c("C4815", "C9325", "C3809", "C4906"))] <- 1
     ccc19x$der_Endo <- factor(ccc19x$der_Endo)
     summary(ccc19x$der_Endo[ccc19x$redcap_repeat_instrument == ''])
     
     #Dermatologic including invasive NMSC
     ccc19x$der_Derm <- 0
     ccc19x$der_Derm[which(ccc19x$cancer_type %in% c("C3224", "C9231","C4819","C2921")|
-                            ccc19x$cancer_type_2 %in% c("C3224", "C9231","C4819","C2921"))] <- 1
+                            ccc19x$cancer_type_2 %in% c("C3224", "C9231","C4819","C2921")|
+                            ccc19x$cancer_type_3 %in% c("C3224", "C9231","C4819","C2921")|
+                            ccc19x$cancer_type_4 %in% c("C3224", "C9231","C4819","C2921")|
+                            ccc19x$cancer_type_5 %in% c("C3224", "C9231","C4819","C2921"))] <- 1
     ccc19x$der_Derm <- factor(ccc19x$der_Derm)
     summary(ccc19x$der_Derm[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_Melanoma <- 0
     ccc19x$der_Melanoma[which(ccc19x$cancer_type %in% c("C3224")|
-                                ccc19x$cancer_type_2 %in% c("C3224"))] <- 1
+                                ccc19x$cancer_type_2 %in% c("C3224")|
+                                ccc19x$cancer_type_3 %in% c("C3224")|
+                                ccc19x$cancer_type_4 %in% c("C3224")|
+                                ccc19x$cancer_type_5 %in% c("C3224"))] <- 1
     ccc19x$der_Melanoma <- factor(ccc19x$der_Melanoma)
     summary(ccc19x$der_Melanoma[ccc19x$redcap_repeat_instrument == ''])
     
     #Head & Neck
     ccc19x$der_HN <- 0
     ccc19x$der_HN[which(ccc19x$cancer_type %in% c("C4013", "C3871")|
-                          ccc19x$cancer_type_2 %in% c("C4013", "C3871"))] <- 1
+                          ccc19x$cancer_type_2 %in% c("C4013", "C3871")|
+                          ccc19x$cancer_type_3 %in% c("C4013", "C3871")|
+                          ccc19x$cancer_type_4 %in% c("C4013", "C3871")|
+                          ccc19x$cancer_type_5 %in% c("C4013", "C3871"))] <- 1
     ccc19x$der_HN <- factor(ccc19x$der_HN)
     summary(ccc19x$der_HN[ccc19x$redcap_repeat_instrument == ''])
     
     #Sarcoma
     ccc19x$der_Sarcoma <- 0
     ccc19x$der_Sarcoma[which(ccc19x$cancer_type %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")|
-                               ccc19x$cancer_type_2 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+                               ccc19x$cancer_type_2 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")|
+                               ccc19x$cancer_type_3 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")|
+                               ccc19x$cancer_type_4 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538")|
+                               ccc19x$cancer_type_5 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
     ccc19x$der_Sarcoma <- factor(ccc19x$der_Sarcoma)
     summary(ccc19x$der_Sarcoma[ccc19x$redcap_repeat_instrument == ''])
     
     #Neuro
     ccc19x$der_Neuro <- 0
     ccc19x$der_Neuro[which(ccc19x$cancer_type %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
-                             ccc19x$cancer_type_2 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541"))] <- 1
+                             ccc19x$cancer_type_2 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
+                             ccc19x$cancer_type_3 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
+                             ccc19x$cancer_type_4 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
+                             ccc19x$cancer_type_5 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541"))] <- 1
     ccc19x$der_Neuro <- factor(ccc19x$der_Neuro)
     summary(ccc19x$der_Neuro[ccc19x$redcap_repeat_instrument == ''])
     
     #Solid tumors NOS (including unassigned "Other" cancers)
     ccc19x$der_SolidNOS <- 0
     ccc19x$der_SolidNOS[which(ccc19x$cancer_type %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH")|
-                                ccc19x$cancer_type_2 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH"))] <- 1
+                                ccc19x$cancer_type_2 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH")|
+                                ccc19x$cancer_type_3 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH")|
+                                ccc19x$cancer_type_4 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH")|
+                                ccc19x$cancer_type_5 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH"))] <- 1
     ccc19x$der_SolidNOS <- factor(ccc19x$der_SolidNOS)
     summary(ccc19x$der_SolidNOS[ccc19x$redcap_repeat_instrument == ''])
     
@@ -6945,33 +7053,34 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     #X3. Modified Khorana
     ccc19x$der_VTE_risk <- NA
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")| ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
+                                 ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
+                                 ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
+                                 ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
+                                 ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                 ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                 ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                 ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                 ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                 ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                 ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                 ccc19x$cancer_type_4 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                 ccc19x$cancer_type_5 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                 ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                 ccc19x$cancer_type_3 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                 ccc19x$cancer_type_4 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                 ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
     ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
     ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
     summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Alternate code
-    # ccc19x$der_VTE_risk <- NA
-    # ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Pancreas,UpperGI,Neuro_GBM)|
-    #                 ccc19x$cancer_type_2 %in% c(Pancreas,UpperGI,Neuro_GBM)))] <- 'High-risk VTE malignancy'
-    # ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Thoracic,GYN,GU_Other,GU_Renal,Lymph,PCDs)|
-    #                              ccc19x$cancer_type_2 %in% c(Thoracic,GYN,GU_Other,GU_Renal,Lymph,PCDs)))] <- 'Intermediate-risk VTE malignancy'
-    # 
-    # temp <- SolidAll[!SolidAll %in% c(Pancreas,UpperGI,Neuro_GBM,Thoracic,GYN,GU_Other,GU_Renal,Breast,Prostate,LowerGI)]
-    # ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c(Breast,Prostate,LowerGI,temp)|
-    #                              ccc19x$cancer_type_2 %in% c(Breast,Prostate,LowerGI,temp)))] <- 'Low-risk VTE malignancy'
-    # 
-    # temp <- Heme[!Heme %in% c(Lymph,PCDs)]
-    # ccc19x$der_VTE_risk[which(ccc19x$cancer_type %in% temp|
-    #                              ccc19x$cancer_type_2 %in% temp)] <- 'Other hematologic malignancy'
-    # 
-    # ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
-    # ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
-    # summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
     ccc19x$der_30d_due <- NA
@@ -7136,7 +7245,11 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #ADT (prostate)
     temp.ref <- which((ccc19x$adt == 99|is.na(ccc19x$adt)) &
                         !ccc19x$hx_treatment %in% c(3,88) &
-                        (ccc19x$cancer_type == 'C4863'|ccc19x$cancer_type_2 == 'C4863'))
+                        (ccc19x$cancer_type == 'C4863'|
+                           ccc19x$cancer_type_2 == 'C4863'|
+                           ccc19x$cancer_type_3 == 'C4863'|
+                           ccc19x$cancer_type_4 == 'C4863'|
+                           ccc19x$cancer_type_5 == 'C4863'))
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; ADT missing or unknown', sep = '')
@@ -7144,14 +7257,22 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Biomarkers (breast)
     temp.ref <- which(((ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 0 &
                           ccc19x$breast_biomarkers___tnbc == 0) | (ccc19x$breast_biomarkers___99 == 1)) &
-                        (ccc19x$cancer_type == 'C4872'|ccc19x$cancer_type_2 == 'C4872'))
+                        (ccc19x$cancer_type == 'C4872'|
+                           ccc19x$cancer_type_2 == 'C4872'|
+                           ccc19x$cancer_type_3 == 'C4872'|
+                           ccc19x$cancer_type_4 == 'C4872'|
+                           ccc19x$cancer_type_5 == 'C4872'))
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; Breast cancer biomarkers missing or unknown', sep = '')
     
     #BCG (bladder)
     temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
-                        (ccc19x$cancer_type == 'C4912'|ccc19x$cancer_type_2 == 'C4912'))
+                        (ccc19x$cancer_type == 'C4912'|
+                           ccc19x$cancer_type_2 == 'C4912'|
+                           ccc19x$cancer_type_3 == 'C4912'|
+                           ccc19x$cancer_type_4 == 'C4912'|
+                           ccc19x$cancer_type_5 == 'C4912'))
     ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
     ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
                                            '; Intravesicular BCG missing or unknown', sep = '')
