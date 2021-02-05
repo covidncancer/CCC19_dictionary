@@ -421,7 +421,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
     
     
-    #O8. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
+    #O8a. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
     
     #Present
@@ -448,7 +448,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_severe <- as.factor(ccc19x$der_severe)
     summary(ccc19x$der_severe[ccc19x$redcap_repeat_instrument == ''])
     
-    #O9. Severe composite outcome v2 - mechanical ventilation, intensive care unit (ICU) requirement, or death
+    #O8b. Severe composite outcome v2 - mechanical ventilation, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe2 <- NA
     ccc19x$der_severe2[which(ccc19x$der_deadbinary == 1)] <- 1
     ccc19x$der_severe2[which(ccc19x$der_mv == 1)] <- 1
@@ -472,7 +472,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_severe2 <- as.factor(ccc19x$der_severe2)
     summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
     
-    #O10. Severe composite outcome v3 - death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation
+    #O8c. Severe composite outcome v3 - death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation
     ccc19x$der_severe3 <- NA
     
     #Present
@@ -499,6 +499,8 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #ccc19x$der_severe3 <- relevel(ccc19x$der_severe3, ref = '1')
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
    
+    
+    
   }
   print('Outcomes completed')
   
@@ -3114,6 +3116,26 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     ccc19x$der_dead180 <- as.factor(ccc19x$der_dead180)
     summary(ccc19x$der_dead180[ccc19x$redcap_repeat_instrument == ''])
+    
+    #O9. Composite outcome - hospitalization (ever/never), or death within 30 days
+    ccc19x$der_composite_hosp_death <- NA
+    
+    #Present
+    ccc19x$der_composite_hosp_death[which(ccc19x$der_dead30 == 1)] <- 1
+    ccc19x$der_composite_hosp_death[which(ccc19x$der_hosp == 1)] <- 1
+    
+    #Absent (requires all 2 derived variables to be absent, and not meeting another criteria)
+    ccc19x$der_composite_hosp_death[which(ccc19x$der_dead30 == 0 &
+                              ccc19x$der_hosp == 0 &
+                              is.na(ccc19x$der_composite_hosp_death))] <- 0
+    
+    #Unknown
+    ccc19x$der_composite_hosp_death[which((ccc19x$der_dead30 == 99 |ccc19x$der_hosp == 99) &
+                                      is.na(ccc19x$der_composite_hosp_death))] <- 99
+    
+    #Factor
+    ccc19x$der_composite_hosp_death <- as.factor(ccc19x$der_composite_hosp_death)
+    summary(ccc19x$der_composite_hosp_death[ccc19x$redcap_repeat_instrument == ''])
     
     #T9 Month and year of diagnosis, accounting for interval bounds
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
