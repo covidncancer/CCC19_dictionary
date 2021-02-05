@@ -6554,6 +6554,24 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_metastatic <- as.factor(ccc19x$der_metastatic)
     summary(ccc19x$der_metastatic[which(ccc19x$der_solid == 1)])
     
+    #Ca19a. Metastatic disease to lung
+    ccc19x$der_met_lung <- NA
+    
+    #Yes
+    ccc19x$der_met_lung[which(ccc19x$mets_sites___1116_1 == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_lung[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_met_lung))] <- 0
+    ccc19x$der_met_lung[which(ccc19x$mets_yn == 0 & is.na(ccc19x$der_met_lung))] <- 0
+    ccc19x$der_met_lung[which(ccc19x$mets_yn == 1 & ccc19x$mets_sites___1116_1 == 0)] <- 0
+    
+    #Unknown
+    ccc19x$der_met_lung[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_lung))] <- 99
+    ccc19x$der_met_lung[which(ccc19x$mets_sites___9 == 1 & is.na(ccc19x$der_met_lung))] <- 99
+    
+    ccc19x$der_met_lung <- as.factor(ccc19x$der_met_lung)
+    summary(ccc19x$der_met_lung[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca20. Stage at cancer diagnosis, simplified
     ccc19x$der_stage <- NA
     
@@ -7502,6 +7520,77 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
     summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+    
+    #####################################
+    #X10. Lower respiratory tract disease
+    #####################################
+    ccc19x$der_lrtd <- NA
+    
+    #Yes
+    ccc19x$der_lrtd[which(ccc19x$der_mv == 1)] <- 1 #Intubated
+    
+    #Baseline
+    ccc19x$der_lrtd[which(ccc19x$resp_failure_tx %in% 2:6 | 
+                          ccc19x$c19_complications_pulm___205237003 == 1 | 
+                          ccc19x$c19_complications_pulm___233604007 == 1 |
+                          ccc19x$c19_complications_pulm___67782005 == 1)] <- 1
+    
+    #Follow-up
+    ccc19x$der_lrtd[which(ccc19x$resp_failure_tx_fu %in% 2:6 | 
+                          ccc19x$who_ordinal_scale %in% 5:7 | 
+                          ccc19x$c19_complications_pulm_fu___205237003 == 1 | 
+                          ccc19x$c19_complications_pulm_fu___233604007 == 1 |
+                          ccc19x$c19_complications_pulm_fu___67782005 == 1)] <- 1
+    
+    #No
+    
+    #Baseline
+    ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 0 |
+                           ccc19x$resp_failure_tx == 1 |
+                             ccc19x$c19_complications_pulm___none == 1) &
+                          is.na(ccc19x$der_lrtd))] <- 0
+    
+    #Follow-up
+    ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 0 |
+                           ccc19x$resp_failure_tx_fu == 1|
+                             ccc19x$c19_complications_pulm_fu___none == 1|
+                             ccc19x$who_ordinal_scale %in% c(1,3,4)) &
+                          is.na(ccc19x$der_lrtd))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 99 |
+                           ccc19x$resp_failure_tx == 99 |
+                           ccc19x$c19_complications_pulm___unk == 1) &
+                          is.na(ccc19x$der_lrtd))] <- 99
+    
+    #Followup
+    ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 99 |
+                           ccc19x$resp_failure_tx_fu == 99 |
+                           ccc19x$c19_complications_pulm_fu___unk == 1) &
+                          is.na(ccc19x$der_lrtd))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_mv[temp.ref]
+      temp2 <- ccc19x$der_mv[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1 else
+          if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          {
+            if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 0
+            if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 99
+          }
+      }
+    }
+    
+    ccc19x$der_lrtd <- factor(ccc19x$der_lrtd)
+    summary(ccc19x$der_lrtd[ccc19x$redcap_repeat_instrument == ''])
     
   }
   print('Other derived variables completed')
