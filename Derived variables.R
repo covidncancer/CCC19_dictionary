@@ -6641,7 +6641,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-01-28.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-06.csv', header = T, stringsAsFactors = F)
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
@@ -6745,6 +6745,112 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_venet <- factor(ccc19x$der_venet)
     summary(ccc19x$der_venet[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4d: Tamoxifen
+    ccc19x$der_tam <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Tamoxifen'))) ccc19x$der_tam[temp.ref[i]] <- 1 else
+               ccc19x$der_tam[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_tam <- factor(ccc19x$der_tam)
+    summary(ccc19x$der_tam[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4e: Aromatase inhibitor
+    ccc19x$der_ai <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Letrozole','Exemestane','Anastrozole','Aromatase inhibitor'))) ccc19x$der_ai[temp.ref[i]] <- 1 else
+               ccc19x$der_ai[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_ai <- factor(ccc19x$der_ai)
+    summary(ccc19x$der_ai[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4f: VEGF inhibitor
+    ccc19x$der_vegfi <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Axitinib','Bevacizumab','Cabozantinib','Lenvatinib','Pazopanib',
+               'Sorafenib','Sunitinib','Vandetanib','Ramucirumab'))) ccc19x$der_vegfi[temp.ref[i]] <- 1 else
+               ccc19x$der_vegfi[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_vegfi <- factor(ccc19x$der_vegfi)
+    summary(ccc19x$der_vegfi[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4g: TKI inhibitor (incomplete list, possibly)
+    ccc19x$der_tki <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Afatinib','Alectinib','Axitinib','Brigatinib','Cabozantinib','Ceritinib',
+               'Crizotinib','Entrectinib','Erlotinib','Gefitinib','Gilteritinib','Lapatinib',
+               'Lenvatinib','Lorlatinib','Neratinib','Nilotinib','Niraparib','Osimertinib',
+               'Pazopanib','Ponatinib','Regorafenib','Ripretinib','Selpercatinib','Sorafenib',
+               'Sunitinib','Acalabrutinib','Bosutinib','Dasatinib','Fedratinib','Ibrutinib',
+               'Imatinib','Midostaurin','Pexidartinib','Pralsetinib','Ruxolitinib','Tucatinib',
+               'Vandetinib'))) ccc19x$der_tki[temp.ref[i]] <- 1 else
+                 ccc19x$der_tki[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_tki <- factor(ccc19x$der_tki)
+    summary(ccc19x$der_tki[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4h: CDK4/6 inhibitor
+    ccc19x$der_cdk46i <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Abemaciclib','Palbociclib','Ribociclib'))) ccc19x$der_cdk46i[temp.ref[i]] <- 1 else
+               ccc19x$der_cdk46i[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_cdk46i <- factor(ccc19x$der_cdk46i)
+    summary(ccc19x$der_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4i: GNRH agonists and antagonists
+    ccc19x$der_gnrh <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('ADT','Goserelin','Histrelin','Leuprolide','Triptorelin',
+               'Abarelix','Degarelix','Relugolix'))) ccc19x$der_gnrh[temp.ref[i]] <- 1 else
+                 ccc19x$der_gnrh[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_gnrh <- factor(ccc19x$der_gnrh)
+    summary(ccc19x$der_gnrh[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4j: Oral anti-androgen
+    ccc19x$der_oral_antiandrogen <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Abiraterone','Apalutamide','Darolutamide','Enzalutmide',
+               'Flutamide','Nilutamide','Bicalutamide'))) ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 1 else
+                 ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_oral_antiandrogen <- factor(ccc19x$der_oral_antiandrogen)
+    summary(ccc19x$der_oral_antiandrogen[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
