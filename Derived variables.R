@@ -4417,13 +4417,11 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_ac_apa <- factor(ccc19x$der_ac_apa)
     summary(ccc19x$der_ac_apa[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx11. Anticoagulation, aspirin, or APA at baseline
+    #Rx15. Anticoagulation, aspirin, or APA at baseline
     ccc19x$der_ac_apa_baseline <- NA
     ccc19x$der_ac_apa_baseline[which(ccc19x$concomitant_meds___n02ba == 1|
                                        ccc19x$concomitant_meds___b01ac == 1|
                                        ccc19x$concomitant_meds___b01a == 1)] <- 1
-    
-    summary(factor(ccc19x$der_ac_apa_baseline))
     
     #Unexposed
     ccc19x$der_ac_apa_baseline[which(is.na(ccc19x$der_ac_apa_baseline) & ccc19x$concomitant_meds___n02ba == 0 &
@@ -4431,24 +4429,18 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
                                        ccc19x$concomitant_meds___b01a == 0 &
                                        ccc19x$concomitant_meds___unk == 0)] <- 0
     
-    summary(factor(ccc19x$der_ac_apa_baseline))
-    
     #Unknown baseline
     ccc19x$der_ac_apa_baseline[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_ac_apa_baseline))] <- 99
-    
-    summary(factor(ccc19x$der_ac_apa_baseline))
     
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_apa_baseline[i] <- NA
-    
-    summary(factor(ccc19x$der_ac_apa_baseline))
-    
+   
     ccc19x$der_ac_apa_baseline <- factor(ccc19x$der_ac_apa_baseline)
     summary(ccc19x$der_ac_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx11a. Anticoagulation at baseline
+    #Rx13a. Anticoagulation at baseline
     ccc19x$der_ac_baseline <- NA
     ccc19x$der_ac_baseline[which(ccc19x$concomitant_meds___b01a == 1)] <- 1
     
@@ -4459,24 +4451,18 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
                                    ccc19x$concomitant_meds___b01a == 0 &
                                    ccc19x$concomitant_meds___unk == 0)] <- 0
     
-    summary(factor(ccc19x$der_ac_baseline))
-    
     #Unknown baseline
     ccc19x$der_ac_baseline[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_ac_baseline))] <- 99
-    
-    summary(factor(ccc19x$der_ac_baseline))
     
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_baseline[i] <- NA
     
-    summary(factor(ccc19x$der_ac_baseline))
-    
     ccc19x$der_ac_baseline <- factor(ccc19x$der_ac_baseline)
     summary(ccc19x$der_ac_baseline[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx11b. Aspirin or APA at baseline
+    #Rx13b. APA at baseline
     ccc19x$der_apa_baseline <- NA
     ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___n02ba == 1|
                                     ccc19x$concomitant_meds___b01ac == 1)] <- 1
@@ -4504,6 +4490,100 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     ccc19x$der_apa_baseline <- factor(ccc19x$der_apa_baseline)
     summary(ccc19x$der_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx17. ACEi at baseline
+    ccc19x$der_acei_bl <- NA
+    ccc19x$der_acei_bl[which(ccc19x$concomitant_meds___c09a == 1)] <- 1
+    
+    summary(factor(ccc19x$der_acei_bl))
+    
+    #Unexposed
+    ccc19x$der_acei_bl[which(is.na(ccc19x$der_acei_bl) &
+                               ccc19x$concomitant_meds___c09a == 0 &
+                               ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_acei_bl[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_acei_bl))] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_acei_bl[i] <- NA
+    
+    ccc19x$der_acei_bl <- factor(ccc19x$der_acei_bl)
+    summary(ccc19x$der_acei_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    ######################
+    #Rx18. ARB at baseline
+    ######################
+    ccc19x$der_arb_bl <- NA
+    ccc19x$der_arb_bl[which(ccc19x$concomitant_meds___c09c == 1)] <- 1
+    
+    summary(factor(ccc19x$der_arb_bl))
+    
+    #Unexposed
+    ccc19x$der_arb_bl[which(is.na(ccc19x$der_arb_bl) &
+                              ccc19x$concomitant_meds___c09c == 0 &
+                              ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_arb_bl[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_arb_bl))] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_arb_bl[i] <- NA
+    
+    ccc19x$der_arb_bl <- factor(ccc19x$der_arb_bl)
+    summary(ccc19x$der_arb_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #####################################
+    #Rx19. Immunosuppressants at baseline
+    #####################################
+    ccc19x$der_immunosupp_bl <- NA
+    ccc19x$der_immunosupp_bl[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    summary(factor(ccc19x$der_immunosupp_bl))
+    
+    #Unexposed
+    ccc19x$der_immunosupp_bl[which(is.na(ccc19x$der_immunosupp_bl) &
+                                     ccc19x$concomitant_meds___l04a == 0 &
+                                     ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_immunosupp_bl[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_immunosupp_bl))] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_immunosupp_bl[i] <- NA
+    
+    ccc19x$der_immunosupp_bl <- factor(ccc19x$der_immunosupp_bl)
+    summary(ccc19x$der_immunosupp_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #####################################
+    #Rx20. High-dose steroids at baseline
+    #####################################
+    ccc19x$der_steroids_hd_bl <- NA
+    ccc19x$der_steroids_hd_bl[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #Unexposed or under-exposed
+    ccc19x$der_steroids_hd_bl[which((ccc19x$steroid_specific_2 %in% c(1,'1a','1b') |
+                                       ccc19x$concomitant_meds___h02 == 0) &
+                                      ccc19x$concomitant_meds___unk == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_steroids_hd_bl[which((ccc19x$concomitant_meds___unk == 1 |
+                                       ccc19x$steroid_specific_2 == 99) & 
+                                      is.na(ccc19x$der_steroids_hd_bl))] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_hd_bl[i] <- NA
+    
+    ccc19x$der_steroids_hd_bl <- factor(ccc19x$der_steroids_hd_bl)
+    summary(ccc19x$der_steroids_hd_bl[ccc19x$redcap_repeat_instrument == ''])
     
     #Rx12. Aspirin or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_as_apa <- NA
@@ -6363,6 +6443,38 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     
     ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
     summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
+    
+    ################################
+    #Ca23. Stem cell transplant ever
+    ################################
+    ccc19x$der_sct <- NA
+    
+    #Yes
+    ccc19x$der_sct[which(ccc19x$significant_comorbidities___234336002 == 1)] <- 1
+    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy %in% 1:5 &
+                           ccc19x$transplant_cellular_timing != 0)] <- 1
+    
+    #No
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___234336002|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_sct)))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___234336002[i] == 0) ccc19x$der_sct[i] <- 0
+    }
+    
+    #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_sct == 0))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_sct[i] <- 99
+    }
+    
+    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy == 7 & ccc19x$der_sct == 0)] <- 99
+    
+    ccc19x$der_sct <- factor(ccc19x$der_sct)
+    summary(ccc19x$der_sct[ccc19x$redcap_repeat_instrument == ''])
+    
     
     #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
     ccc19x$der_ARA_1st_gen <- NA
