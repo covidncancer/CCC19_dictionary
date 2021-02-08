@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
+suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -4780,7 +4780,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     #D1. age with estimation for categoricals
     ccc19x$der_age <- ccc19x$age_exact
     ccc19x$der_age[which(is.na(ccc19x$der_age))] <- ccc19x$age[which(is.na(ccc19x$der_age))]
-    ccc19x$der_age[which(ccc19x$der_age == 1)] <- 18
+    ccc19x$der_age[which(ccc19x$der_age == 1)] <- 18 #Truncate patients younger than 18 to 18
     ccc19x$der_age[which(ccc19x$der_age == 2)] <- (18+29)/2
     ccc19x$der_age[which(ccc19x$der_age == 3)] <- (30+39)/2
     ccc19x$der_age[which(ccc19x$der_age == 4)] <- (40+49)/2
@@ -4788,7 +4788,7 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
     ccc19x$der_age[which(ccc19x$der_age == 6)] <- (60+69)/2
     ccc19x$der_age[which(ccc19x$der_age == 7)] <- (70+79)/2
     ccc19x$der_age[which(ccc19x$der_age == 8)] <- (80+89)/2
-    ccc19x$der_age[which(ccc19x$der_age == 9)] <- 90
+    ccc19x$der_age[which(ccc19x$der_age == 9)] <- 90 #Truncate patients older than 89 to 90
     
     #Treat unknown as missing
     ccc19x$der_age[which(ccc19x$der_age == 10)] <- NA
@@ -7836,6 +7836,14 @@ suffix <- 'data with derived variables for analysis (thru 1-29-2021)'
   print('Other derived variables completed')
   
 }
+
+#Remove duplicates
+ccc19x <- ccc19x[!duplicated(ccc19x),]
+temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
+temp.ref2 <- which(duplicated(ccc19x$record_id[temp.ref]))
+keep <- rep(T, nrow(ccc19x))
+keep[temp.ref[temp.ref2]] <- F
+ccc19x <- ccc19x[keep,]
 
 #Save here
 save(ccc19x, file = paste(Sys.time(),'.',suffix,'.RData', sep = ''))
