@@ -4779,8 +4779,13 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
   {
     #D1. age with estimation for categoricals
     ccc19x$der_age <- ccc19x$age_exact
+    
+    #Make sure there is not accidental PHI or age <18
+    ccc19x$der_age[which(ccc19x$age_exact < 18)] <- '18-'
+    ccc19x$der_age[which(ccc19x$age_exact > 89)] <- '90+'
+    
     ccc19x$der_age[which(is.na(ccc19x$der_age))] <- ccc19x$age[which(is.na(ccc19x$der_age))]
-    ccc19x$der_age[which(ccc19x$der_age == 1)] <- 18 #Truncate patients younger than 18 to 18
+    ccc19x$der_age[which(ccc19x$der_age == 1)] <- '18-' #Truncate patients younger than 18 to 18-
     ccc19x$der_age[which(ccc19x$der_age == 2)] <- (18+29)/2
     ccc19x$der_age[which(ccc19x$der_age == 3)] <- (30+39)/2
     ccc19x$der_age[which(ccc19x$der_age == 4)] <- (40+49)/2
@@ -4788,12 +4793,12 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     ccc19x$der_age[which(ccc19x$der_age == 6)] <- (60+69)/2
     ccc19x$der_age[which(ccc19x$der_age == 7)] <- (70+79)/2
     ccc19x$der_age[which(ccc19x$der_age == 8)] <- (80+89)/2
-    ccc19x$der_age[which(ccc19x$der_age == 9)] <- 90 #Truncate patients older than 89 to 90
+    ccc19x$der_age[which(ccc19x$der_age == 9)] <- '90+' #Truncate patients older than 89 to 90+
     
     #Treat unknown as missing
     ccc19x$der_age[which(ccc19x$der_age == 10)] <- NA
     
-    summary(ccc19x$der_age[ccc19x$redcap_repeat_instrument == ''])
+    summary(factor(ccc19x$der_age)[ccc19x$redcap_repeat_instrument == ''])
     
     #D1a. Age re-categorized
     ccc19x$der_age_cat <- ccc19x$der_age
