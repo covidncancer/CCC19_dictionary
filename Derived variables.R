@@ -6216,14 +6216,17 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     ccc19x$der_txline <- relevel(ccc19x$der_txline, ref = 'Untreated in last 12 months')
     summary(ccc19x$der_txline[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca10. Any treatment in past 3 months
+    ############################################
+    #Ca10. Any cancer treatment in past 3 months
+    ############################################
     ccc19x$der_anytx <- NA
     
     ccc19x$der_anytx[which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
                              ccc19x$hx_treatment == 1)] <- 1
     
     ccc19x$der_anytx[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
-                             (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% c(88) & ccc19x$hx_treatment != 1))] <- 0
+                             (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 88 & ccc19x$hx_treatment != 1)|
+                             ccc19x$recent_treatment == 98)] <- 0
     
     ccc19x$der_anytx[which((ccc19x$on_treatment == 99 | 
                               ccc19x$recent_treatment == 99 |
@@ -6233,6 +6236,26 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     
     ccc19x$der_anytx <- factor(ccc19x$der_anytx)
     summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
+    
+    ############################################
+    #Ca10x. Any cancer treatment in past 4 weeks
+    ############################################
+    ccc19x$der_anytx_4wk <- NA
+    
+    ccc19x$der_anytx_4wk[which(ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:2)] <- 1
+    
+    ccc19x$der_anytx_4wk[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
+                                 (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 3:88)|
+                                 ccc19x$recent_treatment == 98)] <- 0
+    
+    ccc19x$der_anytx_4wk[which((ccc19x$on_treatment == 99 | 
+                                  ccc19x$recent_treatment == 99 |
+                                  ccc19x$hx_treatment %in% c(1,99) |  #This includes treatment completed within 3 months
+                                  (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))) &
+                                 is.na(ccc19x$der_anytx_4wk))] <- 99
+    
+    ccc19x$der_anytx_4wk <- factor(ccc19x$der_anytx_4wk)
+    summary(ccc19x$der_anytx_4wk[ccc19x$redcap_repeat_instrument == ''])
     
     #####################################
     #Ca10a. Any cytotoxic within 3 months
@@ -6345,9 +6368,18 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     summary(ccc19x$der_any_rt[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10f. Any cancer surgery within 3 months
-    ccc19x$der_any_surgery <- ccc19x$der_anytx
-    ccc19x$der_any_surgery[which(ccc19x$der_any_surgery == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
-    summary(ccc19x$der_any_surgery[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_any_ca_surgery <- ccc19x$der_anytx
+    ccc19x$der_any_ca_surgery[which(ccc19x$der_any_ca_surgery == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
+    summary(ccc19x$der_any_ca_surgery[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10f1. Any ***surgery*** within 30 days
+    ccc19x$der_any_surgery_1mo <- ccc19x$der_anytx_4wk
+    ccc19x$der_any_surgery_1mo[which(ccc19x$der_any_surgery_1mo == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
+    ccc19x$der_any_surgery_1mo[which(ccc19x$surgery_timing == 1)] <- 1
+    ccc19x$der_any_surgery_1mo[which(ccc19x$surgery_timing %in% 2:3 &
+                                       (is.na(ccc19x$der_any_surgery_1mo)|ccc19x$der_any_surgery_1mo == 99))] <- 0
+    ccc19x$der_any_surgery_1mo[which(ccc19x$surgery_timing == 'UNK' & ccc19x$der_any_surgery_1mo == 0)] <- 99
+    summary(ccc19x$der_any_surgery_1mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10g. Any other therapy within 3 months
     ccc19x$der_any_other <- ccc19x$der_anytx
@@ -6376,7 +6408,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10j. Any local therapy within 3 months (surgery or radiation)
-    ccc19x$der_any_local <- ccc19x$der_any_surgery
+    ccc19x$der_any_local <- ccc19x$der_any_ca_surgery
     ccc19x$der_any_local[which(ccc19x$der_any_rt == 1)] <- 1
     summary(ccc19x$der_any_local[ccc19x$redcap_repeat_instrument == ''])
     
@@ -6758,7 +6790,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-06.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-08.csv', header = T, stringsAsFactors = F)
+    drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
@@ -6816,9 +6849,21 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
     ccc19x$der_no_drugs <- factor(ccc19x$der_no_drugs)
     summary(ccc19x$der_no_drugs[ccc19x$redcap_repeat_instrument == ''])
     
-    #Merge the drugs into the main data table
+    #Add the drugs into the main data table
     drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
-    ccc19x <- merge(ccc19x, drugs, all.x = T)
+    ccc19x$drug1 <- NA
+    ccc19x$drug2 <- NA
+    ccc19x$drug3 <- NA
+    ccc19x$drug4 <- NA
+    ccc19x$drug5 <- NA
+    ccc19x$drug6 <- NA
+    ccc19x$drug7 <- NA
+    #ccc19x$drug8 <- NA
+    
+    temp.ref <- which(ccc19x$record_id %in% drugs$record_id & ccc19x$redcap_repeat_instrument == '')
+    if(length(temp.ref) == nrow(drugs))
+      ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] <- drugs[,2:8] else ccc19x$drug1 <- 'ERROR'
+    
     
     #Ca4a: CD20 drugs
     ccc19x$der_cd20 <- NA
