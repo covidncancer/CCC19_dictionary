@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
+suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -7886,14 +7886,6 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-6-2021)'
   print('Other derived variables completed')
   
 }
-
-#Remove duplicates
-ccc19x <- ccc19x[!duplicated(ccc19x),]
-temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
-temp.ref2 <- which(duplicated(ccc19x$record_id[temp.ref]))
-keep <- rep(T, nrow(ccc19x))
-keep[temp.ref[temp.ref2]] <- F
-ccc19x <- ccc19x[keep,]
 
 #Save here
 save(ccc19x, file = paste(Sys.time(),'.',suffix,'.RData', sep = ''))
