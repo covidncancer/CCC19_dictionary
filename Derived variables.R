@@ -6790,20 +6790,20 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-08.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-11.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
     
-    for(i in 13:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
+    for(i in 3:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
     
     #Add structured drugs later
     temp.exclude <- c('Acalabrutinib','Dasatinib','Fedratinib','Ibrutinib',
                       'Imatinib','Nilotinib','Ruxolitinib','Tofacitinib',
                       'Ipilimumab','Nivolumab','Pembrolizumab','Atezolizumab',
                       'Durvalumab','Avelumab','Cemiplimab',
-                      'ADT','Degarelix','Goserelin','Leuprolide','Leuprorelin')
+                      'ADT','Degarelix','Goserelin','Leuprolide')
     
     ccc19x$der_no_drugs <- NA
     
@@ -7013,6 +7013,21 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     ccc19x$der_oral_antiandrogen <- factor(ccc19x$der_oral_antiandrogen)
     summary(ccc19x$der_oral_antiandrogen[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4k: PD-1/PD-L1 antibodies
+    ccc19x$der_pd1_l1 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Nivolumab','Pembrolizumab','Atezolizumab','Avelumab',
+               'Durvalumab','Cemiplimab'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
+                 ccc19x$der_pd1_l1[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
+    summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
