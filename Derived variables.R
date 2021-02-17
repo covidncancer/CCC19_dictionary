@@ -4827,7 +4827,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_age[which(ccc19x$der_age == 9)] <- '90+' #Truncate patients older than 89 to 90+
     
     #Treat unknown as missing
-    ccc19x$der_age[which(ccc19x$der_age == 10)] <- NA
+    ccc19x$der_age[which(ccc19x$der_age == 99)] <- NA
     
     summary(factor(ccc19x$der_age)[ccc19x$redcap_repeat_instrument == ''])
     
@@ -6504,7 +6504,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
                            ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
     ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
-                           ccc19x$transplant_cellular_timing == 5)] <- 99
+                           ccc19x$transplant_cellular_timing == 99)] <- 99
     ccc19x$der_allo365[which(ccc19x$transplant_cellular_therapy %in% c(2:5,10) &
                                is.na(ccc19x$transplant_cellular_timing))] <- NA
     
@@ -6516,7 +6516,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
                                ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
     ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
-                               ccc19x$transplant_cellular_timing == 5)] <- 99
+                               ccc19x$transplant_cellular_timing == 99)] <- 99
     ccc19x$der_auto100[which(ccc19x$transplant_cellular_therapy == 1 &
                                is.na(ccc19x$transplant_cellular_timing))] <- NA
     
@@ -6549,7 +6549,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_sct[i] <- 99
     }
     
-    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy == 7 & ccc19x$der_sct == 0)] <- 99
+    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy == 99 & ccc19x$der_sct == 0)] <- 99
     
     ccc19x$der_sct <- factor(ccc19x$der_sct)
     summary(ccc19x$der_sct[ccc19x$redcap_repeat_instrument == ''])
@@ -6780,7 +6780,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     #Unknown
     ccc19x$der_met_lung[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_lung))] <- 99
-    ccc19x$der_met_lung[which(ccc19x$mets_sites___9 == 1 & is.na(ccc19x$der_met_lung))] <- 99
+    ccc19x$der_met_lung[which(ccc19x$mets_sites___99 == 1 & is.na(ccc19x$der_met_lung))] <- 99
     
     ccc19x$der_met_lung <- as.factor(ccc19x$der_met_lung)
     summary(ccc19x$der_met_lung[ccc19x$redcap_repeat_instrument == ''])
