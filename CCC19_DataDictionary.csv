@@ -155,33 +155,33 @@ mortality_90,covid19_details,,radio,"<div class=""rich-text-field-label""><p>If 
 mortality_180,covid19_details,,radio,"<div class=""rich-text-field-label""><p>If it has been at least 180 days (~6 months) from the presumptive or laboratory-proven COVID-19 diagnosis, was the patient alive 180 days after diagnosis?</p></div>","1, Yes | 0, No | 88, N/A - it has been fewer than 180 days since COVID-19 diagnosis | 99, Unknown",,,,,,"[covid_19_dx_interval] != '1' and [covid_19_dx_interval] != '2' and [covid_19_dx_interval] != '3' and [covid_19_dx_interval] != '4' and [covid_19_dx_interval] != '5' and [covid_19_dx_interval] != '6' and [mortality] != '0' and [mortality_90] != '0'",y,,,,,
 labs,covid19_details," <div class=""rich-text-field-label""><div class=""rich-text-field-label""><p><span style=""color: #843fa1;"">Baseline laboratory values at the time of or closest to the date of the COVID-19 diagnosis</span></p> <p><span style=""color: #236fa1; font-weight: normal;"">If the laboratory value (e.g., IL-6 level) was not available at the time of presentation, please enter the earliest known result, if known.</span></p></div></div>",radio,"<div class=""rich-text-field-label""><p>At what time point were labs drawn?</p> <p><span style=""color: #236fa1; font-weight: normal;"">This information is important to build predictive models of disease severity based on lab values. Your answer should be based on common labs (CBC, CMP, BNP, etc.) - not necessarily send-out labs that were drawn later in the course of COVID-19 illness.</span></p></div>","1, At the time of initial COVID-19 diagnosis | 2a, At the time of a change in clinical status (hospitalization) | 2b, At the time of a change in clinical status (other than hospitalization) | 3, Labs were not drawn or are not available for review | OTH, Other | UNK, Unknown",,,,,,,,,,,,
 labs_oth_specify,covid19_details,,notes,"<div class=""rich-text-field-label""><p><span style=""color: #000000;"">Please specify what other time point labs were drawn</span></p> <p><span style=""color: #000000; font-weight: normal;""><span style=""color: #e03e2d;"">Do not record </span></span><span style=""color: #e03e2d;"">any PHI<span style=""font-weight: normal;""> in this field. As a reminder, this includes all elements of dates other than year.</span></span></p></div>",,,,,,,"[labs] = 'OTH'",,,,,,
-wbc_range,covid19_details,"CBC values at presentation",radio,"Total WBC count","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,
-alc_range,covid19_details,,radio,"Absolute lymphocyte count (ALC) - less than 1500/uL should be considered low","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,"less than 1500/uL should be considered low"
-anc_range,covid19_details,,radio,"Absolute neutrophil count (ANC)","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,"less than 1000/uL should be considered low"
-aec_range,covid19_details,,radio,"Absolute eosinophil count (AEC)","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,
-hgb_range,covid19_details,,radio,Hemoglobin,"LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,
-plt_range,covid19_details,,radio,Platelets,"LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,cbc,,
+wbc_range,covid19_details,"CBC values at presentation",radio,"Total WBC count","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,
+alc_range,covid19_details,,radio,"Absolute lymphocyte count (ALC) - less than 1500/uL should be considered low","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,"less than 1500/uL should be considered low"
+anc_range,covid19_details,,radio,"Absolute neutrophil count (ANC)","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,"less than 1000/uL should be considered low"
+aec_range,covid19_details,,radio,"Absolute eosinophil count (AEC)","LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,
+hgb_range,covid19_details,,radio,Hemoglobin,"LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,
+plt_range,covid19_details,,radio,Platelets,"LO, Low | WNL, Normal | HI, High | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,cbc,,
 wbc_numeric,covid19_details,,text,"Total WBC count in 10^9/L",,,number,0,1000,,"[wbc_range] = 'LO' or [wbc_range] = 'HI'",,,,,,
 alc,covid19_details,,text,"Absolute lymphocyte count per uL",,,number,0,,,"[alc_range] = 'LO' or [alc_range] = 'HI'",,,,,,
 anc,covid19_details,,text,"Absolute neutrophil count per uL",,,number,0,,,"[anc_range] = 'LO' or [anc_range] = 'HI'",,,,,,
 aec,covid19_details,,text,"Absolute eosinophil count per uL",,,number,0,,,"[aec_range] = 'LO' or [aec_range] = 'HI'",,,,,,
 hgb,covid19_details,,text,"Hemoglobin level in g/dL",,,number,0,,,"[hgb_range] = 'LO' or [hgb_range] = 'HI'",,,,,,
 plt,covid19_details,,text,"Platelet count, 10^3/uL",,,number,0,,,"[plt_range] = 'LO' or [plt_range] = 'HI'",,,,,,
-creat,covid19_details,"Other lab values at presentation",radio,Creatinine,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,"SNOMED: 1032061000000108"
-tbili,covid19_details,,radio,"Total bilirubin","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-ast,covid19_details,,radio,AST,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-alt,covid19_details,,radio,ALT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-ldh,covid19_details,,radio,LDH,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,"SNOMED: 250644007"
-tni,covid19_details,,radio,"Troponin I (TnI)","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-hs_trop,covid19_details,,radio,"High-sensitivity troponin","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-bnp,covid19_details,,radio,BNP,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-crp,covid19_details,,radio,CRP,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-il6,covid19_details,,radio,IL-6,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-pt,covid19_details,,radio,PT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-aptt,covid19_details,,radio,aPTT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
-fibrinogen,covid19_details,,radio,Fibrinogen,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,"SNOMED: 71636003"
-ddimer,covid19_details,,radio,D-Dimer,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,"SNOMED: 1019221000000107"
-other_lab,covid19_details,,radio,"Other (free text will open for more details below)","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"([covid_19_more] = '1' or [ccc19] = '1' ) and [labs] != '3'",,,,labs,,
+creat,covid19_details,"Other lab values at presentation",radio,Creatinine,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,"SNOMED: 1032061000000108"
+tbili,covid19_details,,radio,"Total bilirubin","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+ast,covid19_details,,radio,AST,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+alt,covid19_details,,radio,ALT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+ldh,covid19_details,,radio,LDH,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,"SNOMED: 250644007"
+tni,covid19_details,,radio,"Troponin I (TnI)","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+hs_trop,covid19_details,,radio,"High-sensitivity troponin","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+bnp,covid19_details,,radio,BNP,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+crp,covid19_details,,radio,CRP,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+il6,covid19_details,,radio,IL-6,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+pt,covid19_details,,radio,PT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+aptt,covid19_details,,radio,aPTT,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
+fibrinogen,covid19_details,,radio,Fibrinogen,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,"SNOMED: 71636003"
+ddimer,covid19_details,,radio,D-Dimer,"0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,"SNOMED: 1019221000000107"
+other_lab,covid19_details,,radio,"Other (free text will open for more details below)","0, Normal | 1, Abnormal | NT, Not tested | 99, Unknown",,,,,,"[labs] != '3'",,,,labs,,
 creat_numeric,covid19_details,,text,"Please provide measured creatinine level in mg/dL",,,number,0,,,"[creat] = '1'",,,,,,
 tbili_numeric,covid19_details,,text,"Please provide measured total bilirubin value in mg/dL",,,,,,,"[tbili] = '1'",,,,,,
 ast_numeric,covid19_details,,text,"Please provide measured AST/SGOT value in units/L",,,number,32,,,"[ast] = '1'",,,,,,
