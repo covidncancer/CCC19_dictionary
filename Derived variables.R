@@ -3549,38 +3549,69 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     summary(factor(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == '']))
     
-    #O23a. ordinal_v2a (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
+    #O26. ordinal_v3 (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
     #                  2 = hospitalized and required O2; 3 = ICU; 4 = vent; 5 = death within 30d)
     
     #Declare as missing
-    ccc19x$der_ordinal_v2a <- NA
+    ccc19x$der_ordinal_v3 <- NA
     
     #Start with non-hospitalized
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_hosp == 0)] <- 0
+    ccc19x$der_ordinal_v3[which(ccc19x$der_hosp == 0)] <- 0
     
     #Hospitalized and did NOT require O2
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)] <- 1
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_hosp == 99|ccc19x$der_o2_ever == 99)] <- 99
+    ccc19x$der_ordinal_v3[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)] <- 1
+    ccc19x$der_ordinal_v3[which(ccc19x$der_hosp == 99|ccc19x$der_o2_ever == 99)] <- 99
     
     #Hospitalized and did require O2
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
+    ccc19x$der_ordinal_v3[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
     
     #ICU
-    #ccc19x$der_ordinal_v2a[which(ccc19x$der_ICU == 0)]
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_ICU == 1)] <- 3
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_ICU == 99)] <- 99
+    #ccc19x$der_ordinal_v3[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v3[which(ccc19x$der_ICU == 1)] <- 3
+    ccc19x$der_ordinal_v3[which(ccc19x$der_ICU == 99)] <- 99
     
     #Mechanical ventilation
-    #ccc19x$der_ordinal_v2a[which(ccc19x$der_mv == 0)]
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_mv == 1)] <- 4
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_mv == 99)] <- 99
+    #ccc19x$der_ordinal_v3[which(ccc19x$der_mv == 0)]
+    ccc19x$der_ordinal_v3[which(ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v3[which(ccc19x$der_mv == 99)] <- 99
     
     #Death within 30 days
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_dead30 == 1)] <- 5
-    ccc19x$der_ordinal_v2a[which(ccc19x$der_dead30 == 99)] <- 99
+    ccc19x$der_ordinal_v3[which(ccc19x$der_dead30 == 1)] <- 5
+    ccc19x$der_ordinal_v3[which(ccc19x$der_dead30 == 99)] <- 99
     
-    summary(factor(ccc19x$der_ordinal_v2a[ccc19x$redcap_repeat_instrument == '']))
+    summary(factor(ccc19x$der_ordinal_v3[ccc19x$redcap_repeat_instrument == '']))
     
+    #O26a. ordinal_v3a (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
+    #                  2 = hospitalized and required O2; 3 = ICU; 4 = vent; 5 = death at any time)
+    
+    #Declare as missing
+    ccc19x$der_ordinal_v3a <- NA
+    
+    #Start with non-hospitalized
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_hosp == 0)] <- 0
+    
+    #Hospitalized and did NOT require O2
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)] <- 1
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_hosp == 99|ccc19x$der_o2_ever == 99)] <- 99
+    
+    #Hospitalized and did require O2
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
+    
+    #ICU
+    #ccc19x$der_ordinal_v3a[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_ICU == 1)] <- 3
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_ICU == 99)] <- 99
+    
+    #Mechanical ventilation
+    #ccc19x$der_ordinal_v3a[which(ccc19x$der_mv == 0)]
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_mv == 99)] <- 99
+    
+    #Death at any time
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_deadbinary == 1)] <- 5
+    ccc19x$der_ordinal_v3a[which(ccc19x$der_deadbinary == 99)] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == '']))
     
   }
   print('Ordinal outcomes completed')
@@ -6357,10 +6388,20 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
     summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca10c1. Any targeted therapy within 12 months
+    ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_targeted_12mo[which(ccc19x$der_any_targeted_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+    summary(ccc19x$der_any_targeted_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca10d. Any endocrine therapy within 3 months
     ccc19x$der_any_endo <- ccc19x$der_anytx
     ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
     summary(ccc19x$der_any_endo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10d1. Any endocrine therapy within 12 months
+    ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+    summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10e. Any radiation therapy within 3 months
     ccc19x$der_any_rt <- ccc19x$der_anytx
