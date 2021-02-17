@@ -6388,20 +6388,11 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
     summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca10c1. Any targeted therapy within 12 months
-    ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
-    ccc19x$der_any_targeted_12mo[which(ccc19x$der_any_targeted_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
-    summary(ccc19x$der_any_targeted_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10d. Any endocrine therapy within 3 months
     ccc19x$der_any_endo <- ccc19x$der_anytx
     ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
     summary(ccc19x$der_any_endo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Ca10d1. Any endocrine therapy within 12 months
-    ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
-    ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
-    summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10e. Any radiation therapy within 3 months
     ccc19x$der_any_rt <- ccc19x$der_anytx
@@ -6487,6 +6478,16 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     ccc19x$der_any_systemic_v2 <- factor(ccc19x$der_any_systemic_v2)
     summary(ccc19x$der_any_systemic_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10c1. Any targeted therapy within 12 months
+    ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_targeted_12mo[which(ccc19x$der_any_targeted_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+    summary(ccc19x$der_any_targeted_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10d1. Any endocrine therapy within 12 months
+    ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+    summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10l. Any intravesicular BCG therapy (no time restriction) - declare as none
     ccc19x$der_any_intravesicular_bcg <- 0
