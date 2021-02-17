@@ -7581,8 +7581,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
       }
     }
     
-    ccc19x$der_quality[which(ccc19x$missing > 94)] <- ccc19x$der_quality[which(ccc19x$missing > 94)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > 94)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 94)],
+    ccc19x$der_quality[which(ccc19x$missing > 101)] <- ccc19x$der_quality[which(ccc19x$missing > 101)] + 5
+    ccc19x$der_problems[which(ccc19x$missing > 101)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 101)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
