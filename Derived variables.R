@@ -9,7 +9,9 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
+  #########
   #Outcomes
+  #########
   {
     
     "deadbinary"
@@ -7328,7 +7330,142 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_trop_combined <- factor(ccc19x$der_trop_combined)
     summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
     
-  }
+  
+    
+    #L20. WBC value transformation
+    
+    #creating the transformed row
+    ccc19x$transformed_wbc <- ccc19x$wbc_numeric
+    
+    #Determine the units (cells/uL or cells*10^9/L) for any wbc with a decimal value, greater than 500, or less than 100 (proper units for this variable is cells*10^9/L, as stated on REDCAP variable description)
+    
+    ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"] <- ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"]/1000
+    
+    summary(ccc19x$wbc_numeric[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_wbc[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_wbc)
+    
+    #L21. ALC value transformation (started out with alc_flag set to all NA values since this variable was slightly more complicated to deal with)
+    
+    #creation of flag and transformed_alc
+    ccc19x$alc_flag <- NA
+    ccc19x[which(ccc19x[,"alc"] < 10), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[,"alc"] > 120), "alc_flag"] <- FALSE
+    ccc19x$transformed_alc <- ccc19x$alc
+    #values between 10-120 I am unsure about units (cells/uL or cells*10^9/L)
+    
+    #transforming: multiply by 1000 when needed (cells/uL is proper units)
+    ccc19x[which(ccc19x[,"alc"] < 10), "transformed_alc"] <- ccc19x[which(ccc19x[,"alc"] < 10), "transformed_alc"]*1000
+    ccc19x[which(ccc19x$transformed_alc != floor(ccc19x$transformed_alc)), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x$transformed_alc != floor(ccc19x$transformed_alc)), "transformed_alc"] <- ccc19x[which(ccc19x$transformed_alc != floor(ccc19x$transformed_alc)), "transformed_alc"] * 1000
+    
+    #used total wbc count to determine the units of alc
+    ccc19x[which(ccc19x[,"transformed_wbc"] < 30), "alc_flag"] <- FALSE
+    
+    #patients with CLL
+    ccc19x[which(ccc19x[,"record_id"] == 1064), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[,"record_id"] == 1064), "transformed_alc"] <- ccc19x[which(ccc19x[,"record_id"] == 1064), "transformed_alc"]*1000
+    ccc19x[which(ccc19x[,"record_id"] == 133386), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[,"record_id"] == 133386), "transformed_alc"] <- ccc19x[which(ccc19x[,"record_id"] == 133386), "transformed_alc"]*1000
+    
+    #If there was no total wbc count for alc values between 10-120, could not easily infer the alc units
+    ccc19x[which(ccc19x[, "transformed_alc"] < 120, is.na(ccc19x$alc_flag)), "alc_flag"] <- TRUE
+    
+    #most of the remaining with alc between 10-120, had a total wbc count to determine correct alc units
+    ccc19x[which(ccc19x[, "transformed_wbc"] < 80), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[, "transformed_alc"] == 0), "alc_flag"] <- FALSE
+    
+    #for remaining alc, determined their units individually, or flagged them true if couldn't determine their units
+    ccc19x[which(ccc19x[, "record_id"] == 1023), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[, "record_id"] == 133419), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[, "record_id"] == 1398), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[, "alc"] == 0.1), "alc_flag"] <- FALSE
+    ccc19x[which(ccc19x[, "record_id"] == 462), "alc_flag"] <- TRUE
+    
+    summary(ccc19x$alc[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_alc[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(log10(ccc19x$transformed_alc))
+    
+    #L22. ANC value transformation, similar to ALC
+    
+    ccc19x$anc_flag <- FALSE
+    ccc19x$transformed_anc <- ccc19x$anc
+    
+    #individual anc where there was no wbc count to determine correct units (in gray area at anc = 100)
+    ccc19x[which(ccc19x[, "transformed_anc"] == 100), "anc_flag"] <- TRUE
+    
+    #rest with anc < 100 and not ending in .000 were determined to be in units of cells*10^9/L, multiplied by 1000 to get cells/uL
+    temp.ref <- which(!grepl(ccc19x$transformed_anc, pattern = '.000') & ccc19x$transformed_anc < 100)
+    ccc19x[temp.ref, "transformed_anc"] <- ccc19x[temp.ref, "transformed_anc"]*1000
+    
+    #individual record for which could not determine anc value units
+    ccc19x[which(ccc19x[, "record_id"] == 133398), "anc_flag"] <- TRUE
+    
+    #only anc value less than 100 where could conclude that it was in cells/uL (fixed this after multiplying anc values less than 100)
+    ccc19x[which(ccc19x[, "record_id"] == 773), "transformed_anc"] <- 20.0
+    
+    summary(ccc19x$anc[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_anc[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_anc)
+    
+    #L23. AEC value calculation
+    
+    ccc19x$aec_flag <- FALSE
+    ccc19x$transformed_aec <- ccc19x$aec
+    
+    #similar to other WBC counts, multiplied all values with a non-zero digit after the decimal point by 1000, to get values in cells/uL
+    ccc19x[which(ccc19x[,"transformed_aec"] %% 1 >0), "transformed_aec"] <- ccc19x[which(ccc19x[,"transformed_aec"] %% 1 >0), "transformed_aec"] * 1000
+    
+    #determined if aec values could be transformed into correct units 
+    ccc19x[which(ccc19x[, "record_id"] == 335), "aec_flag"] <- TRUE
+    ccc19x[which(ccc19x[, "record_id"] == 1485), "aec_flag"] <- TRUE
+    ccc19x[which(ccc19x[, "transformed_aec"] == 11), "aec_flag"] <- TRUE
+    ccc19x[which(ccc19x[, "record_id"] == 824), "aec_flag"] <- TRUE
+    ccc19x[which(ccc19x[, "record_id"] == 133193), "aec_flag"] <- TRUE
+    ccc19x[which(ccc19x[,"transformed_aec"] < 10), "transformed_aec"] <- ccc19x[which(ccc19x[,"transformed_aec"] < 10), "transformed_aec"] * 1000
+    ccc19x[which(ccc19x[, "record_id"] == 801), "aec_flag"] <- TRUE
+    
+    summary(ccc19x$aec[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_aec[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_aec)
+    
+    #L24. HGB value transformation (transform a few values that were reported in g/L instead of g/dL)
+    
+    ccc19x$transformed_hgb <- ccc19x$hgb
+    ccc19x$transformed_hgb[which(ccc19x$transformed_hgb >20 & ccc19x$transformed_hgb <= 500)] <- ccc19x$transformed_hgb[which(ccc19x$transformed_hgb >20 & ccc19x$transformed_hgb <= 500)] / 10
+    ccc19x$transformed_hgb[which(ccc19x$transformed_hgb >500)] <- ccc19x$transformed_hgb[which(ccc19x$transformed_hgb >500)] / 100
+    
+    summary(ccc19x$hgb[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_hgb[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_hgb)
+    
+    #L25. PLT value transformation (only needed to transform a few values that were off by 1000)
+    
+    ccc19x$transformed_plt <- ccc19x$plt
+    ccc19x[which(ccc19x[,"transformed_plt"] > 10000), "transformed_plt"] <- ccc19x[which(ccc19x[,"transformed_plt"] > 10000), "transformed_plt"] / 1000
+    ccc19x[which(ccc19x[,"transformed_plt"] < 1), "transformed_plt"] <- ccc19x[which(ccc19x[,"transformed_plt"] < 1), "transformed_plt"] * 1000
+    ccc19x[which(ccc19x[,"transformed_plt"] < 10), "transformed_plt"] <- ccc19x[which(ccc19x[,"transformed_plt"] < 10), "transformed_plt"] * 10
+    
+    summary(ccc19x$plt[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_plt[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_plt)
+    
+    #L26. Creatinine transformation
+    
+    ccc19x$creat_flag <- FALSE
+    ccc19x$transformed_creat <- ccc19x$creat_numeric
+    ccc19x[which(ccc19x[,"creat_numeric"] > 30), "transformed_creat"] <- ccc19x[which(ccc19x[,"creat_numeric"] > 30, arr.ind=TRUE), "transformed_creat"] / 88.4
+    ccc19x$transformed_creat <- round(ccc19x$transformed_creat, digits = 2)
+    
+    #couldn't determine units for 2 rows
+    ccc19x[which(ccc19x[,"creat_numeric"] == 42), "creat_flag"] <- TRUE
+    ccc19x[which(ccc19x[,"creat_numeric"] == 14), "creat_flag"] <- TRUE
+    
+    summary(ccc19x$creat[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_creat[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(log10(ccc19x$transformed_creat))
+    
+    }
   print('Laboratory values completed')
   
   ######
