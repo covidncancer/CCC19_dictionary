@@ -77,7 +77,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #No
     ccc19x$der_hosp[which(ccc19x$hosp_status == 0| 
                             ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
-                            ccc19x$worst_status_clinical %in% c(1:3))] <- 0
+                            ccc19x$worst_status_clinical %in% c(0:3)|
+                            ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
     ccc19x$der_hosp[which(ccc19x$hosp_status %in% c(1:3) | 
@@ -148,7 +149,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #No
     ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 0| 
                             ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
-                            ccc19x$worst_status_clinical %in% c(1:3))] <- 0
+                            ccc19x$worst_status_clinical %in% c(0:3)|
+                              ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
     ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:3) | 
@@ -186,7 +188,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #No
     ccc19x$der_ICU[which((ccc19x$hosp_status %in% c(0:1) | 
                             ccc19x$current_status %in% c(1,3) |
-                            ccc19x$worst_status_clinical %in% 1:6) &
+                            ccc19x$worst_status_clinical %in% 0:6 |
+                            ccc19x$worst_complications_severity___0 == 1) &
                            is.na(ccc19x$der_ICU))] <- 0
     
     #Yes
@@ -264,9 +267,10 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     #Baseline
     ccc19x$der_mv[which((ccc19x$o2_requirement_c19 == 0 |
-                                  ccc19x$resp_failure_tx %in% 1:5 |
-                                  ccc19x$worst_status_clinical %in% 1:7) &
-                                 is.na(ccc19x$der_mv))] <- 0
+                           ccc19x$resp_failure_tx %in% 1:5 |
+                           ccc19x$worst_status_clinical %in% 0:7 |
+                           ccc19x$worst_complications_severity___0 == 1) &
+                          is.na(ccc19x$der_mv))] <- 0
     
     #Follow-up
     ccc19x$der_mv[which((ccc19x$o2_requirement_fu == 0 |
@@ -3383,7 +3387,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #1. Outpatient with no limitation of activity, must exclude ECOG > 1
     ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
                             ccc19x$current_status == 1|
-                            ccc19x$worst_status_clinical == 1) 
+                            ccc19x$worst_status_clinical %in% 0:1) 
                          & !(ccc19x$ecog_status %in% c(1,2,3,4)))] <- 1 
     #2. Outpatient with limitation of activities
     ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
@@ -3394,7 +3398,7 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     #2a. Recapture patients who only ruled out of 1 due to ECOG 1+
     ccc19x$der_who[which((ccc19x$severity_of_covid_19_v2 == 1|
                             ccc19x$current_status == 1|
-                            ccc19x$worst_status_clinical == 1) 
+                            ccc19x$worst_status_clinical %in% 0:1) 
                          & (ccc19x$ecog_status %in% c(1,2,3,4)))] <- 2
     #3. Hospitalized, no oxygen
     ccc19x$der_who[which(is.na(ccc19x$der_o2_ever) & ccc19x$der_hosp == 1)] <- 3
@@ -5877,6 +5881,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     summary(ccc19x$der_Thoracic[ccc19x$redcap_repeat_instrument == ''])
     
     #GI cancers
+    
+    #Lower GI
     ccc19x$der_LowerGI <- 0
     ccc19x$der_LowerGI[which(ccc19x$cancer_type %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
                                ccc19x$cancer_type_2 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
@@ -5885,6 +5891,26 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
                                ccc19x$cancer_type_5 %in% c("C9291","C4910","C9330","C7724","C2955","C9382"))] <- 1
     ccc19x$der_LowerGI <- factor(ccc19x$der_LowerGI)
     summary(ccc19x$der_LowerGI[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Colorectal
+    ccc19x$der_colorectal <- 0
+    ccc19x$der_colorectal[which(ccc19x$cancer_type %in% c("C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_2 %in% c("C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_3 %in% c("C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_4 %in% c("C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_5 %in% c("C4910","C2955","C9382"))] <- 1
+    ccc19x$der_colorectal <- factor(ccc19x$der_colorectal)
+    summary(ccc19x$der_colorectal[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Anal
+    ccc19x$der_anal <- 0
+    ccc19x$der_anal[which(ccc19x$cancer_type %in% c("C9291")|
+                            ccc19x$cancer_type_2 %in% c("C9291")|
+                            ccc19x$cancer_type_3 %in% c("C9291")|
+                            ccc19x$cancer_type_4 %in% c("C9291")|
+                            ccc19x$cancer_type_5 %in% c("C9291"))] <- 1
+    ccc19x$der_anal <- factor(ccc19x$der_anal)
+    summary(ccc19x$der_anal[ccc19x$redcap_repeat_instrument == ''])
     
     #Upper GI including pancreaticohepatobiliary
     ccc19x$der_UpperGI <- 0
@@ -5895,6 +5921,36 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
                                ccc19x$cancer_type_5 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513"))] <- 1
     ccc19x$der_UpperGI <- factor(ccc19x$der_UpperGI)
     summary(ccc19x$der_UpperGI[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Hepatobiliary (excluding pancreas)
+    ccc19x$der_hepatobiliary <- 0
+    ccc19x$der_hepatobiliary[which(ccc19x$cancer_type %in% c("C4436","C3844","C3099")|
+                                     ccc19x$cancer_type_2 %in% c("C4436","C3844","C3099")|
+                                     ccc19x$cancer_type_3 %in% c("C4436","C3844","C3099")|
+                                     ccc19x$cancer_type_4 %in% c("C4436","C3844","C3099")|
+                                     ccc19x$cancer_type_5 %in% c("C4436","C3844","C3099"))] <- 1
+    ccc19x$der_hepatobiliary <- factor(ccc19x$der_hepatobiliary)
+    summary(ccc19x$der_hepatobiliary[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Pancreaticohepatobiliary
+    ccc19x$der_pancreaticohepatobiliary <- 0
+    ccc19x$der_pancreaticohepatobiliary[which(ccc19x$cancer_type %in% c("C4436","C3844","C3099","C3850")|
+                                                ccc19x$cancer_type_2 %in% c("C4436","C3844","C3099","C3850")|
+                                                ccc19x$cancer_type_3 %in% c("C4436","C3844","C3099","C3850")|
+                                                ccc19x$cancer_type_4 %in% c("C4436","C3844","C3099","C3850")|
+                                                ccc19x$cancer_type_5 %in% c("C4436","C3844","C3099","C3850"))] <- 1
+    ccc19x$der_pancreaticohepatobiliary <- factor(ccc19x$der_pancreaticohepatobiliary)
+    summary(ccc19x$der_pancreaticohepatobiliary[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Esophagogastric
+    ccc19x$der_esophagogastric <- 0
+    ccc19x$der_esophagogastric[which(ccc19x$cancer_type %in% c("C3513","C4911")|
+                                       ccc19x$cancer_type_2 %in% c("C3513","C4911")|
+                                       ccc19x$cancer_type_3 %in% c("C3513","C4911")|
+                                       ccc19x$cancer_type_4 %in% c("C3513","C4911")|
+                                       ccc19x$cancer_type_5 %in% c("C3513","C4911"))] <- 1
+    ccc19x$der_esophagogastric <- factor(ccc19x$der_esophagogastric)
+    summary(ccc19x$der_esophagogastric[ccc19x$redcap_repeat_instrument == ''])
     
     #GI overall
     ccc19x$der_GI <- 0
@@ -5921,6 +5977,16 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
                             ccc19x$cancer_type_5 %in% c("C4815", "C9325", "C3809", "C4906"))] <- 1
     ccc19x$der_Endo <- factor(ccc19x$der_Endo)
     summary(ccc19x$der_Endo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Neuroendocrine tumors
+    ccc19x$der_NET <- 0
+    ccc19x$der_NET[which(ccc19x$cancer_type %in% c("C3809")|
+                           ccc19x$cancer_type_2 %in% c("C3809")|
+                           ccc19x$cancer_type_3 %in% c("C3809")|
+                           ccc19x$cancer_type_4 %in% c("C3809")|
+                           ccc19x$cancer_type_5 %in% c("C3809"))] <- 1
+    ccc19x$der_NET <- factor(ccc19x$der_NET)
+    summary(ccc19x$der_NET[ccc19x$redcap_repeat_instrument == ''])
     
     #Dermatologic including invasive NMSC
     ccc19x$der_Derm <- 0
