@@ -3981,6 +3981,70 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     ccc19x$der_plasma <- factor(ccc19x$der_plasma)
     summary(ccc19x$der_plasma[ccc19x$redcap_repeat_instrument == ''])
     
+    #Rx16. Monoclonal antibody ever used for treatment of COVID-19
+    ccc19x$der_monoclonals <- NA
+    ccc19x$der_monoclonals[which(ccc19x$covid_19_treatment___db_15718 == 1|
+                                   ccc19x$covid_19_treatment___bam_et == 1|
+                                   ccc19x$covid_19_treatment___regen_cov2 == 1|
+                                   ccc19x$covid_19_trial_tx___db_15718 == 1|
+                                   ccc19x$covid_19_trial_tx___bam_et == 1|
+                                   ccc19x$covid_19_trial_tx___regen_cov2 == 1|
+                                   ccc19x$covid_19_treatment_fu___db_15718 == 1|
+                                   ccc19x$covid_19_treatment_fu___bam_et == 1|
+                                   ccc19x$covid_19_treatment_fu___regen_cov2 == 1|
+                                   ccc19x$covid_19_trial_tx_fu___db_15718 == 1|
+                                   ccc19x$covid_19_trial_tx_fu___bam_et == 1|
+                                   ccc19x$covid_19_trial_tx_fu___regen_cov2 == 1)] <- 1
+    
+    #Never
+    ccc19x$der_monoclonals[which((ccc19x$covid_19_treatment___db_15718 == 0 & 
+                                    ccc19x$covid_19_treatment___bam_et == 0 &
+                                    ccc19x$covid_19_treatment___regen_cov2 == 0 &
+                                    is.na(ccc19x$der_monoclonals))|
+                                   (ccc19x$covid_19_treatment_fu___db_15718 == 0 & 
+                                      ccc19x$covid_19_treatment_fu___bam_et == 0 &
+                                      ccc19x$covid_19_treatment_fu___regen_cov2 == 0 &
+                                      is.na(ccc19x$der_monoclonals)))] <- 0
+    
+    #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment___unk[i] == 1 &
+         (ccc19x$der_monoclonals[i] == 0 | is.na(ccc19x$der_monoclonals[i]))) ccc19x$der_monoclonals[i] <- 99
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0)& ccc19x$covid_19_treatment_fu___unk[i] == 1 &
+         (ccc19x$der_monoclonals[i] == 0 | is.na(ccc19x$der_monoclonals[i]))) ccc19x$der_monoclonals[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_monoclonals[i] == 0) ccc19x$der_monoclonals[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_monoclonals[i] == 0) ccc19x$der_monoclonals[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_monoclonals[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_monoclonals[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_monoclonals[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_monoclonals[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_monoclonals <- factor(ccc19x$der_monoclonals)
+    summary(ccc19x$der_monoclonals[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx6. Tocilizumab ever used for TREATMENT of COVID-19
     ccc19x$der_toci <- NA
     ccc19x$der_toci[which(ccc19x$covid_19_treatment___rxcui_612865 == 1|
