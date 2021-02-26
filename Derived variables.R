@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
+suffix <- 'data with derived variables (thru 2-22-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -4987,8 +4987,8 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     #D05. Ethnicity (simply factor and redefine levels, declare blanks as missing)
     ccc19x$der_ethnicity <- ccc19x$ethnicity
-    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latino'
-    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2186-5")] <- 'Not Hispanic/Latino'
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latinx'
+    ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2186-5")] <- 'Not Hispanic/Latinx'
     ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "UNK")] <- 'Unknown'
     ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "")] <- NA
     ccc19x$der_ethnicity <- factor(ccc19x$der_ethnicity)
@@ -5344,6 +5344,29 @@ suffix <- 'data with derived variables for ASCO abstracts (thru 2-9-2021)'
     
     ccc19x$der_dm2 <- factor(ccc19x$der_dm2)
     summary(ccc19x$der_dm2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C14. Autoimmune disease including IBD
+    ccc19x$der_autoimmune <- NA
+    ccc19x$der_autoimmune[which(ccc19x$significant_comorbidities___24526004 == 1 |
+                                  ccc19x$significant_comorbidities___85828009 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___73211009|significant_comorbidities___190388001|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___73211009[i] == 0 &
+         ccc19x$significant_comorbidities___190388001[i] == 0) ccc19x$der_autoimmune[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_autoimmune[i] <- 99
+    }
+    
+    ccc19x$der_autoimmune <- factor(ccc19x$der_autoimmune)
+    summary(ccc19x$der_autoimmune[ccc19x$redcap_repeat_instrument == ''])
     
     #C05. Immunosuppressed
     ccc19x$der_immunosuppressed <- NA
