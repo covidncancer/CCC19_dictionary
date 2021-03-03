@@ -7626,7 +7626,9 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
   ######
   {
     
+    #########################################
     #X1. Negative controls (partial variable)
+    #########################################
     ccc19x$der_neg_control <- NA
     
     #Non-Exposure to the categories of interest
@@ -7691,7 +7693,10 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_neg_control <- factor(ccc19x$der_neg_control)
     summary(ccc19x$der_neg_control[ccc19x$redcap_repeat_instrument == ''])
     
+    #######################
     #X2. IMWG frailty index
+    #######################
+    
     #Frailty scored using adapted simplified IMWG frailty score (Palumbo et al, Blood, 2015; Facon et al, Leukemia, 2019)
     #Patients will be categorized as nonfrail (0-1 pt), frail (≥2)  
     ccc19x$der_imwg <- NA
@@ -7758,7 +7763,9 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_imwg_mod <- factor(ccc19x$der_imwg_mod)
     summary(ccc19x$der_imwg_mod[ccc19x$redcap_repeat_instrument == ''])
     
+    #####################
     #X3. Modified Khorana
+    #####################
     ccc19x$der_VTE_risk <- NA
     ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
                                  ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
@@ -7844,7 +7851,10 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     summary(ccc19x$der_90d_complete[ccc19x$redcap_repeat_instrument == ''])
     summary(ccc19x$der_180d_complete[ccc19x$redcap_repeat_instrument == ''])
     
+    ##############################################
     #X4. Quality score and X5. Enumerated problems
+    ##############################################
+    
     #Calculate a quality score for each case
     ccc19x$der_quality <- 0
     ccc19x$der_problems <- ''
@@ -7872,8 +7882,14 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
       }
     }
     
-    ccc19x$der_quality[which(ccc19x$missing > 101)] <- ccc19x$der_quality[which(ccc19x$missing > 101)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > 101)] <- paste(ccc19x$der_problems[which(ccc19x$missing > 101)],
+    #Create density plot of missingness
+    x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
+    plot(x)
+    threshold <- 101
+    abline(v = threshold)
+    
+    ccc19x$der_quality[which(ccc19x$missing > threshold)] <- ccc19x$der_quality[which(ccc19x$missing > threshold)] + 5
+    ccc19x$der_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$der_problems[which(ccc19x$missing > threshold)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
@@ -8212,22 +8228,70 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
       temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_mv[temp.ref]
-      temp2 <- ccc19x$der_mv[temp.ref][2:length(temp.ref)]
+      temp <- ccc19x$der_lrtd[temp.ref]
+      temp2 <- ccc19x$der_lrtd[temp.ref][2:length(temp.ref)]
       temp2 <- temp2[!is.na(temp2)]
       if(length(temp[!is.na(temp)]) > 0)
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 1 else
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 1 else
           if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
           {
-            if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 0
-            if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_mv[temp.ref] <- 99
+            if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 0
+            if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 99
           }
       }
     }
     
     ccc19x$der_lrtd <- factor(ccc19x$der_lrtd)
     summary(ccc19x$der_lrtd[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###############
+    #X11. PASC (v1)
+    ###############
+    ccc19x$der_pasc <- NA
+    
+    #No - patient marked as fully recovered within 90 days
+    
+    #Baseline
+    ccc19x$der_pasc[which((ccc19x$current_status_v2 == 1|ccc19x$current_status_retro == 1) &
+                            ccc19x$covid_19_dx_interval %in% 1:5)] <- 0
+    
+    #Follow-up
+    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu == 1 &
+                            (ccc19x$fu_weeks %in% c(30,90)|
+                              ccc19x$timing_of_report_weeks <= 13))] <- 0
+    
+    #Yes - patient marked as having recovered with complications within 90 days
+    
+    #Baseline
+    ccc19x$der_pasc[which((ccc19x$current_status_v2 == '1b'|ccc19x$current_status_retro == '1b') &
+                            ccc19x$covid_19_dx_interval %in% 1:5)] <- 1
+    
+    #Follow-up
+    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu == '1b' &
+                            (ccc19x$fu_weeks %in% c(30,90)|
+                               ccc19x$timing_of_report_weeks <= 13))] <- 1
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pasc[temp.ref]
+      temp2 <- ccc19x$der_pasc[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_pasc[temp.ref] <- 1 else
+          if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+          {
+            if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_pasc[temp.ref] <- 0
+            if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_pasc[temp.ref] <- 99
+          }
+      }
+    }
+    
+    ccc19x$der_pasc <- factor(ccc19x$der_pasc)
+    summary(ccc19x$der_pasc[ccc19x$redcap_repeat_instrument == ''])
     
   }
   print('Other derived variables completed')
