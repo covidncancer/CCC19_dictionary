@@ -328,6 +328,22 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_mv <- as.factor(ccc19x$der_mv)
     summary(ccc19x$der_mv[ccc19x$redcap_repeat_instrument == ''])
     
+    #O3b. composite of ICU + mechanical ventilation + vasopressors/inotropes
+    
+    #Declare as missing
+    ccc19x$der_ICU_mv_pressors <- NA
+    
+    #Yes
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1 & ccc19x$der_pressors == 1)] <- 1
+    
+    #No
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0 & ccc19x$der_pressors == 0)] <- 0
+    
+    #Unknown (any component)
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 99| ccc19x$der_mv == 99| ccc19x$der_pressors == 99)] <- 99
+    
+    ccc19x$der_ICU_mv_pressors <- as.factor(ccc19x$der_ICU_mv_pressors)
+    summary(ccc19x$der_ICU_mv_pressors[ccc19x$redcap_repeat_instrument == ''])
     
     "recovered"                           
     #O5. Derived recovery variable
@@ -1280,6 +1296,45 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
   
   ccc19x$der_sepsis_comp_v2 <- as.factor(ccc19x$der_sepsis_comp_v2)
   summary(ccc19x$der_sepsis_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+  
+  #Comp12b Pressors (der_pressors)
+  
+  ccc19x$der_pressors <- NA
+  
+  #Present at baseline
+  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 1)] <- 1
+  
+  #Absent at baseline
+  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 0)] <- 0
+  
+  #Unknown at baseline
+  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 99)] <- 99
+  
+  #Present at follow-up
+  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 1)] <- 1
+  
+  #Absent at follow-up
+  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 0)] <- 0
+  
+  #Unknown at follow-up
+  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 99)] <- 99
+  
+  #Merge baseline and followup if discrepancy
+  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+  {
+    temp.ref <- which(ccc19x$record_id == i)
+    temp <- ccc19x$der_pressors[temp.ref]
+    temp <- as.numeric(unique(temp[!is.na(temp)]))
+    if(length(temp) > 0)
+    {
+      if(any(temp == 1)) ccc19x$der_pressors[temp.ref] <- 1
+      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pressors[temp.ref] <- 99
+      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pressors[temp.ref] <- 0
+    }
+  }
+  
+  ccc19x$der_pressors <- as.factor(ccc19x$der_pressors)
+  summary(ccc19x$der_pressors[ccc19x$redcap_repeat_instrument == ''])
   
   #Comp13 Bleeding: 50960005 (der_bleeding_comp)
   
@@ -3619,6 +3674,41 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     summary(factor(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == '']))
     
+    #O27. ordinal_v4 (0 = ambulatory, 1 = hospitalized, 2= hospitalized with supplemental oxygen, 
+    #     3 = ICU admission, 4 = ICU + mechanical ventilation, 
+    #     5 = ICU + mechanical ventilation + vasopressors/inotropes, 6 = death)
+    
+    #Declare as missing
+    ccc19x$der_ordinal_v4 <- NA
+    
+    #Start with non-hospitalized
+    ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 0)] <- 0
+    
+    #Hospitalized
+    ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1)] <- 1
+    ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 99)] <- 99
+    
+    #Hospitalized and did require O2
+    ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
+    ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 99)] <- 99
+    
+    #ICU
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1)] <- 3
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 99)] <- 99
+    
+    #ICU + Mechanical ventilation
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 99)] <- 99
+    
+    #ICU + Mechanical ventilation + pressors
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 1)] <- 5
+    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 99)] <- 99
+    
+    #Death at any time
+    ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 1)] <- 6
+    ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 99)] <- 99
+    
+    summary(factor(ccc19x$der_ordinal_v4[ccc19x$redcap_repeat_instrument == '']))
   }
   print('Ordinal outcomes completed')
   
@@ -4283,14 +4373,12 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_statins <- NA
     ccc19x$der_statins[which(ccc19x$concomitant_meds___atc_c10aa == 1|
                                ccc19x$covid_19_treatment___atc_c10aa == 1|
-                               ccc19x$covid_19_trial_tx___atc_c10aa == 1|
                                ccc19x$covid_19_treatment_fu___atc_c10aa == 1|
                                ccc19x$covid_19_trial_tx_fu___atc_c10aa == 1)] <- 1
     
     #Never
     ccc19x$der_statins[which(ccc19x$concomitant_meds___atc_c10aa == 0 &
                                ccc19x$covid_19_treatment___atc_c10aa == 0 &
-                               (is.na(ccc19x$covid_19_trial_tx___atc_c10aa) | ccc19x$covid_19_trial_tx___atc_c10aa == 0) &
                                (is.na(ccc19x$covid_19_treatment_fu___atc_c10aa) | ccc19x$covid_19_treatment_fu___atc_c10aa == 0) &
                                (is.na(ccc19x$covid_19_trial_tx_fu___atc_c10aa) | ccc19x$covid_19_trial_tx_fu___atc_c10aa == 0))] <- 0
     
@@ -5500,7 +5588,56 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_card <- factor(ccc19x$der_card)
     summary(ccc19x$der_card[ccc19x$redcap_repeat_instrument == ''])
     
+    #C07a. Cardiovascular comorbidity v2 (CAD, CHF, PVD, CVA)
+    ccc19x$der_card_v2 <- NA
+    ccc19x$der_card_v2[which( ccc19x$significant_comorbidities___53741008 == 1|#
+                                ccc19x$significant_comorbidities___42343007 == 1|#
+                                ccc19x$significant_comorbidities___400047006 == 1|#
+                                ccc19x$significant_comorbidities___275526006 == 1#
+    )] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___53741008|comorbidities___42343007|comorbidities___400047006|comorbidities___275526006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___53741008[i] == 0,
+                                         ccc19x$significant_comorbidities___42343007[i] == 0,
+                                         ccc19x$significant_comorbidities___400047006[i] == 0,
+                                         ccc19x$significant_comorbidities___275526006[i] == 0)
+      )) ccc19x$der_card_v2[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_card_v2[i] <- 99
+    }
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_card_v2[temp.ref]
+      temp2 <- ccc19x$der_card_v2[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_card_v2[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+        {
+          if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card_v2[temp.ref] <- 0
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_card_v2[temp.ref] <- 99
+        }
+      }
+    }
+    
+    ccc19x$der_card_v2 <- factor(ccc19x$der_card_v2)
+    summary(ccc19x$der_card_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #######################
     #C08. Renal comorbidity
+    #######################
     ccc19x$der_renal <- NA
     ccc19x$der_renal[which( ccc19x$significant_comorbidities___90708001 == 1|
                               ccc19x$significant_comorbidities___723190009 == 1|
@@ -5548,8 +5685,9 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_renal <- factor(ccc19x$der_renal)
     summary(ccc19x$der_renal[ccc19x$redcap_repeat_instrument == ''])
     
-    
+    ##################
     #C09. Hypertension
+    ##################
     ccc19x$der_htn <- NA
     ccc19x$der_htn[which(ccc19x$significant_comorbidities___38341003 == 1)] <- 1
     
@@ -5570,6 +5708,55 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_htn <- factor(ccc19x$der_htn)
     summary(ccc19x$der_htn[ccc19x$redcap_repeat_instrument == ''])
+    
+    ####################
+    #C15. Hyperlipidemia
+    ####################
+    ccc19x$der_hld <- NA
+    ccc19x$der_hld[which(ccc19x$significant_comorbidities___55822004 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___55822004|significant_comorbidities___unk'))
+    
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___55822004[i] == 0) ccc19x$der_hld[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_hld[i] <- 99
+    }
+    
+    ccc19x$der_hld <- factor(ccc19x$der_hld)
+    summary(ccc19x$der_hld[ccc19x$redcap_repeat_instrument == ''])
+    
+    ####################
+    #C15a. Hyperlipidemia v2 - includes concomitant statins as an HLD equivalent
+    ####################
+    ccc19x$der_hld_v2 <- NA
+    ccc19x$der_hld_v2[which(ccc19x$significant_comorbidities___55822004 == 1|
+                              ccc19x$concomitant_meds___atc_c10aa == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___55822004|significant_comorbidities___unk'))
+    
+    for(i in which(is.na(ccc19x$der_hld_v2) & ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___55822004[i] == 0) ccc19x$der_hld_v2[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(is.na(ccc19x$der_hld_v2) & ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_hld_v2[i] <- 99
+    }
+    
+    ccc19x$der_hld_v2 <- factor(ccc19x$der_hld_v2)
+    summary(ccc19x$der_hld_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #######################
     #C10. Baseline dementia
