@@ -3675,8 +3675,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     summary(factor(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == '']))
     
     #O27. ordinal_v4 (0 = ambulatory, 1 = hospitalized, 2= hospitalized with supplemental oxygen, 
-    #     3 = ICU admission, 4 = ICU + mechanical ventilation, 
-    #     5 = ICU + mechanical ventilation + vasopressors/inotropes, 6 = death)
+    #     3 = ICU admission, 4 = mechanical ventilation, 
+    #     5 = ICU or mechanical ventilation, with vasopressors/inotropes, 6 = death)
     
     #Declare as missing
     ccc19x$der_ordinal_v4 <- NA
@@ -3688,7 +3688,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1)] <- 1
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 99)] <- 99
     
-    #Hospitalized and did require O2
+    #Hospitalized and required O2
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 99)] <- 99
     
@@ -3696,13 +3696,13 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1)] <- 3
     ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 99)] <- 99
     
-    #ICU + Mechanical ventilation
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1)] <- 4
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 99)] <- 99
+    #Mechanical ventilation
+    ccc19x$der_ordinal_v4[which(ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v4[which(ccc19x$der_mv == 99)] <- 99
     
-    #ICU + Mechanical ventilation + pressors
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 1)] <- 5
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 99)] <- 99
+    #ICU or Mechanical ventilation, with pressors
+    ccc19x$der_ordinal_v4[which((ccc19x$der_ICU == 1|ccc19x$der_mv == 1) & ccc19x$der_pressors == 1)] <- 5
+    ccc19x$der_ordinal_v4[which((ccc19x$der_ICU == 1|ccc19x$der_mv == 1) & ccc19x$der_pressors == 99)] <- 99
     
     #Death at any time
     ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 1)] <- 6
@@ -4419,6 +4419,96 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_statins <- factor(ccc19x$der_statins)
     summary(ccc19x$der_statins[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx8a. Statins at baseline
+    ccc19x$der_statins_baseline <- NA
+    ccc19x$der_statins_baseline[which(ccc19x$concomitant_meds___atc_c10aa == 1)] <- 1
+    
+    #Never
+    ccc19x$der_statins_baseline[which(ccc19x$concomitant_meds___atc_c10aa == 0)] <- 0
+    
+    #Unknown baseline or treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
+    
+    #Unknown f/u treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_statins_baseline[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_statins_baseline[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_statins_baseline[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_statins_baseline[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_statins_baseline <- factor(ccc19x$der_statins_baseline)
+    summary(ccc19x$der_statins_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx22. Beta blockers (BB) at baseline
+    ccc19x$der_BB_baseline <- NA
+    ccc19x$der_BB_baseline[which(ccc19x$concomitant_meds___c07a == 1)] <- 1
+    
+    #Never
+    ccc19x$der_BB_baseline[which(ccc19x$concomitant_meds___c07a == 0)] <- 0
+    
+    #Unknown baseline or treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
+    
+    #Unknown f/u treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_BB_baseline[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_BB_baseline[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_BB_baseline[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_BB_baseline[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_BB_baseline <- factor(ccc19x$der_BB_baseline)
+    summary(ccc19x$der_BB_baseline[ccc19x$redcap_repeat_instrument == ''])
     
     #Rx9. Antivirals ever (except oseltamivir or remdesivir) for treatment of COVID-19
     ccc19x$der_antivirals <- NA
@@ -5956,6 +6046,51 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_CVD_risk <- factor(ccc19x$der_CVD_risk)
     summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
     
+    #########################
+    #C13a. CVD risk factor v2 
+    #########################
+    ccc19x$der_CVD_risk_v2 <- NA
+    
+    #Two or more risk factors
+    temp <- rep(0, nrow(ccc19x))
+    
+    #Sex and age
+    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    
+    #Hypertension
+    temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
+    #Hyperlipidemia
+    temp[which(ccc19x$significant_comorbidities___55822004 == 1)] <- temp[which(ccc19x$significant_comorbidities___55822004 == 1)] + 1
+    #Diabetes
+    temp[which(ccc19x$der_dm2 == 1)] <- temp[which(ccc19x$der_dm2 == 1)] + 1
+    #Tobacco use
+    temp[which(ccc19x$der_smoking == 'Current')] <- temp[which(ccc19x$der_smoking == 'Current')] + 1
+    
+    ccc19x$der_CVD_risk_v2[which(temp >= 2)] <- 1
+    
+    #Removals
+    
+    #1 risk factor
+    ccc19x$der_CVD_risk_v2[which(temp == 1 & is.na(ccc19x$der_CVD_risk_v2) & ccc19x$redcap_repeat_instrument == '')] <- 0
+    
+    #Too young
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & ccc19x$der_age < 55)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & ccc19x$der_age < 60)] <- 0
+    
+    #Unknowns
+    ccc19x$der_CVD_risk_v2[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   (ccc19x$significant_comorbidities___55822004 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   ccc19x$der_dm2 == 99|
+                                   ccc19x$der_smoking == 'Unknown')
+    ] <- 'Unknown'
+    
+    #Already has CVD
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
+    
+    ccc19x$der_CVD_risk_v2 <- factor(ccc19x$der_CVD_risk_v2)
+    summary(ccc19x$der_CVD_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     }
   print('Comorbidities completed')
   
@@ -6865,37 +7000,43 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
     summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
     
-    ################################
-    #Ca23. Stem cell transplant ever
-    ################################
-    ccc19x$der_sct <- NA
+    #########################################
+    #Ca23. Hematopoeitic cell transplant ever
+    #########################################
+    ccc19x$der_hct <- NA
     
     #Yes
-    ccc19x$der_sct[which(ccc19x$significant_comorbidities___234336002 == 1)] <- 1
-    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy %in% 1:5 &
+    ccc19x$der_hct[which(ccc19x$significant_comorbidities___234336002 == 1)] <- 1
+    ccc19x$der_hct[which(ccc19x$transplant_cellular_therapy %in% 1:5 &
                            ccc19x$transplant_cellular_timing != 0)] <- 1
     
     #No
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___234336002|significant_comorbidities___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_sct)))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_hct)))
     {
-      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___234336002[i] == 0) ccc19x$der_sct[i] <- 0
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___234336002[i] == 0) ccc19x$der_hct[i] <- 0
     }
     
     #Unknown
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_sct == 0))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_hct == 0))
     {
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_sct[i] <- 99
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_hct[i] <- 99
     }
     
-    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy == 99 & ccc19x$der_sct == 0)] <- 99
+    ccc19x$der_hct[which(ccc19x$transplant_cellular_therapy == 99 & ccc19x$der_hct == 0)] <- 99
     
-    ccc19x$der_sct <- factor(ccc19x$der_sct)
-    summary(ccc19x$der_sct[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_hct <- factor(ccc19x$der_hct)
+    summary(ccc19x$der_hct[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca23a. Recent allo (within 1 year) or auto (within 100 days)
+    ccc19x$der_hct_recent <- ccc19x$der_allo365
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 1)] <- 1
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 0 & is.na(ccc19x$der_hct_recent))] <- 0
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
+    summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
     ccc19x$der_ARA_1st_gen <- NA
@@ -7248,6 +7389,27 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     if(length(temp.ref) == nrow(drugs))
       ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] <- drugs[,2:8] else ccc19x$drug1 <- 'ERROR'
     
+    #Ca24: Regimen match
+    ccc19x$der_regimen <- NA
+    for(i in which(!is.na(ccc19x$drug1)))
+    {
+      #Get list of drugs
+      temp <- ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
+      temp <- temp[temp != '']
+      temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
+      
+      #Look for match
+      list.match <- which(concept_stage$concept_name == temp)
+      
+      #If there is a match, pull the potential regimens that contain these drugs
+      if(length(list.match) > 0)
+      {
+        out <- concept_relationship_stage$concept_code_1[concept_relationship_stage$concept_code_2 %in% concept_stage$concept_code[list.match] &
+                                                           concept_relationship_stage$relationship_id == 'Has anti-cancer drugs']
+        if(length(out) > 1) out <- paste(out, collapse = '|')
+        ccc19x$der_regimen[i] <- out
+      } else ccc19x$der_regimen[i] <- 'No match'      
+    }
     
     #Ca4a: CD20 drugs
     ccc19x$der_cd20 <- NA
