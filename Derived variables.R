@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 2-22-2021)'
+suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -7230,6 +7230,25 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_cancer_status_v3 <- as.factor(ccc19x$der_cancer_status_v3)
     ccc19x$der_cancer_status_v3 <- relevel(ccc19x$der_cancer_status_v3, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca07d. Cancer status with remission conditioned on cancer timing
+    ccc19x$der_cancer_status_v4 <- NA
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
+                                        ccc19x$cancer_timing %in% 1:2)] <- 'Remission/NED, recent diagnosis'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
+                                        ccc19x$cancer_timing == 3)] <- 'Remission/NED, remote diagnosis'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 2)] <- 'Active, responding'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 3)] <- 'Active, stable'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 4)] <- 'Active, progressing'
+    
+    #Unknown status
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status %in% c(5,99))] <- 'Unknown'
+    #Unknown timing
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_timing == 99 & is.na(ccc19x$der_cancer_status_v4))] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_cancer_status_v4 <- as.factor(ccc19x$der_cancer_status_v4)
+    summary(ccc19x$der_cancer_status_v4[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca19. Metastatic status (only applicable to solid tumors)
     ccc19x$der_metastatic <- NA
