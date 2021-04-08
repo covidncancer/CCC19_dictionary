@@ -5290,7 +5290,37 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     
     summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
     
+    #D20. Insurance 
+    ccc19x$der_insurance <- NA
     
+    #Uninsured
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 1 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Uninsured'
+    
+    #Private insurance +/- any other
+    ccc19x$der_insurance[which(ccc19x$insurance___1 == 1)] <- 'Private +/- other'
+    
+    #Medicaid alone
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 1 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Medicaid alone'
+    
+    #Medicare alone
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 1 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Medicare alone'
+    
+    #Medicare/Medicaid
+    ccc19x$der_insurance[which(ccc19x$insurance___2 == 1 &ccc19x$insurance___3 == 1)] <- 'Medicare/Medicaid +/- other'
+    
+    #Other government
+    ccc19x$der_insurance[which(ccc19x$insurance___4 == 1)] <- 'Other government +/- other'
+    
+    #Unknown
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 1)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_insurance <- as.factor(ccc19x$der_insurance)
+    summary(ccc19x$der_insurance[ccc19x$redcap_repeat_instrument == ''])
     
   }
   print('Demographics completed')
