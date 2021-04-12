@@ -7624,6 +7624,21 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
     summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4l: Anti-HER2
+    ccc19x$der_her2 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Lapatinib','Neratinib','Tucatinib','Trastuzumab','Margetuximab',
+               'Trastuzumab emtansine','Trastuzumab deruxtecan','Pertuzumab'))) ccc19x$der_her2[temp.ref[i]] <- 1 else
+                 ccc19x$der_her2[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_her2 <- factor(ccc19x$der_her2)
+    summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
@@ -8283,7 +8298,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     #Create density plot of missingness
     x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
     plot(x)
-    threshold <- 101
+    threshold <- 105
     abline(v = threshold)
     
     ccc19x$der_quality[which(ccc19x$missing > threshold)] <- ccc19x$der_quality[which(ccc19x$missing > threshold)] + 5
