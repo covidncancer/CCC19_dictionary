@@ -7474,6 +7474,20 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_cd20 <- factor(ccc19x$der_cd20)
     summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4m: CD38 drugs
+    ccc19x$der_cd38 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Daratumumab','Isatuximab'))) ccc19x$der_cd38[temp.ref[i]] <- 1 else
+               ccc19x$der_cd38[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_cd38 <- factor(ccc19x$der_cd38)
+    summary(ccc19x$der_cd38[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca4b: BTKi
     ccc19x$der_btki <- NA
     
