@@ -5710,10 +5710,10 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     
     #C07a. Cardiovascular comorbidity v2 (CAD, CHF, PVD, CVA)
     ccc19x$der_card_v2 <- NA
-    ccc19x$der_card_v2[which( ccc19x$significant_comorbidities___53741008 == 1|#
-                                ccc19x$significant_comorbidities___42343007 == 1|#
-                                ccc19x$significant_comorbidities___400047006 == 1|#
-                                ccc19x$significant_comorbidities___275526006 == 1#
+    ccc19x$der_card_v2[which( ccc19x$significant_comorbidities___53741008 == 1|#CAD
+                                ccc19x$significant_comorbidities___42343007 == 1|#CHF
+                                ccc19x$significant_comorbidities___400047006 == 1|#PVD
+                                ccc19x$significant_comorbidities___275526006 == 1#CVA
     )] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
@@ -5754,6 +5754,94 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     
     ccc19x$der_card_v2 <- factor(ccc19x$der_card_v2)
     summary(ccc19x$der_card_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07b. CAD comorbidity
+    ccc19x$der_CAD_bl <- NA
+    ccc19x$der_CAD_bl[which( ccc19x$significant_comorbidities___53741008 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___53741008|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___53741008[i] == 0)
+      )) ccc19x$der_CAD_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CAD_bl[i] <- 99
+    }
+    
+    ccc19x$der_CAD_bl <- factor(ccc19x$der_CAD_bl)
+    summary(ccc19x$der_CAD_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07c. CHF comorbidity
+    ccc19x$der_CHF_bl <- NA
+    ccc19x$der_CHF_bl[which( ccc19x$significant_comorbidities___42343007 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___42343007|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___42343007[i] == 0)
+      )) ccc19x$der_CHF_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CHF_bl[i] <- 99
+    }
+    
+    ccc19x$der_CHF_bl <- factor(ccc19x$der_CHF_bl)
+    summary(ccc19x$der_CHF_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07d. PVD comorbidity
+    ccc19x$der_PVD_bl <- NA
+    ccc19x$der_PVD_bl[which( ccc19x$significant_comorbidities___400047006 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___400047006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___400047006[i] == 0)
+      )) ccc19x$der_PVD_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_PVD_bl[i] <- 99
+    }
+    
+    ccc19x$der_PVD_bl <- factor(ccc19x$der_PVD_bl)
+    summary(ccc19x$der_PVD_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07e. CVA comorbidity
+    ccc19x$der_CVA_bl <- NA
+    ccc19x$der_CVA_bl[which( ccc19x$significant_comorbidities___275526006 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___275526006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___275526006[i] == 0)
+      )) ccc19x$der_CVA_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CVA_bl[i] <- 99
+    }
+    
+    ccc19x$der_CVA_bl <- factor(ccc19x$der_CVA_bl)
+    summary(ccc19x$der_CVA_bl[ccc19x$redcap_repeat_instrument == ''])
     
     #######################
     #C08. Renal comorbidity
