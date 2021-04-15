@@ -2492,35 +2492,35 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$ts_5 <- gsub(ccc19x$ts_5, pattern = '/20 ', replacement = '/2020 ')
     
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
-    ccc19x$der_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 7*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 7*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 14*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 14*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 28*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 28*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 56*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 56*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 84*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 84*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 180*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 180*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 270*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 270*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 360*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2534,12 +2534,12 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
                                                           '%Y-%m-%d %H:%M'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime[temp.ref] <- temp.time
+        ccc19x$meta_righttime[temp.ref] <- temp.time
       }
     }
     
     #T3. Median f/u
-    ccc19x$der_median_fu <- NA
+    ccc19x$der_days_fu <- NA
     pts <- unique(ccc19x$record_id)
     
     #Middle of follow-up intervals (from covid_19_dx_interval)
@@ -2558,34 +2558,34 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
         {
           if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
           {
-            ccc19x$der_median_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
+            ccc19x$der_days_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
           } else #Default is the median of the time interval of diagnosis
-            ccc19x$der_median_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+            ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
         } else
         {
           #Default is the median of the time interval of diagnosis
-          ccc19x$der_median_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+          ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
           
           # #Check that LOS aren't longer than this
-          # if(!is.na(ccc19x$der_median_fu[temp.ref]))
+          # if(!is.na(ccc19x$der_days_fu[temp.ref]))
           # {
           #   temp <- ccc19x[temp.ref,c('hosp_los','hosp_los_2','icu_los')]
           #   temp <- sum(temp[!is.na(temp)])
-          #   if(temp > ccc19x$der_median_fu[temp.ref]) ccc19x$der_median_fu[temp.ref] <- temp
+          #   if(temp > ccc19x$der_days_fu[temp.ref]) ccc19x$der_days_fu[temp.ref] <- temp
           # }
           
           #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 30 & 
             ccc19x$mortality[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
           
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 90 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 90 & 
             ccc19x$mortality_90[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
           
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 180 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 180 & 
             ccc19x$mortality_180[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
           
         }
       } else
@@ -2597,7 +2597,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
         {
           if(temp != 9999) 
           {
-            ccc19x$der_median_fu[temp.ref] <- temp
+            ccc19x$der_days_fu[temp.ref] <- temp
           }
         } else
         {
@@ -2606,56 +2606,56 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
           {
             temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
           }
-          if(length(temp[temp != '']) > 0) ccc19x$der_median_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
+          if(length(temp[temp != '']) > 0) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
         }
         
         #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 30) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 30) & 
           any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
         
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 90) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 90) & 
           any(ccc19x$d90_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
         
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 180) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 180) & 
           any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
       }
     }
     
-    summary(ccc19x$der_median_fu[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
     
     #T4 & T5 Median f/u in days anchored to actual dates
-    ccc19x$der_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - 7*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - 7*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (7+14)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (7+14)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (14+28)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (14+28)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (28+56)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (28+56)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (56+84)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (56+84)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (90+180)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (90+180)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (180+270)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+270)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (270+360)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (270+360)*24*60*60/2
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2669,7 +2669,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
                                                           '%Y-%m-%d %H:%M'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime2[temp.ref] <- temp.time
+        ccc19x$meta_righttime2[temp.ref] <- temp.time
       }
     }
     
@@ -2690,38 +2690,38 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
     
     #T7 & T8 Calculated time from diagnosis has to be at least 30 days
-    ccc19x$der_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 0*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 7*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 14*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 28*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 56*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 90*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 180*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 270*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 360*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2735,11 +2735,11 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
                                                           '%Y-%m-%d %H:%M'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime3[temp.ref] <- temp.time
+        ccc19x$meta_righttime3[temp.ref] <- temp.time
       }
     }
     
-    temp.diff <- difftime(ccc19x$der_righttime3, ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
     temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
     
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
@@ -2759,7 +2759,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
@@ -2861,7 +2861,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #0. Median f/u time is > 30 days or alive on a follow-up form
-    temp.ref2 <- which(ccc19x$der_dead30a[which(ccc19x$der_median_fu > 30)])
+    temp.ref2 <- which(ccc19x$der_dead30a[which(ccc19x$der_days_fu > 30)])
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -2873,7 +2873,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 1
@@ -2987,7 +2987,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 90 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 90)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
@@ -3091,7 +3091,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 180 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 180)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
@@ -3202,12 +3202,12 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
     
     #First, extract month and year from the POSIXlt objects
-    x1 <- months(ccc19x$der_lefttime[temp.ref])
-    xm <- months(ccc19x$der_lefttime2[temp.ref])
-    x2 <- months(ccc19x$der_lefttime3[temp.ref])
-    y1 <- format(ccc19x$der_lefttime[temp.ref], format = '%Y')
-    ym <- format(ccc19x$der_lefttime2[temp.ref], format = '%Y')
-    y2 <- format(ccc19x$der_lefttime3[temp.ref], format = '%Y')
+    x1 <- months(ccc19x$meta_lefttime[temp.ref])
+    xm <- months(ccc19x$meta_lefttime2[temp.ref])
+    x2 <- months(ccc19x$meta_lefttime3[temp.ref])
+    y1 <- format(ccc19x$meta_lefttime[temp.ref], format = '%Y')
+    ym <- format(ccc19x$meta_lefttime2[temp.ref], format = '%Y')
+    y2 <- format(ccc19x$meta_lefttime3[temp.ref], format = '%Y')
     
     ccc19x$der_month_dx <- NA
     temp.ref2 <- which(x1 == x2 & y1 == y2 & y1 != 2099)
@@ -8312,17 +8312,17 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
-    ccc19x$der_30d_due <- NA
-    ccc19x$der_90d_due <- NA
-    ccc19x$der_180d_due <- NA
+    ccc19x$meta_30d_due <- NA
+    ccc19x$meta_90d_due <- NA
+    ccc19x$meta_180d_due <- NA
     
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 30*24*60*60)
-    ccc19x$der_30d_due[temp.ref] <- gsub(ccc19x$der_30d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$der_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 90*24*60*60)
-    ccc19x$der_90d_due[temp.ref] <- gsub(ccc19x$der_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$der_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 180*24*60*60)
-    ccc19x$der_180d_due[temp.ref] <- gsub(ccc19x$der_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 30*24*60*60)
+    ccc19x$meta_30d_due[temp.ref] <- gsub(ccc19x$meta_30d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 90*24*60*60)
+    ccc19x$meta_90d_due[temp.ref] <- gsub(ccc19x$meta_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 180*24*60*60)
+    ccc19x$meta_180d_due[temp.ref] <- gsub(ccc19x$meta_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
     
     
     #X8a-c. Completion of 30d, 90d, 180d forms
@@ -8371,8 +8371,8 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ##############################################
     
     #Calculate a quality score for each case
-    ccc19x$der_quality <- 0
-    ccc19x$der_problems <- ''
+    ccc19x$meta_quality <- 0
+    ccc19x$meta_problems <- ''
     
     ###############
     #Major problems
@@ -8403,8 +8403,8 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     threshold <- 105
     abline(v = threshold)
     
-    ccc19x$der_quality[which(ccc19x$missing > threshold)] <- ccc19x$der_quality[which(ccc19x$missing > threshold)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$der_problems[which(ccc19x$missing > threshold)],
+    ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
+    ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
@@ -8422,8 +8422,8 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
       ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
     }
     
-    ccc19x$der_quality[which(ccc19x$unknown >= 20)] <- ccc19x$der_quality[which(ccc19x$unknown >= 20)] + 5
-    ccc19x$der_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$der_problems[which(ccc19x$unknown >= 20)],
+    ccc19x$meta_quality[which(ccc19x$unknown >= 20)] <- ccc19x$meta_quality[which(ccc19x$unknown >= 20)] + 5
+    ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
                                                               '; Large number of unknowns', sep = '')
     
     ##################
@@ -8433,47 +8433,47 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     #Cancer status missing
     temp.ref <- which(is.na(ccc19x$der_cancer_status) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Cancer status missing', sep = '')
     
     #ECOG status missing
     temp.ref <- which(is.na(ccc19x$der_ecogcat) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ECOG PS missing', sep = '')
     
     #Death status missing/unk
     temp.ref <- which((ccc19x$der_deadbinary == 99|is.na(ccc19x$der_deadbinary)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Death status missing or unknown', sep = '')
     
     #Baseline COVID-19 severity missing/unk
     temp.ref <- which((ccc19x$severity_of_covid_19_v2 == 99|is.na(ccc19x$severity_of_covid_19_v2)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Baseline COVID-19 severity missing or unknown', sep = '')
     
     #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 30-day f/u is at least 60 days overdue', sep = '')
     
     #90-day f/u is 60+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 90-day f/u is at least 60 days overdue', sep = '')
     
     ###############
@@ -8488,8 +8488,8 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
                            ccc19x$cancer_type_3 == 'C4863'|
                            ccc19x$cancer_type_4 == 'C4863'|
                            ccc19x$cancer_type_5 == 'C4863'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ADT missing or unknown', sep = '')
     
     #Biomarkers (breast)
@@ -8500,8 +8500,8 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
                            ccc19x$cancer_type_3 == 'C4872'|
                            ccc19x$cancer_type_4 == 'C4872'|
                            ccc19x$cancer_type_5 == 'C4872'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Breast cancer biomarkers missing or unknown', sep = '')
     
     #BCG (bladder)
@@ -8511,15 +8511,15 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
                            ccc19x$cancer_type_3 == 'C4912'|
                            ccc19x$cancer_type_4 == 'C4912'|
                            ccc19x$cancer_type_5 == 'C4912'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Intravesicular BCG missing or unknown', sep = '')
     
     #Cancer status unknown
     temp.ref <- which(ccc19x$der_cancer_status == 'Unknown' &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Cancer status unknown', sep = '')
     
     #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
@@ -8527,73 +8527,73 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
                         ccc19x$cancer_status != '1' &
                         !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Metastatic status missing or unknown', sep = '')
     
     #ECOG status unknown
     temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ECOG PS unknown', sep = '')
     
     #ICU status missing/unk
     temp.ref <- which((ccc19x$der_ICU == 99|is.na(ccc19x$der_ICU)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ICU status missing or unknown', sep = '')
     
     #Hospital status missing/unk
     temp.ref <- which((ccc19x$der_hosp == 99|is.na(ccc19x$der_hosp)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Hospital status missing or unknown', sep = '')
     
     #Intubation status missing/unk
     temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Intubation status missing or unknown', sep = '')
     
     #O2 status missing/unk
     temp.ref <- which((ccc19x$der_o2_ever == 99|is.na(ccc19x$der_o2_ever)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; O2 requirement missing or unknown', sep = '')
     
     #Days to death missing or 9999
     temp.ref <- which(ccc19x$der_deadbinary == 1 & 
                         (ccc19x$der_days_to_death_combined == 9999|is.na(ccc19x$der_days_to_death_combined)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Days to death missing or unknown', sep = '')
     
     #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 30-day f/u is at least 30 days overdue', sep = '')
     
     #90-day f/u is 30+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 90-day f/u is at least 30 days overdue', sep = '')
     
     #Remove leading semicolon
-    ccc19x$der_problems <- gsub(ccc19x$der_problems, pattern = '^; ', replacement = '')
+    ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
     
     #######################
     #X07. Breast biomarkers
