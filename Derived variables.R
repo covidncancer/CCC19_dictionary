@@ -6113,6 +6113,12 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_ccc19cci <- factor(ccc19x$der_ccc19cci)
     summary(ccc19x$der_ccc19cci[ccc19x$redcap_repeat_instrument == ''])
     
+    #C12a. Modified Charlson with aggregated categories
+    ccc19x$der_ccc19cci_v2 <- as.character(ccc19x$der_ccc19cci)
+    ccc19x$der_ccc19cci_v2[which(ccc19x$der_ccc19cci_v2 %in% 9:22)] <- '9+'
+    ccc19x$der_ccc19cci_v2 <- factor(ccc19x$der_ccc19cci_v2)
+    summary(ccc19x$der_ccc19cci_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     ##############################
     #C13. CVD risk factor (binary)
     ##############################
@@ -8627,6 +8633,12 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_gleason[ccc19x$der_gleason == ''] <- NA
     ccc19x$der_gleason <- factor(ccc19x$der_gleason)
     summary(ccc19x$der_gleason[ccc19x$der_Prostate == 1])
+    
+    #X08a. Gleason with grouped categories
+    ccc19x$der_gleason_v2 <- as.character(ccc19x$der_gleason)
+    ccc19x$der_gleason_v2[which(ccc19x$der_gleason_v2 %in% c('03','04','05'))] <- 'Less than 6'
+    ccc19x$der_gleason_v2 <- factor(ccc19x$der_gleason_v2)
+    summary(ccc19x$der_gleason_v2[ccc19x$der_Prostate == 1])
     
     ####################
     #X09. Cytokine storm
