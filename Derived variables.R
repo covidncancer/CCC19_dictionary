@@ -5164,6 +5164,31 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     
     summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
     
+    #D04c. Derived variable for race/ethnicity including Asian
+    ccc19x$der_race_v2 <- NA
+    
+    ccc19x$der_race_v2[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic Black"
+    ccc19x$der_race_v2[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0 &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic White"
+    
+    #Overwrite the preceding if AAPI
+    ccc19x$der_race_v2[which((ccc19x$race___2028_9 == 1|ccc19x$race___2076_8 ==1) &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- 'Non-Hispanic AAPI'
+    
+    #Other
+    ccc19x$der_race_v2[which((ccc19x$race___1002_5 == 1|ccc19x$race___2131_1 == 1|
+                                ccc19x$race___unk == 1) & !ccc19x$der_race_v2 %in% c('Non-Hispanic Black',
+                                                                                     'Non-Hispanic White',
+                                                                                     'Non-Hispanic AAPI'))] <- 'Other'
+    
+    #Overwrite "Other" with Hispanic ethnicity
+    ccc19x$der_race_v2[which(ccc19x$ethnicity == "2135-2")] <- "Hispanic"
+    
+    #Factor
+    ccc19x$der_race_v2 <- as.factor(ccc19x$der_race_v2)
+    summary(ccc19x$der_race_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     #D05. Ethnicity (simply factor and redefine levels, declare blanks as missing)
     ccc19x$der_ethnicity <- ccc19x$ethnicity
     ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latinx'
