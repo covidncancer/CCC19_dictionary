@@ -3456,7 +3456,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
                             ccc19x$worst_status_clinical %in% 0:1) 
                          & (ccc19x$ecog_status %in% c(1,2,3,4)))] <- 2
     #3. Hospitalized, no oxygen
-    ccc19x$der_who[which(is.na(ccc19x$der_o2_ever) & ccc19x$der_hosp == 1)] <- 3
+    ccc19x$der_who[which(ccc19x$der_o2_ever == 0 & ccc19x$der_hosp == 1)] <- 3
     #4. Hospitalized, oxygen
     ccc19x$der_who[which(ccc19x$der_o2_ever == 1 & 
                            ccc19x$der_hosp == 1)] <- 4
@@ -3476,6 +3476,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_who[ccc19x$der_deadbinary == 1] <- 8
     
     ccc19x$der_who <- as.factor(ccc19x$der_who)
+    summary(ccc19x$der_who[ccc19x$redcap_repeat_instrument == ''])
     
     #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
     
@@ -3538,7 +3539,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
     
     #O22b. ordinal_v1b -- including "at least"
-    #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
+    #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death ever)
     
     #Declare as missing
     ccc19x$der_ordinal_v1b <- NA
@@ -3547,7 +3548,7 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 0 & 
                                    ccc19x$der_ICU == 0 &
                                    ccc19x$der_mv == 0 &
-                                   ccc19x$der_dead30 == 0)] <- 0
+                                   ccc19x$der_deadbinary == 0)] <- 0
     
     #Hospital (ever/never)
     ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 1)] <- 1
@@ -3568,12 +3569,12 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
     
     #Death within 30 days
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 1)] <- 4
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 1)] <- 4
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
     
     summary(factor(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == '']))
     
