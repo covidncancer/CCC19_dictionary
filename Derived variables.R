@@ -6295,6 +6295,15 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_CLL <- factor(ccc19x$der_CLL)
     summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
     
+    ccc19x$der_Hodgkin <- 0
+    ccc19x$der_Hodgkin[which(ccc19x$cancer_type %in% c("C9357")|
+                               ccc19x$cancer_type_2 %in% c("C9357")|
+                               ccc19x$cancer_type_3 %in% c("C9357")|
+                               ccc19x$cancer_type_4 %in% c("C9357")|
+                               ccc19x$cancer_type_5 %in% c("C9357"))] <- 1
+    ccc19x$der_Hodgkin <- factor(ccc19x$der_Hodgkin)
+    summary(ccc19x$der_Hodgkin[ccc19x$redcap_repeat_instrument == ''])
+    
     ccc19x$der_Lymph_Other <- 0
     ccc19x$der_Lymph_Other[which(ccc19x$cancer_type %in% c("C9308", "C3211")|
                                    ccc19x$cancer_type_2 %in% c("C9308", "C3211")|
