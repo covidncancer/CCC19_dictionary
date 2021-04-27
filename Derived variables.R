@@ -2482,10 +2482,19 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                            '%Y-%m-%d %H:%M',
+                                                            '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$meta_righttime[temp.ref] <- temp.time
+        ccc19x$meta_righttime[temp.ref] <- temp.time[1]
       }
     }
     
@@ -2617,10 +2626,19 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                                    '%Y-%m-%d %H:%M',
+                                                                    '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$meta_righttime2[temp.ref] <- temp.time
+        ccc19x$meta_righttime2[temp.ref] <- temp.time[1]
       }
     }
     
@@ -2683,10 +2701,19 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                                    '%Y-%m-%d %H:%M',
+                                                                    '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$meta_righttime3[temp.ref] <- temp.time
+        ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
       }
     }
     
