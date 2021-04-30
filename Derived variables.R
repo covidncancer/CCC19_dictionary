@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables (thru 2-22-2021)'
+suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -527,1961 +527,1912 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
   print('Outcomes completed')
   
   ##############
-  #Complications - this can take a while!
+  #Complications
   ##############
   {
-  #Comp01. PE complications
-  ccc19x$der_PE_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_PE_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp[i])) ccc19x$der_PE_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_PE_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    #Something is checked besides unknown (including none)
+    master_comp <- rep(NA,nrow(ccc19x))
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_') & !grepl(colnames(ccc19x), pattern = 'unk'))
+    for(i in 1:nrow(ccc19x))
     {
-      if(any(temp == 1)) ccc19x$der_PE_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp[temp.ref] <- 0
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      if(any(temp == 1)) master_comp[i] <- 1
     }
-  }
-  
-  ccc19x$der_PE_comp <- as.factor(ccc19x$der_PE_comp)
-  summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp01a. PE complications within 90 days (3 months)
-  ccc19x$der_PE_comp_within_3mo <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                       ccc19x$fu_weeks %in% c(30,90)|
-                       ccc19x$timing_of_report_weeks <= 13)
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_PE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
-  for(i in temp.ref2)
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp_within_3mo[i])) ccc19x$der_PE_comp_within_3mo[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                 (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_PE_comp_within_3mo[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    #Comp01. PE complications
+    ccc19x$der_PE_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_PE_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_PE_comp[which(master_comp == 1 & is.na(ccc19x$der_PE_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_PE_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_PE_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_PE_comp_within_3mo <- as.factor(ccc19x$der_PE_comp_within_3mo)
-  summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp02. SVT complications
-  ccc19x$der_SVT_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '275517008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_SVT_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '275517008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_SVT_comp[i])) ccc19x$der_SVT_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_SVT_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_PE_comp <- as.factor(ccc19x$der_PE_comp)
+    summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp01a. PE complications within 90 days (3 months)
+    ccc19x$der_PE_comp_within_3mo <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                         ccc19x$fu_weeks %in% c(30,90)|
+                         ccc19x$timing_of_report_weeks <= 13)
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_PE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp_within_3mo[i])) ccc19x$der_PE_comp_within_3mo[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_SVT_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_SVT_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_SVT_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_PE_comp_within_3mo[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_SVT_comp <- as.factor(ccc19x$der_SVT_comp)
-  summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp03. DVT complications
-  ccc19x$der_DVT_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_DVT_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '128053003|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DVT_comp[i])) ccc19x$der_DVT_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_DVT_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_PE_comp_within_3mo <- as.factor(ccc19x$der_PE_comp_within_3mo)
+    summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp02. SVT complications
+    ccc19x$der_SVT_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '275517008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_SVT_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_SVT_comp[which(master_comp == 1 & is.na(ccc19x$der_SVT_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_DVT_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_SVT_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_SVT_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_SVT_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_SVT_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_DVT_comp <- as.factor(ccc19x$der_DVT_comp)
-  summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp03a. DVT complications within 90 days (3 months)
-  ccc19x$der_DVT_comp_within_3mo <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                       ccc19x$fu_weeks %in% c(30,90)|
-                       ccc19x$timing_of_report_weeks <= 13)
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_DVT_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '128053003|unk'))
-  for(i in temp.ref2)
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DVT_comp_within_3mo[i])) ccc19x$der_DVT_comp_within_3mo[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                 (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_DVT_comp_within_3mo[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_SVT_comp <- as.factor(ccc19x$der_SVT_comp)
+    summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp03. DVT complications
+    ccc19x$der_DVT_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_DVT_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_DVT_comp[which(master_comp == 1 & is.na(ccc19x$der_DVT_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_DVT_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_DVT_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_DVT_comp_within_3mo <- as.factor(ccc19x$der_DVT_comp_within_3mo)
-  summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp04. Thrombosis NOS complications
-  ccc19x$der_thrombosis_NOS_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_thrombosis_NOS_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp[i])) ccc19x$der_thrombosis_NOS_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
-  for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
-  for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_thrombosis_NOS_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_DVT_comp <- as.factor(ccc19x$der_DVT_comp)
+    summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp03a. DVT complications within 90 days (3 months)
+    ccc19x$der_DVT_comp_within_3mo <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                         ccc19x$fu_weeks %in% c(30,90)|
+                         ccc19x$timing_of_report_weeks <= 13)
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_DVT_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '128053003|unk'))
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DVT_comp_within_3mo[i])) ccc19x$der_DVT_comp_within_3mo[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_DVT_comp_within_3mo[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
-  summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp04a. thrombosis_NOS complications within 90 days (3 months)
-  ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
-  temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                       ccc19x$fu_weeks %in% c(30,90)|
-                       ccc19x$timing_of_report_weeks <= 13)
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
-  for(i in temp.ref2)
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo[i])) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
-  for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
-  for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                 (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_DVT_comp_within_3mo <- as.factor(ccc19x$der_DVT_comp_within_3mo)
+    summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp04. Thrombosis NOS complications
+    ccc19x$der_thrombosis_NOS_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_thrombosis_NOS_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_thrombosis_NOS_comp[which(master_comp == 1 & is.na(ccc19x$der_thrombosis_NOS_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_thrombosis_NOS_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_thrombosis_NOS_comp_within_3mo <- as.factor(ccc19x$der_thrombosis_NOS_comp_within_3mo)
-  summary(ccc19x$der_thrombosis_NOS_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp05. Combined VTE indicator (excluding SVT)
-  ccc19x$der_VTE_comp <- NA
-  
-  #Any complication
-  temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp','der_thrombosis_NOS_comp'))
-  for(i in temp.ref)
-    ccc19x$der_VTE_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  for(i in which(is.na(ccc19x$der_VTE_comp)))
-  {
-    temp <- ccc19x[i,temp.ref]
-    temp <- temp[!is.na(temp)]
-    temp <- unique(temp)
-    if(length(temp) >= 1)
-      if(length(temp) == 1)
-        if(temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
-  }
-  
-  ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
-  summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp05a. Combined VTE indicator (excluding SVT and thrombosis NOS)
-  ccc19x$der_VTE_comp_v2 <- NA
-  
-  #Any complication
-  temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
-  for(i in temp.ref)
-    ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
-  
-  for(i in which(is.na(ccc19x$der_VTE_comp_v2)))
-  {
-    temp <- ccc19x[i,temp.ref]
-    temp <- temp[!is.na(temp)]
-    temp <- unique(temp)
-    if(length(temp) >= 1)
-      if(length(temp) == 1)
-        if(temp == 0) ccc19x$der_VTE_comp_v2[i] <- 0 else ccc19x$der_VTE_comp_v2[i] <- 99
-  }
-  
-  ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
-  summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp05b. Combined VTE within 3 months (90 days)
-  ccc19x$der_VTE_comp_within_3mo <- NA
-  ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 1|
-                                         ccc19x$der_DVT_comp_within_3mo == 1|
-                                         ccc19x$der_thrombosis_NOS_comp_within_3mo == 1)] <- 1
-  ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 0 &
-                                         ccc19x$der_DVT_comp_within_3mo == 0 &
-                                         ccc19x$der_thrombosis_NOS_comp_within_3mo == 0)] <- 0
-  ccc19x$der_VTE_comp_within_3mo[which((ccc19x$der_PE_comp_within_3mo == 99|
-                                          ccc19x$der_DVT_comp_within_3mo == 99|
-                                          ccc19x$der_thrombosis_NOS_comp_within_3mo == 99) &
-                                         is.na(ccc19x$der_VTE_comp_within_3mo))] <- 99
-  ccc19x$der_VTE_comp_within_3mo <- as.factor(ccc19x$der_VTE_comp_within_3mo)
-  summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp06. ATE complications (MI, CVA)
-  ccc19x$der_ATE_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_ATE_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp[i])) ccc19x$der_ATE_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_ATE_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
+    summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp04a. thrombosis_NOS complications within 90 days (3 months)
+    ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
+    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                         ccc19x$fu_weeks %in% c(30,90)|
+                         ccc19x$timing_of_report_weeks <= 13)
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo[i])) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_ATE_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
-  summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp06a. ATE complications within 90 days (3 months)
-  ccc19x$der_ATE_comp_within_3mo <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                       ccc19x$fu_weeks %in% c(30,90)|
-                       ccc19x$timing_of_report_weeks <= 13)
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_ATE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
-  for(i in temp.ref2)
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp_within_3mo[i])) ccc19x$der_ATE_comp_within_3mo[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                 (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_ATE_comp_within_3mo[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_thrombosis_NOS_comp_within_3mo <- as.factor(ccc19x$der_thrombosis_NOS_comp_within_3mo)
+    summary(ccc19x$der_thrombosis_NOS_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp05. Combined VTE indicator (excluding SVT)
+    ccc19x$der_VTE_comp <- NA
+    
+    #Any complication
+    temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp','der_thrombosis_NOS_comp'))
+    for(i in temp.ref)
+      ccc19x$der_VTE_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    for(i in which(is.na(ccc19x$der_VTE_comp)))
     {
-      if(any(temp == 1)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 0
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      temp <- unique(temp)
+      if(length(temp) >= 1)
+        if(length(temp) == 1)
+          if(temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
     }
-  }
-  
-  ccc19x$der_ATE_comp_within_3mo <- as.factor(ccc19x$der_ATE_comp_within_3mo)
-  summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp07. Stroke complication
-  ccc19x$der_stroke_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_stroke_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '230690007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_stroke_comp[i])) ccc19x$der_stroke_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_stroke_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
+    summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp05a. Combined VTE indicator (excluding SVT and thrombosis NOS)
+    ccc19x$der_VTE_comp_v2 <- NA
+    
+    #Any complication
+    temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
+    for(i in temp.ref)
+      ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
+    
+    for(i in which(is.na(ccc19x$der_VTE_comp_v2)))
     {
-      if(any(temp == 1)) ccc19x$der_stroke_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp[temp.ref] <- 0
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      temp <- unique(temp)
+      if(length(temp) >= 1)
+        if(length(temp) == 1)
+          if(temp == 0) ccc19x$der_VTE_comp_v2[i] <- 0 else ccc19x$der_VTE_comp_v2[i] <- 99
     }
-  }
-  
-  ccc19x$der_stroke_comp <- as.factor(ccc19x$der_stroke_comp)
-  summary(ccc19x$der_stroke_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp07a. stroke complications within 90 days (3 months)
-  ccc19x$der_stroke_comp_within_3mo <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                       ccc19x$fu_weeks %in% c(30,90)|
-                       ccc19x$timing_of_report_weeks <= 13)
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_stroke_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '230690007|unk'))
-  for(i in temp.ref2)
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_stroke_comp_within_3mo[i])) ccc19x$der_stroke_comp_within_3mo[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                 (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_stroke_comp_within_3mo[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
+    summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp05b. Combined VTE within 3 months (90 days)
+    ccc19x$der_VTE_comp_within_3mo <- NA
+    ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 1|
+                                           ccc19x$der_DVT_comp_within_3mo == 1|
+                                           ccc19x$der_thrombosis_NOS_comp_within_3mo == 1)] <- 1
+    ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 0 &
+                                           ccc19x$der_DVT_comp_within_3mo == 0 &
+                                           ccc19x$der_thrombosis_NOS_comp_within_3mo == 0)] <- 0
+    ccc19x$der_VTE_comp_within_3mo[which((ccc19x$der_PE_comp_within_3mo == 99|
+                                            ccc19x$der_DVT_comp_within_3mo == 99|
+                                            ccc19x$der_thrombosis_NOS_comp_within_3mo == 99) &
+                                           is.na(ccc19x$der_VTE_comp_within_3mo))] <- 99
+    ccc19x$der_VTE_comp_within_3mo <- as.factor(ccc19x$der_VTE_comp_within_3mo)
+    summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp06. ATE complications (MI, CVA)
+    ccc19x$der_ATE_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_ATE_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_ATE_comp[which(master_comp == 1 & is.na(ccc19x$der_ATE_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ATE_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_ATE_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_stroke_comp_within_3mo <- as.factor(ccc19x$der_stroke_comp_within_3mo)
-  summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp08. Arrhythmia complications (partial derived)
-  ccc19x$der_arry <- 0
-  ccc19x$der_arry[which(ccc19x$c19_complications_card___71908006 == 1|
-                          ccc19x$c19_complications_card___698247007 == 1|
-                          ccc19x$c19_complications_card_fu___71908006 == 1|
-                          ccc19x$c19_complications_card_fu___698247007 == 1)] <- 1
-  
-  ccc19x$der_arry <- factor(ccc19x$der_arry)
-  summary(ccc19x$der_arry[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp09. CV events 
-  ccc19x$der_CV_event <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007') & 
-                      grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_CV_event[which(ccc19x[,i] == 1)] <- 1
-  
-  ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 1|ccc19x$hotn_pressors_fu == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & 
-                      !grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_CV_event[i])) ccc19x$der_CV_event[i] <- 0
-  
-  ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 0 & is.na(ccc19x$der_CV_event))] <- 0
-  ccc19x$der_CV_event[which(ccc19x$hotn_pressors_fu == 0 & is.na(ccc19x$der_CV_event))] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_CV_event[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
+    summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp06a. ATE complications within 90 days (3 months)
+    ccc19x$der_ATE_comp_within_3mo <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                         ccc19x$fu_weeks %in% c(30,90)|
+                         ccc19x$timing_of_report_weeks <= 13)
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_ATE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp_within_3mo[i])) ccc19x$der_ATE_comp_within_3mo[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_CV_event[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CV_event[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CV_event[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ATE_comp_within_3mo[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_CV_event <- as.factor(ccc19x$der_CV_event)
-  summary(ccc19x$der_CV_event[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp10. Worst severity of complications 
-  ccc19x$der_worst <- NA
-  
-  #Serious
-  temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 3|
-                                   ccc19x$complications_severity___3 == 1|
-                                   ccc19x$worst_complications_severity___3 == 1|
-                                   ccc19x$complications_severity_fu___3 == 1)]
-  ccc19x$der_worst[ccc19x$record_id %in% temp] <- 3
-  
-  #Moderate
-  temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 2|
-                                   (ccc19x$complications_severity___2 == 1 & ccc19x$complications_severity___3 == 0)|
-                                   (ccc19x$worst_complications_severity___2 == 1 & ccc19x$worst_complications_severity___3 == 0)|
-                                   (ccc19x$complications_severity_fu___2 == 1 & ccc19x$complications_severity_fu___3 == 0))] 
-  ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 2
-  
-  #Mild
-  temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 1|
-                                   (ccc19x$complications_severity___1 == 1 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0)|
-                                   (ccc19x$worst_complications_severity___1 == 1 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0)|
-                                   (ccc19x$complications_severity_fu___1 == 1 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))] 
-  ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 1
-  
-  #Other/unknown
-  temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 99|
-                                   ((ccc19x$complications_severity___oth ==1|ccc19x$complications_severity___99 ==1) & 
-                                      ccc19x$complications_severity___1 == 0 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0) |
-                                   ((ccc19x$worst_complications_severity___oth ==1|ccc19x$worst_complications_severity___99 ==1) & 
-                                      ccc19x$worst_complications_severity___1 == 0 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0) |
-                                   ((ccc19x$complications_severity_fu___oth ==1|ccc19x$complications_severity_fu___99 ==1) & 
-                                      ccc19x$complications_severity_fu___1 == 0 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))]
-  ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 99
-  
-  ccc19x$der_worst <- factor(ccc19x$der_worst)
-  summary(ccc19x$der_worst[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Complications
-  
-  #### Systemic ####
-  
-  #Comp11 Multisystem Organ Failure: 57653000 (der_MOF_comp)
-  
-  ccc19x$der_MOF_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '57653000') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_MOF_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '57653000|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_MOF_comp[i])) ccc19x$der_MOF_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
-  for(i in which(is.na(ccc19x$der_MOF_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MOF_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
-  for(i in which(is.na(ccc19x$der_MOF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MOF_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_MOF_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_ATE_comp_within_3mo <- as.factor(ccc19x$der_ATE_comp_within_3mo)
+    summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp07. Stroke complication
+    ccc19x$der_stroke_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_stroke_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_stroke_comp[which(master_comp == 1 & is.na(ccc19x$der_stroke_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_MOF_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_MOF_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_MOF_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_stroke_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_stroke_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_MOF_comp <- as.factor(ccc19x$der_MOF_comp)
-  summary(ccc19x$der_MOF_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp12 Sepsis: 91302008 (der_sepsis_comp)
-  
-  ccc19x$der_sepsis_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_sepsis_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '91302008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_sepsis_comp[i])) ccc19x$der_sepsis_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
-  for(i in which(is.na(ccc19x$der_sepsis_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_sepsis_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
-  for(i in which(is.na(ccc19x$der_sepsis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_sepsis_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_sepsis_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_stroke_comp <- as.factor(ccc19x$der_stroke_comp)
+    summary(ccc19x$der_stroke_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp07a. stroke complications within 90 days (3 months)
+    ccc19x$der_stroke_comp_within_3mo <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                         ccc19x$fu_weeks %in% c(30,90)|
+                         ccc19x$timing_of_report_weeks <= 13)
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_stroke_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '230690007|unk'))
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_stroke_comp_within_3mo[i])) ccc19x$der_stroke_comp_within_3mo[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_sepsis_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_sepsis_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_sepsis_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_stroke_comp_within_3mo[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_sepsis_comp <- as.factor(ccc19x$der_sepsis_comp)
-  summary(ccc19x$der_sepsis_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp12a Sepsis including hypotension that required pressors
-  
-  ccc19x$der_sepsis_comp_v2 <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_sepsis_comp_v2[which(ccc19x[,i] == 1)] <- 1
-  
-  ccc19x$der_sepsis_comp_v2[which((ccc19x$c19_complications_card___45007003 == 1 & ccc19x$sepsis_pressors == 1)|
-                                    (ccc19x$c19_complications_card_fu___45007003 == 1 & ccc19x$hotn_pressors_fu == 1))] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '91302008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_sepsis_comp_v2[i])) ccc19x$der_sepsis_comp_v2[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
-  for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
-  for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_sepsis_comp_v2[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_stroke_comp_within_3mo <- as.factor(ccc19x$der_stroke_comp_within_3mo)
+    summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp08. Arrhythmia complications (partial derived)
+    ccc19x$der_arry <- 0
+    ccc19x$der_arry[which(ccc19x$c19_complications_card___71908006 == 1|
+                            ccc19x$c19_complications_card___698247007 == 1|
+                            ccc19x$c19_complications_card_fu___71908006 == 1|
+                            ccc19x$c19_complications_card_fu___698247007 == 1)] <- 1
+    
+    ccc19x$der_arry <- factor(ccc19x$der_arry)
+    summary(ccc19x$der_arry[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp09. CV events 
+    ccc19x$der_CV_event <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007') & 
+                        grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_CV_event[which(ccc19x[,i] == 1)] <- 1
+    
+    ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 1|ccc19x$hotn_pressors_fu == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & 
+                        !grepl(colnames(ccc19x), pattern = '22298006|414545008|49436004|71908006|698247007|85898001|42343007|unk'))
+    for(i in 1:nrow(ccc19x))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_CV_event[i])) ccc19x$der_CV_event[i] <- 0
+    
+    ccc19x$der_CV_event[which(ccc19x$sepsis_pressors == 0 & is.na(ccc19x$der_CV_event))] <- 0
+    ccc19x$der_CV_event[which(ccc19x$hotn_pressors_fu == 0 & is.na(ccc19x$der_CV_event))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_CV_event) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CV_event[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_CV_event[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_CV_event[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CV_event[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CV_event[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_sepsis_comp_v2 <- as.factor(ccc19x$der_sepsis_comp_v2)
-  summary(ccc19x$der_sepsis_comp_v2[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp12b Pressors (der_pressors)
-  
-  ccc19x$der_pressors <- NA
-  
-  #Present at baseline
-  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 1)] <- 1
-  
-  #Absent at baseline
-  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 0)] <- 0
-  
-  #Unknown at baseline
-  ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 99)] <- 99
-  
-  #Present at follow-up
-  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 1)] <- 1
-  
-  #Absent at follow-up
-  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 0)] <- 0
-  
-  #Unknown at follow-up
-  ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 99)] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_pressors[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_CV_event <- as.factor(ccc19x$der_CV_event)
+    summary(ccc19x$der_CV_event[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp10. Worst severity of complications 
+    ccc19x$der_worst <- NA
+    
+    #Serious
+    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 3|
+                                     ccc19x$complications_severity___3 == 1|
+                                     ccc19x$worst_complications_severity___3 == 1|
+                                     ccc19x$complications_severity_fu___3 == 1)]
+    ccc19x$der_worst[ccc19x$record_id %in% temp] <- 3
+    
+    #Moderate
+    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 2|
+                                     (ccc19x$complications_severity___2 == 1 & ccc19x$complications_severity___3 == 0)|
+                                     (ccc19x$worst_complications_severity___2 == 1 & ccc19x$worst_complications_severity___3 == 0)|
+                                     (ccc19x$complications_severity_fu___2 == 1 & ccc19x$complications_severity_fu___3 == 0))] 
+    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 2
+    
+    #Mild
+    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 1|
+                                     (ccc19x$complications_severity___1 == 1 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0)|
+                                     (ccc19x$worst_complications_severity___1 == 1 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0)|
+                                     (ccc19x$complications_severity_fu___1 == 1 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))] 
+    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 1
+    
+    #Other/unknown
+    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 99|
+                                     ((ccc19x$complications_severity___oth ==1|ccc19x$complications_severity___99 ==1) & 
+                                        ccc19x$complications_severity___1 == 0 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0) |
+                                     ((ccc19x$worst_complications_severity___oth ==1|ccc19x$worst_complications_severity___99 ==1) & 
+                                        ccc19x$worst_complications_severity___1 == 0 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0) |
+                                     ((ccc19x$complications_severity_fu___oth ==1|ccc19x$complications_severity_fu___99 ==1) & 
+                                        ccc19x$complications_severity_fu___1 == 0 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))]
+    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 99
+    
+    ccc19x$der_worst <- factor(ccc19x$der_worst)
+    summary(ccc19x$der_worst[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Complications
+    
+    #### Systemic ####
+    
+    #Comp11 Multisystem Organ Failure: 57653000 (der_MOF_comp)
+    
+    ccc19x$der_MOF_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '57653000') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_MOF_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_MOF_comp[which(master_comp == 1 & is.na(ccc19x$der_MOF_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+    for(i in which(is.na(ccc19x$der_MOF_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MOF_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+    for(i in which(is.na(ccc19x$der_MOF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MOF_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_pressors[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pressors[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pressors[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_MOF_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_MOF_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_MOF_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_MOF_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_pressors <- as.factor(ccc19x$der_pressors)
-  summary(ccc19x$der_pressors[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp13 Bleeding: 50960005 (der_bleeding_comp)
-  
-  ccc19x$der_bleeding_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '50960005') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_bleeding_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '50960005|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_bleeding_comp[i])) ccc19x$der_bleeding_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
-  for(i in which(is.na(ccc19x$der_bleeding_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bleeding_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
-  for(i in which(is.na(ccc19x$der_bleeding_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bleeding_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_bleeding_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_MOF_comp <- as.factor(ccc19x$der_MOF_comp)
+    summary(ccc19x$der_MOF_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp12 Sepsis: 91302008 (der_sepsis_comp)
+    
+    ccc19x$der_sepsis_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_sepsis_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_sepsis_comp[which(master_comp == 1 & is.na(ccc19x$der_sepsis_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+    for(i in which(is.na(ccc19x$der_sepsis_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_sepsis_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+    for(i in which(is.na(ccc19x$der_sepsis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_sepsis_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_bleeding_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_bleeding_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_bleeding_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_sepsis_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_sepsis_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_sepsis_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_sepsis_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_bleeding_comp <- as.factor(ccc19x$der_bleeding_comp)
-  summary(ccc19x$der_bleeding_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp14 DIC: 67406007 (der_DIC_comp)
-  
-  ccc19x$der_DIC_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '67406007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_DIC_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '67406007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DIC_comp[i])) ccc19x$der_DIC_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
-  for(i in which(is.na(ccc19x$der_DIC_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DIC_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
-  for(i in which(is.na(ccc19x$der_DIC_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DIC_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_DIC_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_sepsis_comp <- as.factor(ccc19x$der_sepsis_comp)
+    summary(ccc19x$der_sepsis_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp12a Sepsis including hypotension that required pressors
+    
+    ccc19x$der_sepsis_comp_v2 <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_sepsis_comp_v2[which(ccc19x[,i] == 1)] <- 1
+    
+    ccc19x$der_sepsis_comp_v2[which((ccc19x$c19_complications_card___45007003 == 1 & ccc19x$sepsis_pressors == 1)|
+                                      (ccc19x$c19_complications_card_fu___45007003 == 1 & ccc19x$hotn_pressors_fu == 1))] <- 1
+    
+    #Not present, something else checked besides unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_systemic') & !grepl(colnames(ccc19x), pattern = '91302008|unk'))
+    for(i in 1:nrow(ccc19x))
+      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_sepsis_comp_v2[i])) ccc19x$der_sepsis_comp_v2[i] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+    for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+    for(i in which(is.na(ccc19x$der_sepsis_comp_v2) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1) & any(is.na(ccc19x$der_sepsis_comp_v2))) ccc19x$der_sepsis_comp_v2[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_DIC_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DIC_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DIC_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_sepsis_comp_v2[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_sepsis_comp_v2[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_DIC_comp <- as.factor(ccc19x$der_DIC_comp)
-  summary(ccc19x$der_DIC_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #### Pulmonary ####
-  
-  #Comp15 Respiratory Failure: 409622000 (der_resp_failure_comp)
-  
-  ccc19x$der_resp_failure_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '409622000') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_resp_failure_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '409622000|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_resp_failure_comp[i])) ccc19x$der_resp_failure_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_resp_failure_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_resp_failure_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_resp_failure_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_resp_failure_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_resp_failure_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_sepsis_comp_v2 <- as.factor(ccc19x$der_sepsis_comp_v2)
+    summary(ccc19x$der_sepsis_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp12b Pressors (der_pressors)
+    
+    ccc19x$der_pressors <- NA
+    
+    #Present at baseline
+    ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 1)] <- 1
+    
+    #Absent at baseline
+    ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 0)] <- 0
+    
+    #Unknown at baseline
+    ccc19x$der_pressors[which(ccc19x$sepsis_pressors == 99)] <- 99
+    
+    #Present at follow-up
+    ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 1)] <- 1
+    
+    #Absent at follow-up
+    ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 0)] <- 0
+    
+    #Unknown at follow-up
+    ccc19x$der_pressors[which(ccc19x$hotn_pressors_fu == 99)] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_resp_failure_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_resp_failure_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_resp_failure_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pressors[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_pressors[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pressors[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pressors[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_resp_failure_comp <- as.factor(ccc19x$der_resp_failure_comp)
-  summary(ccc19x$der_resp_failure_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp16 Pneumonitis: 205237003 (der_pneumonitis_comp)
-  
-  ccc19x$der_pneumonitis_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '205237003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_pneumonitis_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '205237003|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_pneumonitis_comp[i])) ccc19x$der_pneumonitis_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_pneumonitis_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonitis_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_pneumonitis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonitis_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_pneumonitis_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_pressors <- as.factor(ccc19x$der_pressors)
+    summary(ccc19x$der_pressors[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp13 Bleeding: 50960005 (der_bleeding_comp)
+    
+    ccc19x$der_bleeding_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '50960005') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_bleeding_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_bleeding_comp[which(master_comp == 1 & is.na(ccc19x$der_bleeding_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+    for(i in which(is.na(ccc19x$der_bleeding_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bleeding_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+    for(i in which(is.na(ccc19x$der_bleeding_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bleeding_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_pneumonitis_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pneumonitis_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pneumonitis_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_bleeding_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_bleeding_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_bleeding_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_bleeding_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_pneumonitis_comp <- as.factor(ccc19x$der_pneumonitis_comp)
-  summary(ccc19x$der_pneumonitis_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp17 Pneumonia: 233604007 (der_pneumonia_comp)
-  
-  ccc19x$der_pneumonia_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '233604007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_pneumonia_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '233604007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_pneumonia_comp[i])) ccc19x$der_pneumonia_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_pneumonia_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonia_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_pneumonia_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonia_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_pneumonia_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_bleeding_comp <- as.factor(ccc19x$der_bleeding_comp)
+    summary(ccc19x$der_bleeding_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp14 DIC: 67406007 (der_DIC_comp)
+    
+    ccc19x$der_DIC_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '67406007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_DIC_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_DIC_comp[which(master_comp == 1 & is.na(ccc19x$der_DIC_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___unk'))
+    for(i in which(is.na(ccc19x$der_DIC_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DIC_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___unk'))
+    for(i in which(is.na(ccc19x$der_DIC_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DIC_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_pneumonia_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pneumonia_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pneumonia_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_DIC_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_DIC_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DIC_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DIC_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_pneumonia_comp <- as.factor(ccc19x$der_pneumonia_comp)
-  summary(ccc19x$der_pneumonia_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp18 Pneumonia/Pneumonitis combined
-  ccc19x$der_pneumo_comp <- NA
-  ccc19x$der_pneumo_comp[which(ccc19x$der_pneumonia_comp == 1|ccc19x$der_pneumonitis_comp == 1)] <- 1
-  ccc19x$der_pneumo_comp[which(ccc19x$der_pneumonia_comp == 0 & ccc19x$der_pneumonitis_comp == 0)] <- 0
-  ccc19x$der_pneumo_comp[which((ccc19x$der_pneumonia_comp == 99|ccc19x$der_pneumonitis_comp == 99) &
-                                 is.na(ccc19x$der_pneumo_comp))] <- 99
-  ccc19x$der_pneumo_comp <- as.factor(ccc19x$der_pneumo_comp)
-  summary(ccc19x$der_pneumo_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp19 ARDS: 67782005 (der_ARDS_comp)
-  
-  ccc19x$der_ARDS_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '67782005') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_ARDS_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '67782005|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ARDS_comp[i])) ccc19x$der_ARDS_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_ARDS_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ARDS_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_ARDS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ARDS_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_ARDS_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_DIC_comp <- as.factor(ccc19x$der_DIC_comp)
+    summary(ccc19x$der_DIC_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #### Pulmonary ####
+    
+    #Comp15 Respiratory Failure: 409622000 (der_resp_failure_comp)
+    
+    ccc19x$der_resp_failure_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '409622000') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_resp_failure_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_resp_failure_comp[which(master_comp == 1 & is.na(ccc19x$der_resp_failure_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_resp_failure_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_resp_failure_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_resp_failure_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_resp_failure_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_ARDS_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ARDS_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ARDS_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_resp_failure_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_resp_failure_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_resp_failure_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_resp_failure_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_ARDS_comp <- as.factor(ccc19x$der_ARDS_comp)
-  summary(ccc19x$der_ARDS_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  
-  #Comp20 Pleural Effusion: 60046008 (der_pleural_eff_comp)
-  
-  ccc19x$der_pleural_eff_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '60046008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_pleural_eff_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '60046008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_pleural_eff_comp[i])) ccc19x$der_pleural_eff_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_pleural_eff_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pleural_eff_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_pleural_eff_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pleural_eff_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_pleural_eff_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_resp_failure_comp <- as.factor(ccc19x$der_resp_failure_comp)
+    summary(ccc19x$der_resp_failure_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp16 Pneumonitis: 205237003 (der_pneumonitis_comp)
+    
+    ccc19x$der_pneumonitis_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '205237003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_pneumonitis_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_pneumonitis_comp[which(master_comp == 1 & is.na(ccc19x$der_pneumonitis_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_pneumonitis_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonitis_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_pneumonitis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonitis_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_pleural_eff_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pleural_eff_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pleural_eff_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pneumonitis_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_pneumonitis_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pneumonitis_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pneumonitis_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_pleural_eff_comp <- as.factor(ccc19x$der_pleural_eff_comp)
-  summary(ccc19x$der_pleural_eff_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp21 Empyema: 312682007 (der_empyema_comp)
-  
-  ccc19x$der_empyema_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '312682007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_empyema_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm') & !grepl(colnames(ccc19x), pattern = '312682007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_empyema_comp[i])) ccc19x$der_empyema_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
-  for(i in which(is.na(ccc19x$der_empyema_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_empyema_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
-  for(i in which(is.na(ccc19x$der_empyema_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_empyema_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_empyema_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_pneumonitis_comp <- as.factor(ccc19x$der_pneumonitis_comp)
+    summary(ccc19x$der_pneumonitis_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp17 Pneumonia: 233604007 (der_pneumonia_comp)
+    
+    ccc19x$der_pneumonia_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '233604007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_pneumonia_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_pneumonia_comp[which(master_comp == 1 & is.na(ccc19x$der_pneumonia_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_pneumonia_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonia_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_pneumonia_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pneumonia_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_empyema_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_empyema_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_empyema_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pneumonia_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_pneumonia_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pneumonia_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pneumonia_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_empyema_comp <- as.factor(ccc19x$der_empyema_comp)
-  summary(ccc19x$der_empyema_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #### Cardio ####
-  
-  #Comp22 Hypotension: 45007003 (der_hotn_comp)
-  
-  ccc19x$der_hotn_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '45007003') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_hotn_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '45007003|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_hotn_comp[i])) ccc19x$der_hotn_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_hotn_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_hotn_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_hotn_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_hotn_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_hotn_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_pneumonia_comp <- as.factor(ccc19x$der_pneumonia_comp)
+    summary(ccc19x$der_pneumonia_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp18 Pneumonia/Pneumonitis combined
+    ccc19x$der_pneumo_comp <- NA
+    ccc19x$der_pneumo_comp[which(ccc19x$der_pneumonia_comp == 1|ccc19x$der_pneumonitis_comp == 1)] <- 1
+    ccc19x$der_pneumo_comp[which(ccc19x$der_pneumonia_comp == 0 & ccc19x$der_pneumonitis_comp == 0)] <- 0
+    ccc19x$der_pneumo_comp[which((ccc19x$der_pneumonia_comp == 99|ccc19x$der_pneumonitis_comp == 99) &
+                                   is.na(ccc19x$der_pneumo_comp))] <- 99
+    ccc19x$der_pneumo_comp <- as.factor(ccc19x$der_pneumo_comp)
+    summary(ccc19x$der_pneumo_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp19 ARDS: 67782005 (der_ARDS_comp)
+    
+    ccc19x$der_ARDS_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '67782005') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_ARDS_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_ARDS_comp[which(master_comp == 1 & is.na(ccc19x$der_ARDS_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_ARDS_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ARDS_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_ARDS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ARDS_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_hotn_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_hotn_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_hotn_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ARDS_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_ARDS_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ARDS_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ARDS_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_hotn_comp <- as.factor(ccc19x$der_hotn_comp)
-  summary(ccc19x$der_hotn_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp23 Myocardial Infarction: 22298006 (def_MI_comp)
-  
-  ccc19x$der_MI_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_MI_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_MI_comp[i])) ccc19x$der_MI_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_MI_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MI_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_MI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MI_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_MI_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_ARDS_comp <- as.factor(ccc19x$der_ARDS_comp)
+    summary(ccc19x$der_ARDS_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    
+    #Comp20 Pleural Effusion: 60046008 (der_pleural_eff_comp)
+    
+    ccc19x$der_pleural_eff_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '60046008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_pleural_eff_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_pleural_eff_comp[which(master_comp == 1 & is.na(ccc19x$der_pleural_eff_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_pleural_eff_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pleural_eff_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_pleural_eff_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_pleural_eff_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_MI_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_MI_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_MI_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_pleural_eff_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_pleural_eff_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_pleural_eff_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_pleural_eff_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_MI_comp <- as.factor(ccc19x$der_MI_comp)
-  summary(ccc19x$der_MI_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp24 Other Cardiac Ischemia: 414545008 (der_card_isch_comp)
-  
-  ccc19x$der_card_isch_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '414545008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_card_isch_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '414545008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_card_isch_comp[i])) ccc19x$der_card_isch_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_card_isch_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_card_isch_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_card_isch_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_card_isch_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_card_isch_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_pleural_eff_comp <- as.factor(ccc19x$der_pleural_eff_comp)
+    summary(ccc19x$der_pleural_eff_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp21 Empyema: 312682007 (der_empyema_comp)
+    
+    ccc19x$der_empyema_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '312682007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_empyema_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_empyema_comp[which(master_comp == 1 & is.na(ccc19x$der_empyema_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm___unk'))
+    for(i in which(is.na(ccc19x$der_empyema_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_empyema_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_pulm_fu___unk'))
+    for(i in which(is.na(ccc19x$der_empyema_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_empyema_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_card_isch_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_card_isch_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_card_isch_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_empyema_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_empyema_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_empyema_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_empyema_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_card_isch_comp <- as.factor(ccc19x$der_card_isch_comp)
-  summary(ccc19x$der_card_isch_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp25 Atrial Fibrillation: 49436004 (der_AFib_comp)
-  
-  ccc19x$der_AFib_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '49436004') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_AFib_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '49436004|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_AFib_comp[i])) ccc19x$der_AFib_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_AFib_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AFib_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_AFib_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AFib_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_AFib_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_empyema_comp <- as.factor(ccc19x$der_empyema_comp)
+    summary(ccc19x$der_empyema_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #### Cardio ####
+    
+    #Comp22 Hypotension: 45007003 (der_hotn_comp)
+    
+    ccc19x$der_hotn_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '45007003') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_hotn_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_hotn_comp[which(master_comp == 1 & is.na(ccc19x$der_hotn_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_hotn_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_hotn_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_hotn_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_hotn_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_AFib_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AFib_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AFib_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_hotn_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_hotn_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_hotn_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_hotn_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_AFib_comp <- as.factor(ccc19x$der_AFib_comp)
-  summary(ccc19x$der_AFib_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp26 Ventricular Fibrillation: 71908006 (der_VF_comp)
-  
-  ccc19x$der_VF_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '71908006') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_VF_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '71908006|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_VF_comp[i])) ccc19x$der_VF_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_VF_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_VF_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_VF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_VF_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_VF_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_hotn_comp <- as.factor(ccc19x$der_hotn_comp)
+    summary(ccc19x$der_hotn_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp23 Myocardial Infarction: 22298006 (def_MI_comp)
+    
+    ccc19x$der_MI_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_MI_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_MI_comp[which(master_comp == 1 & is.na(ccc19x$der_MI_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_MI_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MI_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_MI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_MI_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_VF_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_VF_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_VF_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_MI_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_MI_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_MI_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_MI_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_VF_comp <- as.factor(ccc19x$der_VF_comp)
-  summary(ccc19x$der_VF_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp27 Other Cardiac Arrhythmia: 698247007 (der_arry_oth_comp)
-  
-  ccc19x$der_arry_oth_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '698247007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_arry_oth_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '698247007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_arry_oth_comp[i])) ccc19x$der_arry_oth_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_arry_oth_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_arry_oth_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_arry_oth_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_arry_oth_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_arry_oth_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_MI_comp <- as.factor(ccc19x$der_MI_comp)
+    summary(ccc19x$der_MI_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp24 Other Cardiac Ischemia: 414545008 (der_card_isch_comp)
+    
+    ccc19x$der_card_isch_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '414545008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_card_isch_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_card_isch_comp[which(master_comp == 1 & is.na(ccc19x$der_card_isch_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_card_isch_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_card_isch_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_card_isch_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_card_isch_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_arry_oth_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_arry_oth_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_arry_oth_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_card_isch_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_card_isch_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_card_isch_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_card_isch_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_arry_oth_comp <- as.factor(ccc19x$der_arry_oth_comp)
-  summary(ccc19x$der_arry_oth_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp28 Cardiomyopathy: 85898001 (der_CMY_comp)
-  
-  ccc19x$der_CMY_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '85898001') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_CMY_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '85898001|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_CMY_comp[i])) ccc19x$der_CMY_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_CMY_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CMY_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_CMY_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CMY_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_CMY_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_card_isch_comp <- as.factor(ccc19x$der_card_isch_comp)
+    summary(ccc19x$der_card_isch_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp25 Atrial Fibrillation: 49436004 (der_AFib_comp)
+    
+    ccc19x$der_AFib_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '49436004') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_AFib_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_AFib_comp[which(master_comp == 1 & is.na(ccc19x$der_AFib_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_AFib_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AFib_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_AFib_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AFib_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_CMY_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CMY_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CMY_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_AFib_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_AFib_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AFib_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AFib_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_CMY_comp <- as.factor(ccc19x$der_CMY_comp)
-  summary(ccc19x$der_CMY_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp29 Congestive Heart Failure: 42343007 (der_CHF_comp)
-  
-  ccc19x$der_CHF_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '42343007') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_CHF_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '42343007|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_CHF_comp[i])) ccc19x$der_CHF_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-  for(i in which(is.na(ccc19x$der_CHF_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CHF_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-  for(i in which(is.na(ccc19x$der_CHF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CHF_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_CHF_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_AFib_comp <- as.factor(ccc19x$der_AFib_comp)
+    summary(ccc19x$der_AFib_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp26 Ventricular Fibrillation: 71908006 (der_VF_comp)
+    
+    ccc19x$der_VF_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '71908006') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_VF_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_VF_comp[which(master_comp == 1 & is.na(ccc19x$der_VF_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_VF_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_VF_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_VF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_VF_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_CHF_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CHF_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CHF_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_VF_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_VF_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_VF_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_VF_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_CHF_comp <- as.factor(ccc19x$der_CHF_comp)
-  summary(ccc19x$der_CHF_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #### GI ####
-  
-  #Comp30 Acute Hepatic Injury: 427044009 (der_AHI_comp)
-  
-  ccc19x$der_AHI_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '427044009') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_AHI_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '427044009|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_AHI_comp[i])) ccc19x$der_AHI_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_AHI_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AHI_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_AHI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AHI_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_AHI_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_VF_comp <- as.factor(ccc19x$der_VF_comp)
+    summary(ccc19x$der_VF_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp27 Other Cardiac Arrhythmia: 698247007 (der_arry_oth_comp)
+    
+    ccc19x$der_arry_oth_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '698247007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_arry_oth_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_arry_oth_comp[which(master_comp == 1 & is.na(ccc19x$der_arry_oth_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_arry_oth_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_arry_oth_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_arry_oth_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_arry_oth_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_AHI_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AHI_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AHI_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_arry_oth_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_arry_oth_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_arry_oth_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_arry_oth_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_AHI_comp <- as.factor(ccc19x$der_AHI_comp)
-  summary(ccc19x$der_AHI_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp31 Ascites: 389026000 (der_ascites_comp)
-  
-  ccc19x$der_ascites_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '389026000') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_ascites_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '389026000|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ascites_comp[i])) ccc19x$der_ascites_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_ascites_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ascites_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_ascites_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ascites_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_ascites_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_arry_oth_comp <- as.factor(ccc19x$der_arry_oth_comp)
+    summary(ccc19x$der_arry_oth_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp28 Cardiomyopathy: 85898001 (der_CMY_comp)
+    
+    ccc19x$der_CMY_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '85898001') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_CMY_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_CMY_comp[which(master_comp == 1 & is.na(ccc19x$der_CMY_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_CMY_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CMY_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_CMY_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CMY_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_ascites_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ascites_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ascites_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_CMY_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_CMY_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CMY_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CMY_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_ascites_comp <- as.factor(ccc19x$der_ascites_comp)
-  summary(ccc19x$der_ascites_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp32 Bowel Obstruction: 81060008 (der_BO_comp)
-  
-  ccc19x$der_BO_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '81060008') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_BO_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '81060008|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_BO_comp[i])) ccc19x$der_BO_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_BO_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_BO_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_BO_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_BO_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_BO_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_CMY_comp <- as.factor(ccc19x$der_CMY_comp)
+    summary(ccc19x$der_CMY_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp29 Congestive Heart Failure: 42343007 (der_CHF_comp)
+    
+    ccc19x$der_CHF_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '42343007') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_CHF_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_CHF_comp[which(master_comp == 1 & is.na(ccc19x$der_CHF_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+    for(i in which(is.na(ccc19x$der_CHF_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CHF_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+    for(i in which(is.na(ccc19x$der_CHF_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_CHF_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_BO_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_BO_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_BO_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_CHF_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_CHF_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_CHF_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_CHF_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_BO_comp <- as.factor(ccc19x$der_BO_comp)
-  summary(ccc19x$der_BO_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp33 Bowel Perforation: 56905009 (der_bowelPerf_comp)
-  
-  ccc19x$der_bowelPerf_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '56905009') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_bowelPerf_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '56905009|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_bowelPerf_comp[i])) ccc19x$der_bowelPerf_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_bowelPerf_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bowelPerf_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_bowelPerf_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bowelPerf_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_bowelPerf_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_CHF_comp <- as.factor(ccc19x$der_CHF_comp)
+    summary(ccc19x$der_CHF_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #### GI ####
+    
+    #Comp30 Acute Hepatic Injury: 427044009 (der_AHI_comp)
+    
+    ccc19x$der_AHI_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '427044009') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_AHI_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_AHI_comp[which(master_comp == 1 & is.na(ccc19x$der_AHI_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_AHI_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AHI_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_AHI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AHI_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_bowelPerf_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_bowelPerf_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_bowelPerf_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_AHI_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_AHI_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AHI_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AHI_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_bowelPerf_comp <- as.factor(ccc19x$der_bowelPerf_comp)
-  summary(ccc19x$der_bowelPerf_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp34 Ileus: 710572000 (der_ileus_comp)
-  
-  ccc19x$der_ileus_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '710572000') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_ileus_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '710572000|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ileus_comp[i])) ccc19x$der_ileus_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_ileus_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ileus_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_ileus_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ileus_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_ileus_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_AHI_comp <- as.factor(ccc19x$der_AHI_comp)
+    summary(ccc19x$der_AHI_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp31 Ascites: 389026000 (der_ascites_comp)
+    
+    ccc19x$der_ascites_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '389026000') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_ascites_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_ascites_comp[which(master_comp == 1 & is.na(ccc19x$der_ascites_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_ascites_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ascites_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_ascites_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ascites_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_ileus_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ileus_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ileus_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ascites_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_ascites_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ascites_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ascites_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_ileus_comp <- as.factor(ccc19x$der_ileus_comp)
-  summary(ccc19x$der_ileus_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  #Comp35 Peritonitis: 48661000 (der_peritonitis_comp)
-  
-  ccc19x$der_peritonitis_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '48661000') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_peritonitis_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_gi') & !grepl(colnames(ccc19x), pattern = '48661000|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_peritonitis_comp[i])) ccc19x$der_peritonitis_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
-  for(i in which(is.na(ccc19x$der_peritonitis_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_peritonitis_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
-  for(i in which(is.na(ccc19x$der_peritonitis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_peritonitis_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_peritonitis_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_ascites_comp <- as.factor(ccc19x$der_ascites_comp)
+    summary(ccc19x$der_ascites_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp32 Bowel Obstruction: 81060008 (der_BO_comp)
+    
+    ccc19x$der_BO_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '81060008') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_BO_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_BO_comp[which(master_comp == 1 & is.na(ccc19x$der_BO_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_BO_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_BO_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_BO_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_BO_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_peritonitis_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_peritonitis_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_peritonitis_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_BO_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_BO_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_BO_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_BO_comp[temp.ref] <- 0
+      }
     }
-  }
-  
-  ccc19x$der_peritonitis_comp <- as.factor(ccc19x$der_peritonitis_comp)
-  summary(ccc19x$der_peritonitis_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp36 AKI: 14669001 (der_AKI_comp)
-  
-  ccc19x$der_AKI_comp <- NA
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = '14669001') & grepl(colnames(ccc19x), pattern = 'complications'))
-  
-  #Present
-  for(i in temp.ref)
-    ccc19x$der_AKI_comp[which(ccc19x[,i] == 1)] <- 1
-  
-  #Not present, something else checked besides unknown
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other') & !grepl(colnames(ccc19x), pattern = '14669001|unk'))
-  for(i in 1:nrow(ccc19x))
-    if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_AKI_comp[i])) ccc19x$der_AKI_comp[i] <- 0
-  
-  #Unknown
-  
-  #Baseline
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_other___unk'))
-  for(i in which(is.na(ccc19x$der_AKI_comp) & ccc19x$redcap_repeat_instrument == ''))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AKI_comp[i] <- 99
-  
-  #Followup
-  temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_other_fu___unk'))
-  for(i in which(is.na(ccc19x$der_AKI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-    if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AKI_comp[i] <- 99
-  
-  #Merge baseline and followup if discrepancy
-  for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-  {
-    temp.ref <- which(ccc19x$record_id == i)
-    temp <- ccc19x$der_AKI_comp[temp.ref]
-    temp <- as.numeric(unique(temp[!is.na(temp)]))
-    if(length(temp) > 0)
+    
+    ccc19x$der_BO_comp <- as.factor(ccc19x$der_BO_comp)
+    summary(ccc19x$der_BO_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp33 Bowel Perforation: 56905009 (der_bowelPerf_comp)
+    
+    ccc19x$der_bowelPerf_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '56905009') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_bowelPerf_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_bowelPerf_comp[which(master_comp == 1 & is.na(ccc19x$der_bowelPerf_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_bowelPerf_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bowelPerf_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_bowelPerf_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_bowelPerf_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      if(any(temp == 1)) ccc19x$der_AKI_comp[temp.ref] <- 1
-      if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AKI_comp[temp.ref] <- 99
-      if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AKI_comp[temp.ref] <- 0
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_bowelPerf_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_bowelPerf_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_bowelPerf_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_bowelPerf_comp[temp.ref] <- 0
+      }
     }
-  }
+    
+    ccc19x$der_bowelPerf_comp <- as.factor(ccc19x$der_bowelPerf_comp)
+    summary(ccc19x$der_bowelPerf_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp34 Ileus: 710572000 (der_ileus_comp)
+    
+    ccc19x$der_ileus_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '710572000') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_ileus_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_ileus_comp[which(master_comp == 1 & is.na(ccc19x$der_ileus_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_ileus_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ileus_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_ileus_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ileus_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ileus_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_ileus_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ileus_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ileus_comp[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_ileus_comp <- as.factor(ccc19x$der_ileus_comp)
+    summary(ccc19x$der_ileus_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    
+    #Comp35 Peritonitis: 48661000 (der_peritonitis_comp)
+    
+    ccc19x$der_peritonitis_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '48661000') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_peritonitis_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_peritonitis_comp[which(master_comp == 1 & is.na(ccc19x$der_peritonitis_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi___unk'))
+    for(i in which(is.na(ccc19x$der_peritonitis_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_peritonitis_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_gi_fu___unk'))
+    for(i in which(is.na(ccc19x$der_peritonitis_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_peritonitis_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_peritonitis_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_peritonitis_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_peritonitis_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_peritonitis_comp[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_peritonitis_comp <- as.factor(ccc19x$der_peritonitis_comp)
+    summary(ccc19x$der_peritonitis_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp36 AKI: 14669001 (der_AKI_comp)
+    
+    ccc19x$der_AKI_comp <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '14669001') & grepl(colnames(ccc19x), pattern = 'complications'))
+    
+    #Present
+    for(i in temp.ref)
+      ccc19x$der_AKI_comp[which(ccc19x[,i] == 1)] <- 1
+    
+    #Not present, something else checked besides unknown
+    ccc19x$der_AKI_comp[which(master_comp == 1 & is.na(ccc19x$der_AKI_comp))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_other___unk'))
+    for(i in which(is.na(ccc19x$der_AKI_comp) & ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AKI_comp[i] <- 99
+    
+    #Followup
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_other_fu___unk'))
+    for(i in which(is.na(ccc19x$der_AKI_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_AKI_comp[i] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_AKI_comp[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_AKI_comp[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_AKI_comp[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_AKI_comp[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_AKI_comp <- as.factor(ccc19x$der_AKI_comp)
+    summary(ccc19x$der_AKI_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp37 Viral co-infection within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_viral <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_viral[which(ccc19x$coinfection___49872002 == 1|
+                                         ccc19x$coinfection___407479009 == 1|
+                                         ccc19x$coinfection___407480007 == 1|
+                                         ccc19x$coinfection___1838001 == 1|
+                                         ccc19x$coinfection___6415009 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_viral[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_viral))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_viral[i])) ccc19x$der_coinfection_viral[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_viral[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                         is.na(ccc19x$der_coinfection_viral))] <- 99
+    
+    ccc19x$der_coinfection_viral <- factor(ccc19x$der_coinfection_viral)
+    summary(ccc19x$der_coinfection_viral[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp38 Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_bacterial <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection___409822003 == 1|
+                                             ccc19x$coinfection___8745002 == 1|
+                                             ccc19x$coinfection___233607000 == 1|
+                                             ccc19x$coinfection___81325006 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bacterial))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bacterial[i])) ccc19x$der_coinfection_bacterial[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_bacterial[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                             is.na(ccc19x$der_coinfection_bacterial))] <- 99
+    
+    ccc19x$der_coinfection_bacterial <- factor(ccc19x$der_coinfection_bacterial)
+    summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp38a Gram Positive Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_bact_gram_pos <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection___8745002 == 1|
+                                                 ccc19x$coinfection___233607000 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_pos[i])) ccc19x$der_coinfection_bact_gram_pos[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_bact_gram_pos[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                                 is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 99
+    
+    ccc19x$der_coinfection_bact_gram_pos <- factor(ccc19x$der_coinfection_bact_gram_pos)
+    summary(ccc19x$der_coinfection_bact_gram_pos[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp38b Gram Negative Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_bact_gram_neg <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection___81325006 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_neg[i])) ccc19x$der_coinfection_bact_gram_neg[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_bact_gram_neg[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                                 is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 99
+    
+    ccc19x$der_coinfection_bact_gram_neg <- factor(ccc19x$der_coinfection_bact_gram_neg)
+    summary(ccc19x$der_coinfection_bact_gram_neg[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp39 Fungal co-infection within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_fungal <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_fungal[which(ccc19x$coinfection___414561005 == 1|
+                                          ccc19x$coinfection___2429008 == 1|
+                                          ccc19x$coinfection___709601002 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_fungal[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_fungal))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_fungal[i])) ccc19x$der_coinfection_fungal[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_fungal[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                          is.na(ccc19x$der_coinfection_fungal))] <- 99
+    
+    ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
+    summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp40 Any co-infection 
+    ccc19x$der_coinfection_any <- NA
+    
+    #Yes
+    ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 1|
+                                       ccc19x$der_coinfection_fungal == 1|
+                                       ccc19x$der_coinfection_viral == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 0 &
+                                       ccc19x$der_coinfection_fungal == 0 &
+                                       ccc19x$der_coinfection_viral == 0)] <- 0
+    
+    #Unknown
+    ccc19x$der_coinfection_any[which((ccc19x$der_coinfection_bacterial == 99|
+                                        ccc19x$der_coinfection_fungal == 99|
+                                        ccc19x$der_coinfection_viral == 99) & is.na(ccc19x$der_coinfection_any))] <- 99
+    
+    ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
+    summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
+    
+    
   
-  ccc19x$der_AKI_comp <- as.factor(ccc19x$der_AKI_comp)
-  summary(ccc19x$der_AKI_comp[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp37 Viral co-infection within +/- 2 weeks of COVID-19 diagnosis
-  ccc19x$der_coinfection_viral <- NA
-  
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
-  
-  #Yes
-  ccc19x$der_coinfection_viral[which(ccc19x$coinfection___49872002 == 1|
-                                       ccc19x$coinfection___407479009 == 1|
-                                       ccc19x$coinfection___407480007 == 1|
-                                       ccc19x$coinfection___1838001 == 1|
-                                       ccc19x$coinfection___6415009 == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_viral[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_viral))] <- 0
-  for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_viral[i])) ccc19x$der_coinfection_viral[i] <- 0 
-  
-  #Unknown
-  ccc19x$der_coinfection_viral[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
-                                       is.na(ccc19x$der_coinfection_viral))] <- 99
-  
-  ccc19x$der_coinfection_viral <- factor(ccc19x$der_coinfection_viral)
-  summary(ccc19x$der_coinfection_viral[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp38 Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
-  ccc19x$der_coinfection_bacterial <- NA
-  
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
-  
-  #Yes
-  ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection___409822003 == 1|
-                                           ccc19x$coinfection___8745002 == 1|
-                                           ccc19x$coinfection___233607000 == 1|
-                                           ccc19x$coinfection___81325006 == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bacterial))] <- 0
-  for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bacterial[i])) ccc19x$der_coinfection_bacterial[i] <- 0 
-  
-  #Unknown
-  ccc19x$der_coinfection_bacterial[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
-                                           is.na(ccc19x$der_coinfection_bacterial))] <- 99
-  
-  ccc19x$der_coinfection_bacterial <- factor(ccc19x$der_coinfection_bacterial)
-  summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp38a Gram Positive Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
-  ccc19x$der_coinfection_bact_gram_pos <- NA
-  
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
-  
-  #Yes
-  ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection___8745002 == 1|
-                                               ccc19x$coinfection___233607000 == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 0
-  for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_pos[i])) ccc19x$der_coinfection_bact_gram_pos[i] <- 0 
-  
-  #Unknown
-  ccc19x$der_coinfection_bact_gram_pos[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
-                                               is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 99
-  
-  ccc19x$der_coinfection_bact_gram_pos <- factor(ccc19x$der_coinfection_bact_gram_pos)
-  summary(ccc19x$der_coinfection_bact_gram_pos[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp38b Gram Negative Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
-  ccc19x$der_coinfection_bact_gram_neg <- NA
-  
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
-  
-  #Yes
-  ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection___81325006 == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 0
-  for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_neg[i])) ccc19x$der_coinfection_bact_gram_neg[i] <- 0 
-  
-  #Unknown
-  ccc19x$der_coinfection_bact_gram_neg[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
-                                               is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 99
-  
-  ccc19x$der_coinfection_bact_gram_neg <- factor(ccc19x$der_coinfection_bact_gram_neg)
-  summary(ccc19x$der_coinfection_bact_gram_neg[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp39 Fungal co-infection within +/- 2 weeks of COVID-19 diagnosis
-  ccc19x$der_coinfection_fungal <- NA
-  
-  temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
-  
-  #Yes
-  ccc19x$der_coinfection_fungal[which(ccc19x$coinfection___414561005 == 1|
-                                        ccc19x$coinfection___2429008 == 1|
-                                        ccc19x$coinfection___709601002 == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_fungal[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_fungal))] <- 0
-  for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_fungal[i])) ccc19x$der_coinfection_fungal[i] <- 0 
-  
-  #Unknown
-  ccc19x$der_coinfection_fungal[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
-                                        is.na(ccc19x$der_coinfection_fungal))] <- 99
-  
-  ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
-  summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
-  
-  #Comp40 Any co-infection 
-  ccc19x$der_coinfection_any <- NA
-  
-  #Yes
-  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 1|
-                                        ccc19x$der_coinfection_fungal == 1|
-                                        ccc19x$der_coinfection_viral == 1)] <- 1
-  
-  #No
-  ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 0 &
-                                     ccc19x$der_coinfection_fungal == 0 &
-                                     ccc19x$der_coinfection_viral == 0)] <- 0
-  
-  #Unknown
-  ccc19x$der_coinfection_any[which((ccc19x$der_coinfection_bacterial == 99|
-                                     ccc19x$der_coinfection_fungal == 99|
-                                     ccc19x$der_coinfection_viral == 99) & is.na(ccc19x$der_coinfection_any))] <- 99
-  
-  ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
-  summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
-  
-  
-  }
+    
+    rm(master_comp)
+    }
   print('Complications completed')
   
   ##################
@@ -2492,35 +2443,35 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$ts_5 <- gsub(ccc19x$ts_5, pattern = '/20 ', replacement = '/2020 ')
     
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
-    ccc19x$der_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 7*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 7*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 14*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 14*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 28*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 28*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 56*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 56*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 84*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 84*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 180*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 180*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 270*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 270*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime[temp.ref] <- ccc19x$der_righttime[temp.ref] - 360*24*60*60
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2531,15 +2482,24 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                            '%Y-%m-%d %H:%M',
+                                                            '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime[temp.ref] <- temp.time
+        ccc19x$meta_righttime[temp.ref] <- temp.time[1]
       }
     }
     
     #T3. Median f/u
-    ccc19x$der_median_fu <- NA
+    ccc19x$der_days_fu <- NA
     pts <- unique(ccc19x$record_id)
     
     #Middle of follow-up intervals (from covid_19_dx_interval)
@@ -2558,34 +2518,34 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
         {
           if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
           {
-            ccc19x$der_median_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
+            ccc19x$der_days_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
           } else #Default is the median of the time interval of diagnosis
-            ccc19x$der_median_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+            ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
         } else
         {
           #Default is the median of the time interval of diagnosis
-          ccc19x$der_median_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+          ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
           
           # #Check that LOS aren't longer than this
-          # if(!is.na(ccc19x$der_median_fu[temp.ref]))
+          # if(!is.na(ccc19x$der_days_fu[temp.ref]))
           # {
           #   temp <- ccc19x[temp.ref,c('hosp_los','hosp_los_2','icu_los')]
           #   temp <- sum(temp[!is.na(temp)])
-          #   if(temp > ccc19x$der_median_fu[temp.ref]) ccc19x$der_median_fu[temp.ref] <- temp
+          #   if(temp > ccc19x$der_days_fu[temp.ref]) ccc19x$der_days_fu[temp.ref] <- temp
           # }
           
           #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 30 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 30 & 
             ccc19x$mortality[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
           
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 90 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 90 & 
             ccc19x$mortality_90[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
           
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_median_fu[temp.ref] > 180 & 
+          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 180 & 
             ccc19x$mortality_180[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
           
         }
       } else
@@ -2597,7 +2557,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
         {
           if(temp != 9999) 
           {
-            ccc19x$der_median_fu[temp.ref] <- temp
+            ccc19x$der_days_fu[temp.ref] <- temp
           }
         } else
         {
@@ -2606,56 +2566,56 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
           {
             temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
           }
-          if(length(temp[temp != '']) > 0) ccc19x$der_median_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
+          if(length(temp[temp != '']) > 0) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
         }
         
         #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 30) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 30) & 
           any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 30
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
         
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 90) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 90) & 
           any(ccc19x$d90_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 90
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
         
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_median_fu[temp.ref] > 180) & 
+        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 180) & 
           any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_median_fu[temp.ref] <- 180
+        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
       }
     }
     
-    summary(ccc19x$der_median_fu[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
     
     #T4 & T5 Median f/u in days anchored to actual dates
-    ccc19x$der_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - 7*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - 7*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (7+14)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (7+14)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (14+28)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (14+28)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (28+56)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (28+56)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (56+84)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (56+84)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (90+180)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (90+180)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (180+270)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+270)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime2[temp.ref] <- ccc19x$der_righttime2[temp.ref] - (270+360)*24*60*60/2
+    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (270+360)*24*60*60/2
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2666,10 +2626,19 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                                    '%Y-%m-%d %H:%M',
+                                                                    '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime2[temp.ref] <- temp.time
+        ccc19x$meta_righttime2[temp.ref] <- temp.time[1]
       }
     }
     
@@ -2690,38 +2659,38 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
     
     #T7 & T8 Calculated time from diagnosis has to be at least 30 days
-    ccc19x$der_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$der_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$der_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
+    ccc19x$meta_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 0*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 7*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 14*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 28*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 56*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 90*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 180*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 270*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
-    ccc19x$der_lefttime3[temp.ref] <- ccc19x$der_righttime3[temp.ref] - 360*24*60*60
+    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -2732,14 +2701,23 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
       temp.time <- temp.time[temp.time != '']
       if(length(temp.time) > 0)
       {
+        temp.list <- list() 
+        for(j in 1:length(temp.time))
+          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                                    '%Y-%m-%d %H:%M',
+                                                                    '%Y-%m-%d'))
+        for(j in 1:length(temp.time))
+          temp.time[j] <- as.character(temp.list[[j]])
+        
         temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M'))
+                                                          '%Y-%m-%d %H:%M',
+                                                          '%Y-%m-%d'))
         temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$der_righttime3[temp.ref] <- temp.time
+        ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
       }
     }
     
-    temp.diff <- difftime(ccc19x$der_righttime3, ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
     temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
     
     ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
@@ -2759,7 +2737,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
@@ -2861,7 +2839,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #0. Median f/u time is > 30 days or alive on a follow-up form
-    temp.ref2 <- which(ccc19x$der_dead30a[which(ccc19x$der_median_fu > 30)])
+    temp.ref2 <- which(ccc19x$der_dead30a[which(ccc19x$der_days_fu > 30)])
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -2873,7 +2851,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 1
@@ -2987,7 +2965,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 90 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 90)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
@@ -3091,7 +3069,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 180 days
-    temp.diff <- difftime(ccc19x$der_righttime, ccc19x$der_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 180)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
@@ -3202,12 +3180,12 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
     
     #First, extract month and year from the POSIXlt objects
-    x1 <- months(ccc19x$der_lefttime[temp.ref])
-    xm <- months(ccc19x$der_lefttime2[temp.ref])
-    x2 <- months(ccc19x$der_lefttime3[temp.ref])
-    y1 <- format(ccc19x$der_lefttime[temp.ref], format = '%Y')
-    ym <- format(ccc19x$der_lefttime2[temp.ref], format = '%Y')
-    y2 <- format(ccc19x$der_lefttime3[temp.ref], format = '%Y')
+    x1 <- months(ccc19x$meta_lefttime[temp.ref])
+    xm <- months(ccc19x$meta_lefttime2[temp.ref])
+    x2 <- months(ccc19x$meta_lefttime3[temp.ref])
+    y1 <- format(ccc19x$meta_lefttime[temp.ref], format = '%Y')
+    ym <- format(ccc19x$meta_lefttime2[temp.ref], format = '%Y')
+    y2 <- format(ccc19x$meta_lefttime3[temp.ref], format = '%Y')
     
     ccc19x$der_month_dx <- NA
     temp.ref2 <- which(x1 == x2 & y1 == y2 & y1 != 2099)
@@ -3456,7 +3434,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                             ccc19x$worst_status_clinical %in% 0:1) 
                          & (ccc19x$ecog_status %in% c(1,2,3,4)))] <- 2
     #3. Hospitalized, no oxygen
-    ccc19x$der_who[which(is.na(ccc19x$der_o2_ever) & ccc19x$der_hosp == 1)] <- 3
+    ccc19x$der_who[which(ccc19x$der_o2_ever == 0 & ccc19x$der_hosp == 1)] <- 3
     #4. Hospitalized, oxygen
     ccc19x$der_who[which(ccc19x$der_o2_ever == 1 & 
                            ccc19x$der_hosp == 1)] <- 4
@@ -3476,6 +3454,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_who[ccc19x$der_deadbinary == 1] <- 8
     
     ccc19x$der_who <- as.factor(ccc19x$der_who)
+    summary(ccc19x$der_who[ccc19x$redcap_repeat_instrument == ''])
     
     #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
     
@@ -3538,7 +3517,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
     
     #O22b. ordinal_v1b -- including "at least"
-    #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
+    #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death ever)
     
     #Declare as missing
     ccc19x$der_ordinal_v1b <- NA
@@ -3547,7 +3526,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 0 & 
                                    ccc19x$der_ICU == 0 &
                                    ccc19x$der_mv == 0 &
-                                   ccc19x$der_dead30 == 0)] <- 0
+                                   ccc19x$der_deadbinary == 0)] <- 0
     
     #Hospital (ever/never)
     ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 1)] <- 1
@@ -3568,12 +3547,12 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
     
     #Death within 30 days
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 1)] <- 4
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_dead30 == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 1)] <- 4
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
+    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
     
     summary(factor(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == '']))
     
@@ -3675,8 +3654,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     summary(factor(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == '']))
     
     #O27. ordinal_v4 (0 = ambulatory, 1 = hospitalized, 2= hospitalized with supplemental oxygen, 
-    #     3 = ICU admission, 4 = ICU + mechanical ventilation, 
-    #     5 = ICU + mechanical ventilation + vasopressors/inotropes, 6 = death)
+    #     3 = ICU admission, 4 = mechanical ventilation, 
+    #     5 = ICU or mechanical ventilation, with vasopressors/inotropes, 6 = death)
     
     #Declare as missing
     ccc19x$der_ordinal_v4 <- NA
@@ -3688,7 +3667,7 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1)] <- 1
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 99)] <- 99
     
-    #Hospitalized and did require O2
+    #Hospitalized and required O2
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
     ccc19x$der_ordinal_v4[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 99)] <- 99
     
@@ -3696,13 +3675,13 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1)] <- 3
     ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 99)] <- 99
     
-    #ICU + Mechanical ventilation
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1)] <- 4
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 99)] <- 99
+    #Mechanical ventilation
+    ccc19x$der_ordinal_v4[which(ccc19x$der_mv == 1)] <- 4
+    ccc19x$der_ordinal_v4[which(ccc19x$der_mv == 99)] <- 99
     
-    #ICU + Mechanical ventilation + pressors
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 1)] <- 5
-    ccc19x$der_ordinal_v4[which(ccc19x$der_ordinal_v4 == 4 & ccc19x$der_pressors == 99)] <- 99
+    #ICU or Mechanical ventilation, with pressors
+    ccc19x$der_ordinal_v4[which((ccc19x$der_ICU == 1|ccc19x$der_mv == 1) & ccc19x$der_pressors == 1)] <- 5
+    ccc19x$der_ordinal_v4[which((ccc19x$der_ICU == 1|ccc19x$der_mv == 1) & ccc19x$der_pressors == 99)] <- 99
     
     #Death at any time
     ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 1)] <- 6
@@ -4420,6 +4399,96 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_statins <- factor(ccc19x$der_statins)
     summary(ccc19x$der_statins[ccc19x$redcap_repeat_instrument == ''])
     
+    #Rx8a. Statins at baseline
+    ccc19x$der_statins_baseline <- NA
+    ccc19x$der_statins_baseline[which(ccc19x$concomitant_meds___atc_c10aa == 1)] <- 1
+    
+    #Never
+    ccc19x$der_statins_baseline[which(ccc19x$concomitant_meds___atc_c10aa == 0)] <- 0
+    
+    #Unknown baseline or treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
+    
+    #Unknown f/u treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_statins_baseline[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_statins_baseline[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_statins_baseline[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_statins_baseline[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_statins_baseline <- factor(ccc19x$der_statins_baseline)
+    summary(ccc19x$der_statins_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Rx22. Beta blockers (BB) at baseline
+    ccc19x$der_BB_baseline <- NA
+    ccc19x$der_BB_baseline[which(ccc19x$concomitant_meds___c07a == 1)] <- 1
+    
+    #Never
+    ccc19x$der_BB_baseline[which(ccc19x$concomitant_meds___c07a == 0)] <- 0
+    
+    #Unknown baseline or treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
+    
+    #Unknown f/u treatment
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_BB_baseline[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_BB_baseline[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_BB_baseline[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_BB_baseline[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_BB_baseline <- factor(ccc19x$der_BB_baseline)
+    summary(ccc19x$der_BB_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx9. Antivirals ever (except oseltamivir or remdesivir) for treatment of COVID-19
     ccc19x$der_antivirals <- NA
     ccc19x$der_antivirals[which(ccc19x$covid_19_treatment___ho_44995 == 1|
@@ -5073,6 +5142,31 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
     
+    #D04c. Derived variable for race/ethnicity including Asian
+    ccc19x$der_race_v2 <- NA
+    
+    ccc19x$der_race_v2[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic Black"
+    ccc19x$der_race_v2[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0 &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic White"
+    
+    #Overwrite the preceding if AAPI
+    ccc19x$der_race_v2[which((ccc19x$race___2028_9 == 1|ccc19x$race___2076_8 ==1) &
+                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- 'Non-Hispanic AAPI'
+    
+    #Other
+    ccc19x$der_race_v2[which((ccc19x$race___1002_5 == 1|ccc19x$race___2131_1 == 1|
+                                ccc19x$race___unk == 1) & !ccc19x$der_race_v2 %in% c('Non-Hispanic Black',
+                                                                                     'Non-Hispanic White',
+                                                                                     'Non-Hispanic AAPI'))] <- 'Other'
+    
+    #Overwrite "Other" with Hispanic ethnicity
+    ccc19x$der_race_v2[which(ccc19x$ethnicity == "2135-2")] <- "Hispanic"
+    
+    #Factor
+    ccc19x$der_race_v2 <- as.factor(ccc19x$der_race_v2)
+    summary(ccc19x$der_race_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     #D05. Ethnicity (simply factor and redefine levels, declare blanks as missing)
     ccc19x$der_ethnicity <- ccc19x$ethnicity
     ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latinx'
@@ -5200,7 +5294,37 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
     
+    #D20. Insurance 
+    ccc19x$der_insurance <- NA
     
+    #Uninsured
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 1 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Uninsured'
+    
+    #Private insurance +/- any other
+    ccc19x$der_insurance[which(ccc19x$insurance___1 == 1)] <- 'Private +/- other'
+    
+    #Medicaid alone
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 1 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Medicaid alone'
+    
+    #Medicare alone
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 1 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 0)] <- 'Medicare alone'
+    
+    #Medicare/Medicaid
+    ccc19x$der_insurance[which(ccc19x$insurance___2 == 1 &ccc19x$insurance___3 == 1)] <- 'Medicare/Medicaid +/- other'
+    
+    #Other government
+    ccc19x$der_insurance[which(ccc19x$insurance___4 == 1)] <- 'Other government +/- other'
+    
+    #Unknown
+    ccc19x$der_insurance[which(ccc19x$insurance___0 == 0 & ccc19x$insurance___1 == 0 & ccc19x$insurance___2 == 0 &
+                                 ccc19x$insurance___3 == 0 & ccc19x$insurance___4 == 0 & ccc19x$insurance___99 == 1)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_insurance <- as.factor(ccc19x$der_insurance)
+    summary(ccc19x$der_insurance[ccc19x$redcap_repeat_instrument == ''])
     
   }
   print('Demographics completed')
@@ -5209,6 +5333,16 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
   #Comorbidities
   ##############
   {
+    #Something is checked besides unknown (including none)
+    master_comorbid <- rep(NA,nrow(ccc19x))
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = '^significant_') & !grepl(colnames(ccc19x), pattern = 'unk'))
+    for(i in 1:nrow(ccc19x))
+    {
+      temp <- ccc19x[i,temp.ref]
+      temp <- temp[!is.na(temp)]
+      if(any(temp == 1)) master_comorbid[i] <- 1
+    }
+    
     #C01. BMI, with derived BMI for records that have height and weight recorded and not BMI
     ccc19x$der_bmi <- ccc19x$bmi
     
@@ -5590,10 +5724,10 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     #C07a. Cardiovascular comorbidity v2 (CAD, CHF, PVD, CVA)
     ccc19x$der_card_v2 <- NA
-    ccc19x$der_card_v2[which( ccc19x$significant_comorbidities___53741008 == 1|#
-                                ccc19x$significant_comorbidities___42343007 == 1|#
-                                ccc19x$significant_comorbidities___400047006 == 1|#
-                                ccc19x$significant_comorbidities___275526006 == 1#
+    ccc19x$der_card_v2[which( ccc19x$significant_comorbidities___53741008 == 1|#CAD
+                                ccc19x$significant_comorbidities___42343007 == 1|#CHF
+                                ccc19x$significant_comorbidities___400047006 == 1|#PVD
+                                ccc19x$significant_comorbidities___275526006 == 1#CVA
     )] <- 1
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
@@ -5634,6 +5768,94 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_card_v2 <- factor(ccc19x$der_card_v2)
     summary(ccc19x$der_card_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07b. CAD comorbidity
+    ccc19x$der_CAD_bl <- NA
+    ccc19x$der_CAD_bl[which( ccc19x$significant_comorbidities___53741008 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___53741008|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___53741008[i] == 0)
+      )) ccc19x$der_CAD_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CAD_bl[i] <- 99
+    }
+    
+    ccc19x$der_CAD_bl <- factor(ccc19x$der_CAD_bl)
+    summary(ccc19x$der_CAD_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07c. CHF comorbidity
+    ccc19x$der_CHF_bl <- NA
+    ccc19x$der_CHF_bl[which( ccc19x$significant_comorbidities___42343007 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___42343007|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___42343007[i] == 0)
+      )) ccc19x$der_CHF_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CHF_bl[i] <- 99
+    }
+    
+    ccc19x$der_CHF_bl <- factor(ccc19x$der_CHF_bl)
+    summary(ccc19x$der_CHF_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07d. PVD comorbidity
+    ccc19x$der_PVD_bl <- NA
+    ccc19x$der_PVD_bl[which( ccc19x$significant_comorbidities___400047006 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___400047006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___400047006[i] == 0)
+      )) ccc19x$der_PVD_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_PVD_bl[i] <- 99
+    }
+    
+    ccc19x$der_PVD_bl <- factor(ccc19x$der_PVD_bl)
+    summary(ccc19x$der_PVD_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    #C07e. CVA comorbidity
+    ccc19x$der_CVA_bl <- NA
+    ccc19x$der_CVA_bl[which( ccc19x$significant_comorbidities___275526006 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___275526006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___275526006[i] == 0)
+      )) ccc19x$der_CVA_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_CVA_bl[i] <- 99
+    }
+    
+    ccc19x$der_CVA_bl <- factor(ccc19x$der_CVA_bl)
+    summary(ccc19x$der_CVA_bl[ccc19x$redcap_repeat_instrument == ''])
     
     #######################
     #C08. Renal comorbidity
@@ -5904,6 +6126,12 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_ccc19cci <- factor(ccc19x$der_ccc19cci)
     summary(ccc19x$der_ccc19cci[ccc19x$redcap_repeat_instrument == ''])
     
+    #C12a. Modified Charlson with aggregated categories
+    ccc19x$der_ccc19cci_v2 <- as.character(ccc19x$der_ccc19cci)
+    ccc19x$der_ccc19cci_v2[which(ccc19x$der_ccc19cci_v2 %in% 9:22)] <- '9+'
+    ccc19x$der_ccc19cci_v2 <- factor(ccc19x$der_ccc19cci_v2)
+    summary(ccc19x$der_ccc19cci_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     ##############################
     #C13. CVD risk factor (binary)
     ##############################
@@ -5955,6 +6183,51 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_CVD_risk <- factor(ccc19x$der_CVD_risk)
     summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
+    
+    #########################
+    #C13a. CVD risk factor v2 
+    #########################
+    ccc19x$der_CVD_risk_v2 <- NA
+    
+    #Two or more risk factors
+    temp <- rep(0, nrow(ccc19x))
+    
+    #Sex and age
+    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    
+    #Hypertension
+    temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
+    #Hyperlipidemia
+    temp[which(ccc19x$significant_comorbidities___55822004 == 1)] <- temp[which(ccc19x$significant_comorbidities___55822004 == 1)] + 1
+    #Diabetes
+    temp[which(ccc19x$der_dm2 == 1)] <- temp[which(ccc19x$der_dm2 == 1)] + 1
+    #Tobacco use
+    temp[which(ccc19x$der_smoking == 'Current')] <- temp[which(ccc19x$der_smoking == 'Current')] + 1
+    
+    ccc19x$der_CVD_risk_v2[which(temp >= 2)] <- 1
+    
+    #Removals
+    
+    #1 risk factor
+    ccc19x$der_CVD_risk_v2[which(temp == 1 & is.na(ccc19x$der_CVD_risk_v2) & ccc19x$redcap_repeat_instrument == '')] <- 0
+    
+    #Too young
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & ccc19x$der_age < 55)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & ccc19x$der_age < 60)] <- 0
+    
+    #Unknowns
+    ccc19x$der_CVD_risk_v2[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   (ccc19x$significant_comorbidities___55822004 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   ccc19x$der_dm2 == 99|
+                                   ccc19x$der_smoking == 'Unknown')
+    ] <- 'Unknown'
+    
+    #Already has CVD
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
+    
+    ccc19x$der_CVD_risk_v2 <- factor(ccc19x$der_CVD_risk_v2)
+    summary(ccc19x$der_CVD_risk_v2[ccc19x$redcap_repeat_instrument == ''])
     
     }
   print('Comorbidities completed')
@@ -6009,6 +6282,15 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                            ccc19x$cancer_type_5 %in% c("C3163"))] <- 1
     ccc19x$der_CLL <- factor(ccc19x$der_CLL)
     summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
+    
+    ccc19x$der_Hodgkin <- 0
+    ccc19x$der_Hodgkin[which(ccc19x$cancer_type %in% c("C9357")|
+                               ccc19x$cancer_type_2 %in% c("C9357")|
+                               ccc19x$cancer_type_3 %in% c("C9357")|
+                               ccc19x$cancer_type_4 %in% c("C9357")|
+                               ccc19x$cancer_type_5 %in% c("C9357"))] <- 1
+    ccc19x$der_Hodgkin <- factor(ccc19x$der_Hodgkin)
+    summary(ccc19x$der_Hodgkin[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_Lymph_Other <- 0
     ccc19x$der_Lymph_Other[which(ccc19x$cancer_type %in% c("C9308", "C3211")|
@@ -6865,37 +7147,43 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
     summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
     
-    ################################
-    #Ca23. Stem cell transplant ever
-    ################################
-    ccc19x$der_sct <- NA
+    #########################################
+    #Ca23. Hematopoeitic cell transplant ever
+    #########################################
+    ccc19x$der_hct <- NA
     
     #Yes
-    ccc19x$der_sct[which(ccc19x$significant_comorbidities___234336002 == 1)] <- 1
-    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy %in% 1:5 &
+    ccc19x$der_hct[which(ccc19x$significant_comorbidities___234336002 == 1)] <- 1
+    ccc19x$der_hct[which(ccc19x$transplant_cellular_therapy %in% 1:5 &
                            ccc19x$transplant_cellular_timing != 0)] <- 1
     
     #No
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___234336002|significant_comorbidities___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_sct)))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_hct)))
     {
-      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___234336002[i] == 0) ccc19x$der_sct[i] <- 0
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___234336002[i] == 0) ccc19x$der_hct[i] <- 0
     }
     
     #Unknown
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_sct == 0))
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_hct == 0))
     {
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_sct[i] <- 99
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_hct[i] <- 99
     }
     
-    ccc19x$der_sct[which(ccc19x$transplant_cellular_therapy == 99 & ccc19x$der_sct == 0)] <- 99
+    ccc19x$der_hct[which(ccc19x$transplant_cellular_therapy == 99 & ccc19x$der_hct == 0)] <- 99
     
-    ccc19x$der_sct <- factor(ccc19x$der_sct)
-    summary(ccc19x$der_sct[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_hct <- factor(ccc19x$der_hct)
+    summary(ccc19x$der_hct[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca23a. Recent allo (within 1 year) or auto (within 100 days)
+    ccc19x$der_hct_recent <- ccc19x$der_allo365
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 1)] <- 1
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 0 & is.na(ccc19x$der_hct_recent))] <- 0
+    ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
+    summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
     ccc19x$der_ARA_1st_gen <- NA
@@ -7090,6 +7378,25 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_cancer_status_v3 <- relevel(ccc19x$der_cancer_status_v3, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca07d. Cancer status with remission conditioned on cancer timing
+    ccc19x$der_cancer_status_v4 <- NA
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
+                                        ccc19x$cancer_timing %in% 1:2)] <- 'Remission/NED, recent diagnosis'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
+                                        ccc19x$cancer_timing == 3)] <- 'Remission/NED, remote diagnosis'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 2)] <- 'Active, responding'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 3)] <- 'Active, stable'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 4)] <- 'Active, progressing'
+    
+    #Unknown status
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status %in% c(5,99))] <- 'Unknown'
+    #Unknown timing
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_timing == 99 & is.na(ccc19x$der_cancer_status_v4))] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_cancer_status_v4 <- as.factor(ccc19x$der_cancer_status_v4)
+    summary(ccc19x$der_cancer_status_v4[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca19. Metastatic status (only applicable to solid tumors)
     ccc19x$der_metastatic <- NA
     
@@ -7248,6 +7555,27 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     if(length(temp.ref) == nrow(drugs))
       ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] <- drugs[,2:8] else ccc19x$drug1 <- 'ERROR'
     
+    #Ca24: Regimen match
+    ccc19x$der_regimen <- NA
+    for(i in which(!is.na(ccc19x$drug1)))
+    {
+      #Get list of drugs
+      temp <- ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
+      temp <- temp[temp != '']
+      temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
+      
+      #Look for match
+      list.match <- which(concept_stage$concept_name == temp)
+      
+      #If there is a match, pull the potential regimens that contain these drugs
+      if(length(list.match) > 0)
+      {
+        out <- concept_relationship_stage$concept_code_1[concept_relationship_stage$concept_code_2 %in% concept_stage$concept_code[list.match] &
+                                                           concept_relationship_stage$relationship_id == 'Has anti-cancer drugs']
+        if(length(out) > 1) out <- paste(out, collapse = '|')
+        ccc19x$der_regimen[i] <- out
+      } else ccc19x$der_regimen[i] <- 'No match'      
+    }
     
     #Ca4a: CD20 drugs
     ccc19x$der_cd20 <- NA
@@ -7262,6 +7590,20 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_cd20 <- factor(ccc19x$der_cd20)
     summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4m: CD38 drugs
+    ccc19x$der_cd38 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Daratumumab','Isatuximab'))) ccc19x$der_cd38[temp.ref[i]] <- 1 else
+               ccc19x$der_cd38[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_cd38 <- factor(ccc19x$der_cd38)
+    summary(ccc19x$der_cd38[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4b: BTKi
     ccc19x$der_btki <- NA
@@ -7412,6 +7754,21 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
     summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4l: Anti-HER2
+    ccc19x$der_her2 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Lapatinib','Neratinib','Tucatinib','Trastuzumab','Margetuximab',
+               'Trastuzumab emtansine','Trastuzumab deruxtecan','Pertuzumab'))) ccc19x$der_her2[temp.ref[i]] <- 1 else
+                 ccc19x$der_her2[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_her2 <- factor(ccc19x$der_her2)
+    summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
@@ -7984,17 +8341,17 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
-    ccc19x$der_30d_due <- NA
-    ccc19x$der_90d_due <- NA
-    ccc19x$der_180d_due <- NA
+    ccc19x$meta_30d_due <- NA
+    ccc19x$meta_90d_due <- NA
+    ccc19x$meta_180d_due <- NA
     
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 30*24*60*60)
-    ccc19x$der_30d_due[temp.ref] <- gsub(ccc19x$der_30d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$der_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 90*24*60*60)
-    ccc19x$der_90d_due[temp.ref] <- gsub(ccc19x$der_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$der_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$der_lefttime3[temp.ref]) + 180*24*60*60)
-    ccc19x$der_180d_due[temp.ref] <- gsub(ccc19x$der_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 30*24*60*60)
+    ccc19x$meta_30d_due[temp.ref] <- gsub(ccc19x$meta_30d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 90*24*60*60)
+    ccc19x$meta_90d_due[temp.ref] <- gsub(ccc19x$meta_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 180*24*60*60)
+    ccc19x$meta_180d_due[temp.ref] <- gsub(ccc19x$meta_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
     
     
     #X8a-c. Completion of 30d, 90d, 180d forms
@@ -8043,8 +8400,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ##############################################
     
     #Calculate a quality score for each case
-    ccc19x$der_quality <- 0
-    ccc19x$der_problems <- ''
+    ccc19x$meta_quality <- 0
+    ccc19x$meta_problems <- ''
     
     ###############
     #Major problems
@@ -8072,11 +8429,11 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     #Create density plot of missingness
     x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
     plot(x)
-    threshold <- 101
+    threshold <- 105
     abline(v = threshold)
     
-    ccc19x$der_quality[which(ccc19x$missing > threshold)] <- ccc19x$der_quality[which(ccc19x$missing > threshold)] + 5
-    ccc19x$der_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$der_problems[which(ccc19x$missing > threshold)],
+    ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
+    ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
                                                              '; High levels of baseline missingness', sep = '')
     
     #Large number of unknowns
@@ -8094,8 +8451,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
       ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
     }
     
-    ccc19x$der_quality[which(ccc19x$unknown >= 20)] <- ccc19x$der_quality[which(ccc19x$unknown >= 20)] + 5
-    ccc19x$der_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$der_problems[which(ccc19x$unknown >= 20)],
+    ccc19x$meta_quality[which(ccc19x$unknown >= 20)] <- ccc19x$meta_quality[which(ccc19x$unknown >= 20)] + 5
+    ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
                                                               '; Large number of unknowns', sep = '')
     
     ##################
@@ -8105,47 +8462,47 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     #Cancer status missing
     temp.ref <- which(is.na(ccc19x$der_cancer_status) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Cancer status missing', sep = '')
     
     #ECOG status missing
     temp.ref <- which(is.na(ccc19x$der_ecogcat) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ECOG PS missing', sep = '')
     
     #Death status missing/unk
     temp.ref <- which((ccc19x$der_deadbinary == 99|is.na(ccc19x$der_deadbinary)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Death status missing or unknown', sep = '')
     
     #Baseline COVID-19 severity missing/unk
     temp.ref <- which((ccc19x$severity_of_covid_19_v2 == 99|is.na(ccc19x$severity_of_covid_19_v2)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Baseline COVID-19 severity missing or unknown', sep = '')
     
     #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 3
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 30-day f/u is at least 60 days overdue', sep = '')
     
     #90-day f/u is 60+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 90-day f/u is at least 60 days overdue', sep = '')
     
     ###############
@@ -8160,8 +8517,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                            ccc19x$cancer_type_3 == 'C4863'|
                            ccc19x$cancer_type_4 == 'C4863'|
                            ccc19x$cancer_type_5 == 'C4863'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ADT missing or unknown', sep = '')
     
     #Biomarkers (breast)
@@ -8172,8 +8529,8 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                            ccc19x$cancer_type_3 == 'C4872'|
                            ccc19x$cancer_type_4 == 'C4872'|
                            ccc19x$cancer_type_5 == 'C4872'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Breast cancer biomarkers missing or unknown', sep = '')
     
     #BCG (bladder)
@@ -8183,15 +8540,15 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                            ccc19x$cancer_type_3 == 'C4912'|
                            ccc19x$cancer_type_4 == 'C4912'|
                            ccc19x$cancer_type_5 == 'C4912'))
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Intravesicular BCG missing or unknown', sep = '')
     
     #Cancer status unknown
     temp.ref <- which(ccc19x$der_cancer_status == 'Unknown' &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Cancer status unknown', sep = '')
     
     #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
@@ -8199,73 +8556,73 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
                         ccc19x$cancer_status != '1' &
                         !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Metastatic status missing or unknown', sep = '')
     
     #ECOG status unknown
     temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ECOG PS unknown', sep = '')
     
     #ICU status missing/unk
     temp.ref <- which((ccc19x$der_ICU == 99|is.na(ccc19x$der_ICU)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; ICU status missing or unknown', sep = '')
     
     #Hospital status missing/unk
     temp.ref <- which((ccc19x$der_hosp == 99|is.na(ccc19x$der_hosp)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Hospital status missing or unknown', sep = '')
     
     #Intubation status missing/unk
     temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Intubation status missing or unknown', sep = '')
     
     #O2 status missing/unk
     temp.ref <- which((ccc19x$der_o2_ever == 99|is.na(ccc19x$der_o2_ever)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; O2 requirement missing or unknown', sep = '')
     
     #Days to death missing or 9999
     temp.ref <- which(ccc19x$der_deadbinary == 1 & 
                         (ccc19x$der_days_to_death_combined == 9999|is.na(ccc19x$der_days_to_death_combined)) &
                         ccc19x$redcap_repeat_instrument == '')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Days to death missing or unknown', sep = '')
     
     #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_median_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 1
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 30-day f/u is at least 30 days overdue', sep = '')
     
     #90-day f/u is 30+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$der_lefttime3, units = 'days')
+    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
     temp <- as.numeric(temp.diff)
     
-    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_median_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$der_quality[temp.ref] <- ccc19x$der_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$der_problems[temp.ref] <- paste(ccc19x$der_problems[temp.ref],
+    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; 90-day f/u is at least 30 days overdue', sep = '')
     
     #Remove leading semicolon
-    ccc19x$der_problems <- gsub(ccc19x$der_problems, pattern = '^; ', replacement = '')
+    ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
     
     #######################
     #X07. Breast biomarkers
@@ -8298,6 +8655,12 @@ suffix <- 'data with derived variables (thru 2-22-2021)'
     ccc19x$der_gleason[ccc19x$der_gleason == ''] <- NA
     ccc19x$der_gleason <- factor(ccc19x$der_gleason)
     summary(ccc19x$der_gleason[ccc19x$der_Prostate == 1])
+    
+    #X08a. Gleason with grouped categories
+    ccc19x$der_gleason_v2 <- as.character(ccc19x$der_gleason)
+    ccc19x$der_gleason_v2[which(ccc19x$der_gleason_v2 %in% c('03','04','05'))] <- 'Less than 6'
+    ccc19x$der_gleason_v2 <- factor(ccc19x$der_gleason_v2)
+    summary(ccc19x$der_gleason_v2[ccc19x$der_Prostate == 1])
     
     ####################
     #X09. Cytokine storm
