@@ -7591,6 +7591,31 @@ suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
     ccc19x$der_cd20 <- factor(ccc19x$der_cd20)
     summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4a1: CD20 drugs within 12 months
+    ccc19x$der_cd20_12m <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab')) &
+         (ccc19x$recent_treatment[temp.ref[i]] %in% 1:3|ccc19x$hx_treatment[temp.ref[i]] %in% 1:2)) ccc19x$der_cd20_12m[temp.ref[i]] <- 1 
+    }
+    
+    #Another drug mentioned, within 12 months
+    ccc19x$der_cd20_12m[which(!is.na(ccc19x$drug1) & 
+                                (ccc19x$recent_treatment[temp.ref[i]] %in% 1:3|ccc19x$hx_treatment[temp.ref[i]] %in% 1:2) &
+                                is.na(ccc19x$der_cd20_12m))] <- 0
+    
+    #Treatment more than 12 months ago, or after COVID-19
+    ccc19x$der_cd20_12m[which(ccc19x$recent_treatment == 98|ccc19x$hx_treatment %in% 3:88)] <- 0
+    
+    #Unknown
+    ccc19x$der_cd20_12m[which(ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99)] <- 99
+    
+    ccc19x$der_cd20_12m <- factor(ccc19x$der_cd20_12m)
+    summary(ccc19x$der_cd20_12m[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca4m: CD38 drugs
     ccc19x$der_cd38 <- NA
     
