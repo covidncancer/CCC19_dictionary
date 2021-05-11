@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for site QA (thru 4-07-2021)'
+suffix <- 'data with derived variables for central QA'
 
 ##DERIVED VARIABLES to recode:
 {
