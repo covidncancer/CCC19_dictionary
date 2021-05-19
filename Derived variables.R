@@ -540,527 +540,530 @@ suffix <- 'data with derived variables for central QA'
       if(any(temp == 1)) master_comp[i] <- 1
     }
     
-    #Comp01. PE complications
-    ccc19x$der_PE_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_PE_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_PE_comp[which(master_comp == 1 & is.na(ccc19x$der_PE_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
-    for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
-    for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    #Thrombotic complications
     {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_PE_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      #Comp01. PE complications
+      ccc19x$der_PE_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_PE_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_PE_comp[which(master_comp == 1 & is.na(ccc19x$der_PE_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_PE_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_PE_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_PE_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_PE_comp <- as.factor(ccc19x$der_PE_comp)
-    summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp01a. PE complications within 90 days (3 months)
-    ccc19x$der_PE_comp_within_3mo <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
-    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                         ccc19x$fu_weeks %in% c(30,90)|
-                         ccc19x$timing_of_report_weeks <= 13)
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_PE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
-    for(i in temp.ref2)
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp_within_3mo[i])) ccc19x$der_PE_comp_within_3mo[i] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
-    for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
-    for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_PE_comp_within_3mo[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_PE_comp <- as.factor(ccc19x$der_PE_comp)
+      summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp01a. PE complications within 90 days (3 months)
+      ccc19x$der_PE_comp_within_3mo <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30,90)|
+                           ccc19x$timing_of_report_weeks <= 13)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_PE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp_within_3mo[i])) ccc19x$der_PE_comp_within_3mo[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_PE_comp_within_3mo[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp_within_3mo[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_PE_comp_within_3mo <- as.factor(ccc19x$der_PE_comp_within_3mo)
-    summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp02. SVT complications
-    ccc19x$der_SVT_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '275517008') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_SVT_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_SVT_comp[which(master_comp == 1 & is.na(ccc19x$der_SVT_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_SVT_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_PE_comp_within_3mo <- as.factor(ccc19x$der_PE_comp_within_3mo)
+      summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp02. SVT complications
+      ccc19x$der_SVT_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '275517008') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_SVT_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_SVT_comp[which(master_comp == 1 & is.na(ccc19x$der_SVT_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_SVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_SVT_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_SVT_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_SVT_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_SVT_comp[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_SVT_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_SVT_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_SVT_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_SVT_comp[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_SVT_comp <- as.factor(ccc19x$der_SVT_comp)
-    summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp03. DVT complications
-    ccc19x$der_DVT_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_DVT_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_DVT_comp[which(master_comp == 1 & is.na(ccc19x$der_DVT_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_DVT_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_SVT_comp <- as.factor(ccc19x$der_SVT_comp)
+      summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp03. DVT complications
+      ccc19x$der_DVT_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_DVT_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_DVT_comp[which(master_comp == 1 & is.na(ccc19x$der_DVT_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_DVT_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_DVT_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_DVT_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_DVT_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_DVT_comp <- as.factor(ccc19x$der_DVT_comp)
-    summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp03a. DVT complications within 90 days (3 months)
-    ccc19x$der_DVT_comp_within_3mo <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
-    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                         ccc19x$fu_weeks %in% c(30,90)|
-                         ccc19x$timing_of_report_weeks <= 13)
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_DVT_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '128053003|unk'))
-    for(i in temp.ref2)
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DVT_comp_within_3mo[i])) ccc19x$der_DVT_comp_within_3mo[i] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_DVT_comp_within_3mo[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_DVT_comp <- as.factor(ccc19x$der_DVT_comp)
+      summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp03a. DVT complications within 90 days (3 months)
+      ccc19x$der_DVT_comp_within_3mo <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '128053003') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30,90)|
+                           ccc19x$timing_of_report_weeks <= 13)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_DVT_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '128053003|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_DVT_comp_within_3mo[i])) ccc19x$der_DVT_comp_within_3mo[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_DVT_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_DVT_comp_within_3mo[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_DVT_comp_within_3mo[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_DVT_comp_within_3mo[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_DVT_comp_within_3mo <- as.factor(ccc19x$der_DVT_comp_within_3mo)
-    summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp04. Thrombosis NOS complications
-    ccc19x$der_thrombosis_NOS_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_thrombosis_NOS_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_thrombosis_NOS_comp[which(master_comp == 1 & is.na(ccc19x$der_thrombosis_NOS_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
-    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
-    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_thrombosis_NOS_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_DVT_comp_within_3mo <- as.factor(ccc19x$der_DVT_comp_within_3mo)
+      summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp04. Thrombosis NOS complications
+      ccc19x$der_thrombosis_NOS_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_thrombosis_NOS_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_thrombosis_NOS_comp[which(master_comp == 1 & is.na(ccc19x$der_thrombosis_NOS_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_thrombosis_NOS_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
-    summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp04a. thrombosis_NOS complications within 90 days (3 months)
-    ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
-    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                         ccc19x$fu_weeks %in% c(30,90)|
-                         ccc19x$timing_of_report_weeks <= 13)
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
-    for(i in temp.ref2)
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo[i])) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
-    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
-    for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
+      summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp04a. thrombosis_NOS complications within 90 days (3 months)
+      ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30,90)|
+                           ccc19x$timing_of_report_weeks <= 13)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo[i])) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp_within_3mo[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_thrombosis_NOS_comp_within_3mo <- as.factor(ccc19x$der_thrombosis_NOS_comp_within_3mo)
-    summary(ccc19x$der_thrombosis_NOS_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp05. Combined VTE indicator (excluding SVT)
-    ccc19x$der_VTE_comp <- NA
-    
-    #Any complication
-    temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp','der_thrombosis_NOS_comp'))
-    for(i in temp.ref)
-      ccc19x$der_VTE_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    for(i in which(is.na(ccc19x$der_VTE_comp)))
-    {
-      temp <- ccc19x[i,temp.ref]
-      temp <- temp[!is.na(temp)]
-      temp <- unique(temp)
-      if(length(temp) >= 1)
-        if(length(temp) == 1)
-          if(temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
-    }
-    
-    ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
-    summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp05a. Combined VTE indicator (excluding SVT and thrombosis NOS)
-    ccc19x$der_VTE_comp_v2 <- NA
-    
-    #Any complication
-    temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
-    for(i in temp.ref)
-      ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
-    
-    for(i in which(is.na(ccc19x$der_VTE_comp_v2)))
-    {
-      temp <- ccc19x[i,temp.ref]
-      temp <- temp[!is.na(temp)]
-      temp <- unique(temp)
-      if(length(temp) >= 1)
-        if(length(temp) == 1)
-          if(temp == 0) ccc19x$der_VTE_comp_v2[i] <- 0 else ccc19x$der_VTE_comp_v2[i] <- 99
-    }
-    
-    ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
-    summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp05b. Combined VTE within 3 months (90 days)
-    ccc19x$der_VTE_comp_within_3mo <- NA
-    ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 1|
-                                           ccc19x$der_DVT_comp_within_3mo == 1|
-                                           ccc19x$der_thrombosis_NOS_comp_within_3mo == 1)] <- 1
-    ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 0 &
-                                           ccc19x$der_DVT_comp_within_3mo == 0 &
-                                           ccc19x$der_thrombosis_NOS_comp_within_3mo == 0)] <- 0
-    ccc19x$der_VTE_comp_within_3mo[which((ccc19x$der_PE_comp_within_3mo == 99|
-                                            ccc19x$der_DVT_comp_within_3mo == 99|
-                                            ccc19x$der_thrombosis_NOS_comp_within_3mo == 99) &
-                                           is.na(ccc19x$der_VTE_comp_within_3mo))] <- 99
-    ccc19x$der_VTE_comp_within_3mo <- as.factor(ccc19x$der_VTE_comp_within_3mo)
-    summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp06. ATE complications (MI, CVA)
-    ccc19x$der_ATE_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_ATE_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_ATE_comp[which(master_comp == 1 & is.na(ccc19x$der_ATE_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_ATE_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_thrombosis_NOS_comp_within_3mo <- as.factor(ccc19x$der_thrombosis_NOS_comp_within_3mo)
+      summary(ccc19x$der_thrombosis_NOS_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp05. Combined VTE indicator (excluding SVT)
+      ccc19x$der_VTE_comp <- NA
+      
+      #Any complication
+      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp','der_thrombosis_NOS_comp'))
+      for(i in temp.ref)
+        ccc19x$der_VTE_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      for(i in which(is.na(ccc19x$der_VTE_comp)))
       {
-        if(any(temp == 1)) ccc19x$der_ATE_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp[temp.ref] <- 0
+        temp <- ccc19x[i,temp.ref]
+        temp <- temp[!is.na(temp)]
+        temp <- unique(temp)
+        if(length(temp) >= 1)
+          if(length(temp) == 1)
+            if(temp == 0) ccc19x$der_VTE_comp[i] <- 0 else ccc19x$der_VTE_comp[i] <- 99
       }
-    }
-    
-    ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
-    summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp06a. ATE complications within 90 days (3 months)
-    ccc19x$der_ATE_comp_within_3mo <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                         ccc19x$fu_weeks %in% c(30,90)|
-                         ccc19x$timing_of_report_weeks <= 13)
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_ATE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
-    for(i in temp.ref2)
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp_within_3mo[i])) ccc19x$der_ATE_comp_within_3mo[i] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_ATE_comp_within_3mo[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_VTE_comp <- as.factor(ccc19x$der_VTE_comp)
+      summary(ccc19x$der_VTE_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp05a. Combined VTE indicator (excluding SVT and thrombosis NOS)
+      ccc19x$der_VTE_comp_v2 <- NA
+      
+      #Any complication
+      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
+      for(i in temp.ref)
+        ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
+      
+      for(i in which(is.na(ccc19x$der_VTE_comp_v2)))
       {
-        if(any(temp == 1)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 0
+        temp <- ccc19x[i,temp.ref]
+        temp <- temp[!is.na(temp)]
+        temp <- unique(temp)
+        if(length(temp) >= 1)
+          if(length(temp) == 1)
+            if(temp == 0) ccc19x$der_VTE_comp_v2[i] <- 0 else ccc19x$der_VTE_comp_v2[i] <- 99
       }
-    }
-    
-    ccc19x$der_ATE_comp_within_3mo <- as.factor(ccc19x$der_ATE_comp_within_3mo)
-    summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp07. Stroke complication
-    ccc19x$der_stroke_comp <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-    
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_stroke_comp[which(ccc19x[,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    ccc19x$der_stroke_comp[which(master_comp == 1 & is.na(ccc19x$der_stroke_comp))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_stroke_comp[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
+      summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp05b. Combined VTE within 3 months (90 days)
+      ccc19x$der_VTE_comp_within_3mo <- NA
+      ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 1|
+                                             ccc19x$der_DVT_comp_within_3mo == 1|
+                                             ccc19x$der_thrombosis_NOS_comp_within_3mo == 1)] <- 1
+      ccc19x$der_VTE_comp_within_3mo[which(ccc19x$der_PE_comp_within_3mo == 0 &
+                                             ccc19x$der_DVT_comp_within_3mo == 0 &
+                                             ccc19x$der_thrombosis_NOS_comp_within_3mo == 0)] <- 0
+      ccc19x$der_VTE_comp_within_3mo[which((ccc19x$der_PE_comp_within_3mo == 99|
+                                              ccc19x$der_DVT_comp_within_3mo == 99|
+                                              ccc19x$der_thrombosis_NOS_comp_within_3mo == 99) &
+                                             is.na(ccc19x$der_VTE_comp_within_3mo))] <- 99
+      ccc19x$der_VTE_comp_within_3mo <- as.factor(ccc19x$der_VTE_comp_within_3mo)
+      summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp06. ATE complications (MI, CVA)
+      ccc19x$der_ATE_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_ATE_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_ATE_comp[which(master_comp == 1 & is.na(ccc19x$der_ATE_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_ATE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_stroke_comp[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_ATE_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_ATE_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp[temp.ref] <- 0
+        }
       }
-    }
-    
-    ccc19x$der_stroke_comp <- as.factor(ccc19x$der_stroke_comp)
-    summary(ccc19x$der_stroke_comp[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Comp07a. stroke complications within 90 days (3 months)
-    ccc19x$der_stroke_comp_within_3mo <- NA
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
-    temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
-                         ccc19x$fu_weeks %in% c(30,90)|
-                         ccc19x$timing_of_report_weeks <= 13)
-    #Present
-    for(i in temp.ref)
-      ccc19x$der_stroke_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
-    
-    #Not present, something else checked besides unknown
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '230690007|unk'))
-    for(i in temp.ref2)
-      if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_stroke_comp_within_3mo[i])) ccc19x$der_stroke_comp_within_3mo[i] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
-    for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
-    
-    #Followup
-    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
-    for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
-                   (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
-      if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_stroke_comp_within_3mo[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
+      
+      ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
+      summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp06a. ATE complications within 90 days (3 months)
+      ccc19x$der_ATE_comp_within_3mo <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '22298006|230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30,90)|
+                           ccc19x$timing_of_report_weeks <= 13)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_ATE_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '22298006|230690007|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_ATE_comp_within_3mo[i])) ccc19x$der_ATE_comp_within_3mo[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_ATE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_ATE_comp_within_3mo[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp == 1)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 0
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_ATE_comp_within_3mo[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_ATE_comp_within_3mo[temp.ref] <- 0
+        }
       }
+      
+      ccc19x$der_ATE_comp_within_3mo <- as.factor(ccc19x$der_ATE_comp_within_3mo)
+      summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp07. Stroke complication
+      ccc19x$der_stroke_comp <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+      
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_stroke_comp[which(ccc19x[,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      ccc19x$der_stroke_comp[which(master_comp == 1 & is.na(ccc19x$der_stroke_comp))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_stroke_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+      {
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_stroke_comp[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_stroke_comp[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp[temp.ref] <- 0
+        }
+      }
+      
+      ccc19x$der_stroke_comp <- as.factor(ccc19x$der_stroke_comp)
+      summary(ccc19x$der_stroke_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp07a. stroke complications within 90 days (3 months)
+      ccc19x$der_stroke_comp_within_3mo <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '230690007') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30,90)|
+                           ccc19x$timing_of_report_weeks <= 13)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_stroke_comp_within_3mo[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_card') & !grepl(colnames(ccc19x), pattern = '230690007|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_stroke_comp_within_3mo[i])) ccc19x$der_stroke_comp_within_3mo[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk'))
+      for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk'))
+      for(i in which(is.na(ccc19x$der_stroke_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_stroke_comp_within_3mo[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+      {
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_stroke_comp_within_3mo[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_stroke_comp_within_3mo[temp.ref] <- 0
+        }
+      }
+      
+      ccc19x$der_stroke_comp_within_3mo <- as.factor(ccc19x$der_stroke_comp_within_3mo)
+      summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
     }
-    
-    ccc19x$der_stroke_comp_within_3mo <- as.factor(ccc19x$der_stroke_comp_within_3mo)
-    summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Comp08. Arrhythmia complications (partial derived)
     ccc19x$der_arry <- 0
@@ -6246,6 +6249,16 @@ suffix <- 'data with derived variables for central QA'
                                ccc19x$cancer_type_5 %in% c("C27134", "C9300","OTH_H"))] <- 1
     ccc19x$der_HemeNOS <- factor(ccc19x$der_HemeNOS)
     summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
+    
+    #B-cell malignancies + aggressive NHL + indolent NHL and excluding myeloma
+    ccc19x$der_Bcell <- 0
+    ccc19x$der_Bcell[which(ccc19x$cancer_type %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308")|
+                                   ccc19x$cancer_type_2 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308")|
+                                   ccc19x$cancer_type_3 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308")|
+                                   ccc19x$cancer_type_4 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308")|
+                                   ccc19x$cancer_type_5 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308"))] <- 1
+    ccc19x$der_Bcell <- factor(ccc19x$der_Bcell)
+    summary(ccc19x$der_Bcell[ccc19x$redcap_repeat_instrument == ''])
     
     ccc19x$der_Lymph_HGNHL <- 0
     ccc19x$der_Lymph_HGNHL[which(ccc19x$cancer_type %in% c("C8851","C9244","C2912")|
