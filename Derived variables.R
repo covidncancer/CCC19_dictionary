@@ -7161,6 +7161,11 @@ suffix <- 'data with derived variables for central QA'
     ccc19x$der_any_systemic_v2 <- factor(ccc19x$der_any_systemic_v2)
     summary(ccc19x$der_any_systemic_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca10a1. Any cytotoxic chemotherapy within 12 months
+    ccc19x$der_any_cyto_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_cyto_12mo[which(ccc19x$der_any_cyto_12mo == 1 & ccc19x$treatment_modality___685 == 0)] <- 0
+    summary(ccc19x$der_any_cyto_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca10c1. Any targeted therapy within 12 months
     ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_targeted_12mo[which(ccc19x$der_any_targeted_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
@@ -7673,6 +7678,15 @@ suffix <- 'data with derived variables for central QA'
     
     ccc19x$der_cd20_12m <- factor(ccc19x$der_cd20_12m)
     summary(ccc19x$der_cd20_12m[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4a2: CD20 + chemo within 12 months
+    ccc19x$der_cd20_cyto_12mo <- NA
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 1 & ccc19x$der_any_cyto_12mo == 1)] <- 1
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 99|ccc19x$der_any_cyto_12mo == 99)] <- 99
+    
+    ccc19x$der_cd20_cyto_12mo <- factor(ccc19x$der_cd20_cyto_12mo)
+    summary(ccc19x$der_cd20_cyto_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4m: CD38 drugs
     ccc19x$der_cd38 <- NA
