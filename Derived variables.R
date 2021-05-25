@@ -4797,6 +4797,91 @@ suffix <- 'data with derived variables for central QA'
     ccc19x$der_apa_baseline <- factor(ccc19x$der_apa_baseline)
     summary(ccc19x$der_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
     
+    #Rx23. Thromboprophylaxis, including consideration of baseline anticoagulation
+    #Does not yet account for discrepancies in baseline and follow-up forms
+    ccc19x$der_thromboprophy <- NA
+    
+    #Baseline prophylaxis
+    ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 360271000)] <- 'Baseline prophylactic anticoagulation'
+    
+    #Baseline therapeutic
+    ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 262202000)] <- 'Baseline therapeutic anticoagulation'
+    
+    #COVID-19 prophylaxis
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
+                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 prophylactic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
+                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 prophylactic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
+                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 prophylactic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
+                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 prophylactic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
+                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 prophylactic anticoagulation'
+    
+    #COVID-19 treatment
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+                                      ccc19x$c19_anticoag_reason___2c == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
+                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 therapeutic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+                                      ccc19x$c19_anticoag_reason___2c == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
+                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 therapeutic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+                                      ccc19x$c19_anticoag_reason___2c == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
+                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 therapeutic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+                                      ccc19x$c19_anticoag_reason___2c == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
+                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 therapeutic anticoagulation'
+    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+                                      ccc19x$c19_anticoag_reason___2c == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
+                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 therapeutic anticoagulation'
+    
+    #None for COVID-19
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--no COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--no COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--no COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--no COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--no COVID-19 anticoagulation'
+    
+    #Unknown for COVID-19
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--unknown COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--unknown COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--unknown COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--unknown COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--unknown COVID-19 anticoagulation'
+    
+    #Missing for COVID-19 but not for baseline
+    ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--missing COVID-19 anticoagulation'
+    ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--missing COVID-19 anticoagulation'
+    
+    ccc19x$der_thromboprophy <- factor(ccc19x$der_thromboprophy)
+    summary(ccc19x$der_thromboprophy[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx17. ACEi at baseline
     ccc19x$der_acei_bl <- NA
     ccc19x$der_acei_bl[which(ccc19x$concomitant_meds___c09a == 1)] <- 1
@@ -7618,7 +7703,7 @@ suffix <- 'data with derived variables for central QA'
     if(length(temp.ref) == nrow(drugs))
       ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] <- drugs[,2:8] else ccc19x$drug1 <- 'ERROR'
     
-    #Ca24: Regimen match
+    #Ca24: Regimen match - this will only work if the HemOnc ontology is in the workspace
     ccc19x$der_regimen <- NA
     for(i in which(!is.na(ccc19x$drug1)))
     {
@@ -8630,16 +8715,16 @@ suffix <- 'data with derived variables for central QA'
     ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                            '; Breast cancer biomarkers missing or unknown', sep = '')
     
-    #BCG (bladder)
-    temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
-                        (ccc19x$cancer_type == 'C4912'|
-                           ccc19x$cancer_type_2 == 'C4912'|
-                           ccc19x$cancer_type_3 == 'C4912'|
-                           ccc19x$cancer_type_4 == 'C4912'|
-                           ccc19x$cancer_type_5 == 'C4912'))
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Intravesicular BCG missing or unknown', sep = '')
+    #BCG (bladder) - DEPRECATED
+    # temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
+    #                     (ccc19x$cancer_type == 'C4912'|
+    #                        ccc19x$cancer_type_2 == 'C4912'|
+    #                        ccc19x$cancer_type_3 == 'C4912'|
+    #                        ccc19x$cancer_type_4 == 'C4912'|
+    #                        ccc19x$cancer_type_5 == 'C4912'))
+    # ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+    # ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+    #                                        '; Intravesicular BCG missing or unknown', sep = '')
     
     #Cancer status unknown
     temp.ref <- which(ccc19x$der_cancer_status == 'Unknown' &
