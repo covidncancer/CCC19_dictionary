@@ -7767,6 +7767,12 @@ suffix <- 'data with derived variables for central QA'
     #Ca4a2: CD20 + chemo within 12 months
     ccc19x$der_cd20_cyto_12mo <- NA
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 1 & ccc19x$der_any_cyto_12mo == 1)] <- 1
+    
+    #Extra level if they were also receiving a steroid (e.g., R-CHOP)
+    for(i in which(ccc19x$der_cd20_cyto_12mo == 1))
+      if(any(ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Prednisone','Prednisolone','Methylprednisolone','Dexamethasone','Hydrocortisone'))) ccc19x$der_cd20_cyto_12mo[i] <- 2
+    
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 99|ccc19x$der_any_cyto_12mo == 99)] <- 99
     
