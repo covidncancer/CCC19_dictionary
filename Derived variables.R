@@ -6486,15 +6486,21 @@ suffix <- 'data with derived variables for central QA'
     
     #Lymphoid malignancy
     ccc19x$der_Lymph <- 0
-    ccc19x$der_Lymph[which(ccc19x$der_heme_type %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms")|
-                             ccc19x$der_heme_type_secondary %in% c("Aggressive lymphoid malignancies","Indolent lymphoid malignancies","Plasma cell neoplasms"))] <- 1
+    ccc19x$der_Lymph[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_2 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_3 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_4 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_5 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308"))] <- 1
     ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
     summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
     
     #Myeloid malignancy
     ccc19x$der_Myeloid <- 0
-    ccc19x$der_Myeloid[which(ccc19x$der_heme_type %in% c("Acute myeloid malignancies","Chronic myeloid malignancies")|
-                               ccc19x$der_heme_type_secondary %in% c("Acute myeloid malignancies","Chronic myeloid malignancies"))] <- 1
+    ccc19x$der_Myeloid[which(ccc19x$cancer_type %in% c("C3171","C4345","C3174","C3247")|
+                             ccc19x$cancer_type_2 %in% c("C3171","C4345","C3174","C3247")|
+                             ccc19x$cancer_type_3 %in% c("C3171","C4345","C3174","C3247")|
+                             ccc19x$cancer_type_4 %in% c("C3171","C4345","C3174","C3247")|
+                             ccc19x$cancer_type_5 %in% c("C3171","C4345","C3174","C3247"))] <- 1
     ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
     summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
     
@@ -7629,7 +7635,7 @@ suffix <- 'data with derived variables for central QA'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-02-11.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-05-04.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
