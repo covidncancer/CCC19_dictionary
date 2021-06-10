@@ -5,7 +5,7 @@ setwd("~/Box Sync/CCC19 data")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for central QA'
+suffix <- 'data with derived variables for analysis'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -6486,11 +6486,11 @@ suffix <- 'data with derived variables for central QA'
     
     #Lymphoid malignancy
     ccc19x$der_Lymph <- 0
-    ccc19x$der_Lymph[which(ccc19x$cancer_type %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
-                             ccc19x$cancer_type_2 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
-                             ccc19x$cancer_type_3 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
-                             ccc19x$cancer_type_4 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
-                             ccc19x$cancer_type_5 %in% c("C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308"))] <- 1
+    ccc19x$der_Lymph[which(ccc19x$cancer_type %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_2 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_3 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_4 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
+                             ccc19x$cancer_type_5 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308"))] <- 1
     ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
     summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
     
@@ -9041,6 +9041,19 @@ suffix <- 'data with derived variables for central QA'
   print('Other derived variables completed')
   
 }
+
+#Condensed output for troubleshooting
+temp.ref <- grep(colnames(ccc19x), pattern = '^der_')
+out <- data.frame(variable = colnames(ccc19x)[temp.ref], values = '', stringsAsFactors = F)
+for(i in 1:length(temp.ref))
+{
+  if(is.factor(ccc19x[,temp.ref[i]]))
+  {
+    temp <- summary(ccc19x[ccc19x$redcap_repeat_instrument == '',temp.ref[i]])
+    out$values[i] <- paste(paste(names(temp), temp, sep = ': '), collapse = '; ')
+  } else out$values[i] <- 'NOT A FACTOR'
+}
+write.csv(out, file = paste(Sys.time(),'.summary of derived variables results.csv', sep = ''), row.names = F)
 
 #Save here
 save(ccc19x, file = paste(Sys.time(),'.',suffix,'.RData', sep = ''))
