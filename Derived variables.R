@@ -7354,137 +7354,6 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
     summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
-    ccc19x$der_ARA_1st_gen <- NA
-    
-    temp.ref <- which(ccc19x$der_Prostate == 1)
-    ccc19x$der_ARA_1st_gen[temp.ref] <- 0
-    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___83008 == 1|ccc19x$prostate_tx___4508 == 1|ccc19x$prostate_tx___31805 == 1)] <- 1
-    ccc19x$der_ARA_1st_gen[which(ccc19x$drug1 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug2 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug3 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug4 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug5 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug6 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug7 %in% c('Bicalutamide','Flutamide','Nilutamide'))] <- 1
-    
-    #Unknown
-    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_1st_gen == 0)] <- 99
-    
-    #Missing (everything is unchecked)
-    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
-    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
-    ccc19x$der_ARA_1st_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_1st_gen[temp.ref] == 0)] <- NA
-    
-    ccc19x$der_ARA_1st_gen <- factor(ccc19x$der_ARA_1st_gen)
-    summary(ccc19x$der_ARA_1st_gen[ccc19x$der_Prostate == 1])
-    
-    #Ca15. 2nd generation ARA (only fill for prostate cancer patients, for now)
-    ccc19x$der_ARA_2nd_gen <- NA
-    ccc19x$der_ARA_2nd_gen[which(ccc19x$der_Prostate == 1)] <- 0
-    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___1307298 == 1|ccc19x$prostate_tx___1999574 ==1|ccc19x$prostate_tx___2180325 == 1)] <- 1
-    ccc19x$der_ARA_2nd_gen[which(ccc19x$drug1 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug2 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug3 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug4 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug5 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug6 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug7 %in% c('Apalutamide','Enzalutamide','Darolutamide'))] <- 1
-    
-    #Unknown
-    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_2nd_gen == 0)] <- 99
-    
-    #Missing (everything is unchecked)
-    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
-    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
-    ccc19x$der_ARA_2nd_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_2nd_gen[temp.ref] == 0)] <- NA
-    
-    ccc19x$der_ARA_2nd_gen <- factor(ccc19x$der_ARA_2nd_gen)
-    summary(ccc19x$der_ARA_2nd_gen[ccc19x$der_Prostate == 1])
-    
-    #Ca16. Abiraterone (only fill for prostate cancer patients, for now)
-    ccc19x$der_abi <- NA
-    ccc19x$der_abi[which(ccc19x$der_Prostate == 1)] <- 0
-    ccc19x$der_abi[which(ccc19x$prostate_tx___1100072 == 1)] <- 1
-    ccc19x$der_abi[which(ccc19x$drug1 %in% c('Abiraterone')|
-                           ccc19x$drug2 %in% c('Abiraterone')|
-                           ccc19x$drug3 %in% c('Abiraterone')|
-                           ccc19x$drug4 %in% c('Abiraterone')|
-                           ccc19x$drug5 %in% c('Abiraterone')|
-                           ccc19x$drug6 %in% c('Abiraterone')|
-                           ccc19x$drug7 %in% c('Abiraterone'))] <- 1
-    
-    #Unknown
-    ccc19x$der_abi[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_abi == 0)] <- 99
-    
-    #Missing (everything is unchecked)
-    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
-    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
-    ccc19x$der_abi[temp.ref][which(temp == 0 & ccc19x$der_abi[temp.ref] == 0)] <- NA
-    
-    ccc19x$der_abi <- factor(ccc19x$der_abi)
-    summary(ccc19x$der_abi[ccc19x$der_Prostate == 1])
-    
-    #Ca17. Chemotherapy for prostate cancer (only fill for prostate cancer patients, for now)
-    ccc19x$der_chemo_prca <- NA
-    ccc19x$der_chemo_prca[which(ccc19x$der_Prostate == 1)] <- 0
-    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___996051 == 1|ccc19x$prostate_tx___40048 == 1|ccc19x$prostate_tx___72962 == 1)] <- 1
-    ccc19x$der_chemo_prca[which(ccc19x$drug1 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug2 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug3 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug4 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug5 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug6 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug7 %in% c('Cabazitaxel','Carboplatin','Docetaxel'))] <- 1
-    
-    #Unknown
-    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_chemo_prca == 0)] <- 99
-    
-    #Missing (everything is unchecked)
-    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
-    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
-    ccc19x$der_chemo_prca[temp.ref][which(temp == 0 & ccc19x$der_chemo_prca[temp.ref] == 0)] <- NA
-    
-    ccc19x$der_chemo_prca <- factor(ccc19x$der_chemo_prca)
-    summary(ccc19x$der_chemo_prca[ccc19x$der_Prostate == 1])
-    
-    #Ca18. ADT (only fill for prostate cancer patients, for now)
-    ccc19x$der_adt <- NA
-    
-    #Yes
-    ccc19x$der_adt[which(ccc19x$adt == 1)] <- 1
-    ccc19x$der_adt[which(ccc19x$orchiectomy == 1)] <- 1
-    ccc19x$der_adt[which(is.na(ccc19x$adt) & ccc19x$treatment_modality___691 == 1 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 1
-    
-    ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug2 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug3 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug4 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug5 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug6 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug7 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin'))
-                         & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 2
-    
-    #No
-    ccc19x$der_adt[which(ccc19x$adt == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
-    ccc19x$der_adt[which(ccc19x$treatment_modality___691 == 0 &
-                           (ccc19x$treatment_modality___685 == 1|
-                              ccc19x$treatment_modality___694 == 1|
-                              ccc19x$treatment_modality___58229 == 1|
-                              ccc19x$treatment_modality___695 == 1|
-                              ccc19x$treatment_modality___14051 == 1|
-                              ccc19x$treatment_modality___45186 == 1|
-                              ccc19x$treatment_modality___45215 == 1|
-                              ccc19x$treatment_modality___oth == 1) &
-                           ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
-    ccc19x$der_adt[which(ccc19x$on_treatment == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
-    
-    #Unknown
-    ccc19x$der_adt[which(ccc19x$prostate_tx___unk == 1 & is.na(ccc19x$der_adt))] <- 99
-    
-    ccc19x$der_adt <- factor(ccc19x$der_adt)
-    summary(ccc19x$der_adt[ccc19x$der_Prostate == 1])
-    
     #Ca3a. ecogcat
     #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
     ccc19x$der_ecogcat <- NA
@@ -7735,6 +7604,137 @@ suffix <- 'data with derived variables for analysis'
         ccc19x$der_regimen[i] <- out
       } else ccc19x$der_regimen[i] <- 'No match'      
     }
+    
+    #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
+    ccc19x$der_ARA_1st_gen <- NA
+    
+    temp.ref <- which(ccc19x$der_Prostate == 1)
+    ccc19x$der_ARA_1st_gen[temp.ref] <- 0
+    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___83008 == 1|ccc19x$prostate_tx___4508 == 1|ccc19x$prostate_tx___31805 == 1)] <- 1
+    ccc19x$der_ARA_1st_gen[which(ccc19x$drug1 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug2 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug3 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug4 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug5 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug6 %in% c('Bicalutamide','Flutamide','Nilutamide')|
+                                   ccc19x$drug7 %in% c('Bicalutamide','Flutamide','Nilutamide'))] <- 1
+    
+    #Unknown
+    ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_1st_gen == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_ARA_1st_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_1st_gen[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_ARA_1st_gen <- factor(ccc19x$der_ARA_1st_gen)
+    summary(ccc19x$der_ARA_1st_gen[ccc19x$der_Prostate == 1])
+    
+    #Ca15. 2nd generation ARA (only fill for prostate cancer patients, for now)
+    ccc19x$der_ARA_2nd_gen <- NA
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___1307298 == 1|ccc19x$prostate_tx___1999574 ==1|ccc19x$prostate_tx___2180325 == 1)] <- 1
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$drug1 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug2 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug3 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug4 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug5 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug6 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
+                                   ccc19x$drug7 %in% c('Apalutamide','Enzalutamide','Darolutamide'))] <- 1
+    
+    #Unknown
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_2nd_gen == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_ARA_2nd_gen[temp.ref][which(temp == 0 & ccc19x$der_ARA_2nd_gen[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_ARA_2nd_gen <- factor(ccc19x$der_ARA_2nd_gen)
+    summary(ccc19x$der_ARA_2nd_gen[ccc19x$der_Prostate == 1])
+    
+    #Ca16. Abiraterone (only fill for prostate cancer patients, for now)
+    ccc19x$der_abi <- NA
+    ccc19x$der_abi[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_abi[which(ccc19x$prostate_tx___1100072 == 1)] <- 1
+    ccc19x$der_abi[which(ccc19x$drug1 %in% c('Abiraterone')|
+                           ccc19x$drug2 %in% c('Abiraterone')|
+                           ccc19x$drug3 %in% c('Abiraterone')|
+                           ccc19x$drug4 %in% c('Abiraterone')|
+                           ccc19x$drug5 %in% c('Abiraterone')|
+                           ccc19x$drug6 %in% c('Abiraterone')|
+                           ccc19x$drug7 %in% c('Abiraterone'))] <- 1
+    
+    #Unknown
+    ccc19x$der_abi[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_abi == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_abi[temp.ref][which(temp == 0 & ccc19x$der_abi[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_abi <- factor(ccc19x$der_abi)
+    summary(ccc19x$der_abi[ccc19x$der_Prostate == 1])
+    
+    #Ca17. Chemotherapy for prostate cancer (only fill for prostate cancer patients, for now)
+    ccc19x$der_chemo_prca <- NA
+    ccc19x$der_chemo_prca[which(ccc19x$der_Prostate == 1)] <- 0
+    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___996051 == 1|ccc19x$prostate_tx___40048 == 1|ccc19x$prostate_tx___72962 == 1)] <- 1
+    ccc19x$der_chemo_prca[which(ccc19x$drug1 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug2 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug3 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug4 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug5 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug6 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
+                                  ccc19x$drug7 %in% c('Cabazitaxel','Carboplatin','Docetaxel'))] <- 1
+    
+    #Unknown
+    ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_chemo_prca == 0)] <- 99
+    
+    #Missing (everything is unchecked)
+    temp.ref2 <- grep(colnames(ccc19x), pattern = 'prostate_tx___')
+    temp <- rowSums(ccc19x[which(ccc19x$der_Prostate == 1),temp.ref2])
+    ccc19x$der_chemo_prca[temp.ref][which(temp == 0 & ccc19x$der_chemo_prca[temp.ref] == 0)] <- NA
+    
+    ccc19x$der_chemo_prca <- factor(ccc19x$der_chemo_prca)
+    summary(ccc19x$der_chemo_prca[ccc19x$der_Prostate == 1])
+    
+    #Ca18. ADT (only fill for prostate cancer patients, for now)
+    ccc19x$der_adt <- NA
+    
+    #Yes
+    ccc19x$der_adt[which(ccc19x$adt == 1)] <- 1
+    ccc19x$der_adt[which(ccc19x$orchiectomy == 1)] <- 1
+    ccc19x$der_adt[which(is.na(ccc19x$adt) & ccc19x$treatment_modality___691 == 1 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 1
+    
+    ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug2 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug3 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug4 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug5 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug6 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
+                            ccc19x$drug7 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin'))
+                         & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 2
+    
+    #No
+    ccc19x$der_adt[which(ccc19x$adt == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    ccc19x$der_adt[which(ccc19x$treatment_modality___691 == 0 &
+                           (ccc19x$treatment_modality___685 == 1|
+                              ccc19x$treatment_modality___694 == 1|
+                              ccc19x$treatment_modality___58229 == 1|
+                              ccc19x$treatment_modality___695 == 1|
+                              ccc19x$treatment_modality___14051 == 1|
+                              ccc19x$treatment_modality___45186 == 1|
+                              ccc19x$treatment_modality___45215 == 1|
+                              ccc19x$treatment_modality___oth == 1) &
+                           ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    ccc19x$der_adt[which(ccc19x$on_treatment == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
+    
+    #Unknown
+    ccc19x$der_adt[which(ccc19x$prostate_tx___unk == 1 & is.na(ccc19x$der_adt))] <- 99
+    
+    ccc19x$der_adt <- factor(ccc19x$der_adt)
+    summary(ccc19x$der_adt[ccc19x$der_Prostate == 1])
     
     #Ca4a: CD20 drugs
     ccc19x$der_cd20 <- NA
