@@ -3855,6 +3855,10 @@ suffix <- 'data with derived variables for analysis'
                              ccc19x$covid_19_treatment___rxcui_260101 == 1|
                              ccc19x$covid_19_treatment_fu___rxcui_260101 == 1)] <- 1
     
+    #Factor
+    ccc19x$der_oselt <- as.factor(ccc19x$der_oselt)
+    summary(ccc19x$der_oselt[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx3. HCQ ever used for TREATMENT of COVID-19
     ccc19x$der_hcq <- NA
     ccc19x$der_hcq[which(ccc19x$covid_19_treatment___rxcui_5521 == 1|
@@ -7646,7 +7650,7 @@ suffix <- 'data with derived variables for analysis'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-05-04.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-06-10.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
@@ -7654,16 +7658,9 @@ suffix <- 'data with derived variables for analysis'
     
     for(i in 3:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
     
-    #Add structured drugs later
-    temp.exclude <- c('Acalabrutinib','Dasatinib','Fedratinib','Ibrutinib',
-                      'Imatinib','Nilotinib','Ruxolitinib','Tofacitinib',
-                      'Ipilimumab','Nivolumab','Pembrolizumab','Atezolizumab',
-                      'Durvalumab','Avelumab','Cemiplimab',
-                      'ADT','Degarelix','Goserelin','Leuprolide')
-    
     ccc19x$der_no_drugs <- NA
     
-    #Count the drugs excluding the structured drugs
+    #Count the drugs
     drugs.ref <- which(colnames(drugs) == 'drug1'):which(colnames(drugs) == 'drug12')
     for(i in 1:nrow(drugs))
     {
@@ -7671,29 +7668,8 @@ suffix <- 'data with derived variables for analysis'
       temp <- drugs[i,drugs.ref]
       temp <- temp[!is.na(temp)]
       temp <- temp[temp != '']
-      temp <- temp[!temp %in% temp.exclude]
       ccc19x$der_no_drugs[temp.ref] <- length(temp)
     }
-    
-    #Now add the structured drugs - targeted therapy and ADT
-    temp.ref <- c(grep(colnames(ccc19x), pattern = 'what_targeted_tx___l'), which(colnames(ccc19x) == 'adt'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    {
-      temp <- ccc19x[i,temp.ref]
-      temp <- temp[!is.na(temp)]
-      temp[which(temp == 99)] <- 0
-      if(is.na(ccc19x$der_no_drugs[i])) ccc19x$der_no_drugs[i] <- sum(temp)
-      else ccc19x$der_no_drugs[i] <- ccc19x$der_no_drugs[i] + sum(temp)
-    }
-    
-    #Immunotherapy
-    temp.ref <- which(ccc19x$what_immunotherapy %in% c(45838,45446,45170))
-    ccc19x$der_no_drugs[temp.ref] <- ccc19x$der_no_drugs[temp.ref] + 1
-    temp.ref <- which(ccc19x$what_immunotherapy %in% c('45838-45446'))
-    ccc19x$der_no_drugs[temp.ref] <- ccc19x$der_no_drugs[temp.ref] + 2
-    
-    #Level
-    ccc19x$der_no_drugs[which(ccc19x$der_no_drug >= 3)] <- '3+'
     
     #If a systemic treatment modality was checked but no drug names available --> missing
     ccc19x$der_no_drugs[which((ccc19x$treatment_modality___685 == 1 | 
@@ -7706,7 +7682,7 @@ suffix <- 'data with derived variables for analysis'
     summary(ccc19x$der_no_drugs[ccc19x$redcap_repeat_instrument == ''])
     
     #Add the drugs into the main data table
-    drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
+    drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7','drug8')]
     ccc19x$drug1 <- NA
     ccc19x$drug2 <- NA
     ccc19x$drug3 <- NA
@@ -7714,12 +7690,30 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$drug5 <- NA
     ccc19x$drug6 <- NA
     ccc19x$drug7 <- NA
-    #ccc19x$drug8 <- NA
+    ccc19x$drug8 <- NA
     
-    temp.ref <- which(ccc19x$record_id %in% drugs$record_id & ccc19x$redcap_repeat_instrument == '')
-    if(length(temp.ref) == nrow(drugs))
-      ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] <- drugs[,2:8] else ccc19x$drug1 <- 'ERROR'
+    #In case things are out of order in either table, load drugs one at a time
+    for(i in 1:nrow(drugs))
+    {
+      temp.ref <- which(ccc19x$record_id %in% drugs$record_id[i] & ccc19x$redcap_repeat_instrument == '')
+      if(length(temp.ref) == 1) ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7','drug8')] <- drugs[i,2:9]
+    }
+   
+    #Result checking
+    sum(!is.na(ccc19x$drug1))
+    temp <- c(ccc19x$drug1[!is.na(ccc19x$drug1)],
+              ccc19x$drug2[!is.na(ccc19x$drug2)],
+              ccc19x$drug3[!is.na(ccc19x$drug3)],
+              ccc19x$drug4[!is.na(ccc19x$drug4)],
+              ccc19x$drug5[!is.na(ccc19x$drug5)],
+              ccc19x$drug6[!is.na(ccc19x$drug6)],
+              ccc19x$drug7[!is.na(ccc19x$drug7)],
+              ccc19x$drug8[!is.na(ccc19x$drug8)])
+    temp <- temp[temp != '']
     
+    length(unique(temp))
+    temp <- factor(temp)
+     
     #Ca24: Regimen match - this will only work if the HemOnc ontology is in the workspace
     ccc19x$der_regimen <- NA
     for(i in which(!is.na(ccc19x$drug1)))
@@ -9062,7 +9056,11 @@ for(i in 1:length(temp.ref))
   {
     temp <- summary(ccc19x[ccc19x$redcap_repeat_instrument == '',temp.ref[i]])
     out$values[i] <- paste(paste(names(temp), temp, sep = ': '), collapse = '; ')
-  } else out$values[i] <- 'NOT A FACTOR'
+  } else if(is.integer(ccc19x[,temp.ref[i]]))
+  {
+    temp <- summary(factor(ccc19x[ccc19x$redcap_repeat_instrument == '',temp.ref[i]]))
+    out$values[i] <- paste(paste(names(temp), temp, sep = ': '), collapse = '; ')
+  } else out$values[i] <- 'Not a factor or an integer variable'
 }
 write.csv(out, file = paste(Sys.time(),'.summary of derived variables results.csv', sep = ''), row.names = F)
 
