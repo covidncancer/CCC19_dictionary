@@ -9042,6 +9042,34 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_pasc <- factor(ccc19x$der_pasc)
     summary(ccc19x$der_pasc[ccc19x$redcap_repeat_instrument == ''])
     
+    ############################
+    #X12. SARS-CoV-2 vaccination
+    ############################
+    ccc19x$der_vax <- NA
+    
+    #No
+    ccc19x$der_vax[which(ccc19x$sars_vax == 0)] <- 'Unvaccinated'
+    
+    #Fully vaccinated
+    ccc19x$der_vax[which((ccc19x$sars_vax_which == 4 & ccc19x$sars_vax_when %in% 2:4)|
+                           ccc19x$sars_vax_which %in% c('1b','2b','3b') & ccc19x$sars_vax_when %in% 3:4)] <- 'Fully vaccinated'
+    
+    #Partial early (0-4 weeks)
+    ccc19x$der_vax[which(ccc19x$sars_vax_when == 1)] <- 'Partially vaccinated, early (0-4 wks)'
+    
+    #Partial late (4+ weeks)
+    ccc19x$der_vax[which(ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax))] <- 'Partially vaccinated, late (4+ weeks)'
+    
+    #After COVID-19
+    ccc19x$der_vax[which(ccc19x$sars_vax_when == 88)] <- 'After COVID-19'
+    
+    #Unknown
+    ccc19x$der_vax[which(ccc19x$sars_vax == 99|
+                           ccc19x$sars_vax_when == 99)] <- 'Unknown'
+    
+    ccc19x$der_vax <- factor(ccc19x$der_vax)
+    summary(ccc19x$der_vax[ccc19x$redcap_repeat_instrument == ''])
+    
   }
   print('Other derived variables completed')
   
