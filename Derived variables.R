@@ -3505,137 +3505,145 @@ suffix <- 'data with derived variables for analysis'
     summary(ccc19x$der_who[ccc19x$redcap_repeat_instrument == ''])
     
     #O22. ordinal_v1 (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death in 30 days)
-    
-    #Declare as missing
-    ccc19x$der_ordinal_v1 <- NA
-    
-    #Start with non-hospitalized
-    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 0)] <- 0
-    
-    #Hospital (ever/never)
-    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 1)] <- 1
-    ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 99)] <- 99
-    
-    #ICU (ever/never)
-    #ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 0)]
-    ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 1)] <- 2
-    ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 99)] <- 99
-    
-    #Mechanical ventilation (ever/never)
-    #ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 0)]
-    ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 1)] <- 3
-    ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 99)] <- 99
-    
-    #Death within 30 days
-    ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 1)] <- 4
-    ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 99)] <- 99
-    
-    summary(factor(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == '']))
+    {
+      #Declare as missing
+      ccc19x$der_ordinal_v1 <- NA
+      
+      #Start with non-hospitalized
+      ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 0)] <- 0
+      
+      #Hospital (ever/never)
+      ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 1)] <- 1
+      ccc19x$der_ordinal_v1[which(ccc19x$der_hosp == 99)] <- 99
+      
+      #ICU (ever/never)
+      #ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 0)]
+      ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 1)] <- 2
+      ccc19x$der_ordinal_v1[which(ccc19x$der_ICU == 99)] <- 99
+      
+      #Mechanical ventilation (ever/never)
+      #ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 0)]
+      ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 1)] <- 3
+      ccc19x$der_ordinal_v1[which(ccc19x$der_mv == 99)] <- 99
+      
+      #Death within 30 days
+      ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 1)] <- 4
+      ccc19x$der_ordinal_v1[which(ccc19x$der_dead30 == 99)] <- 99
+      
+      ccc19x$der_ordinal_v1 <- as.integer(ccc19x$der_ordinal_v1)
+      summary(factor(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == '']))
+    }
     
     #O22a. ordinal_v1a (0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death EVER)
+    {
+      #Declare as missing
+      ccc19x$der_ordinal_v1a <- NA
+      
+      #Start with non-hospitalized
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 0)] <- 0
+      
+      #Hospital (ever/never)
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 1)] <- 1
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 99)] <- 99
+      
+      #ICU (ever/never)
+      #ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 0)]
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 1)] <- 2
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 99)] <- 99
+      
+      #Mechanical ventilation (ever/never)
+      #ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 0)]
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 1)] <- 3
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 99)] <- 99
+      
+      #Death at any time
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 1)] <- 4
+      #Only declare unknown if patient not know to be alive at 30, 90, or 180 days
+      ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 &
+                                     !(ccc19x$der_dead30 == 0|ccc19x$der_dead90 == 0|ccc19x$der_dead180 == 0))] <- 99
+      
+      length(ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 & ccc19x$der_dead30 == 99)])
+      
+      ccc19x$der_ordinal_v1a <- as.integer(ccc19x$der_ordinal_v1a)
+      summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
+    }
     
-    #Declare as missing
-    ccc19x$der_ordinal_v1a <- NA
-    
-    #Start with non-hospitalized
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 0)] <- 0
-    
-    #Hospital (ever/never)
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 1)] <- 1
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_hosp == 99)] <- 99
-    
-    #ICU (ever/never)
-    #ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 0)]
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 1)] <- 2
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_ICU == 99)] <- 99
-    
-    #Mechanical ventilation (ever/never)
-    #ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 0)]
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 1)] <- 3
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_mv == 99)] <- 99
-    
-    #Death at any time
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 1)] <- 4
-    #Only declare unknown if patient not know to be alive at 30, 90, or 180 days
-    ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 &
-                                   !(ccc19x$der_dead30 == 0|ccc19x$der_dead90 == 0|ccc19x$der_dead180 == 0))] <- 99
-    
-    length(ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 & ccc19x$der_dead30 == 99)])
-    
-    summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
-    
-    #O22b. ordinal_v1b -- including "at least"
+    #O22b. ordinal_v1b -- including "at least" - so it is actually a categorical
     #(0 = never hospitalized; 1 = hospitalized; 2 = ICU; 3 = vent; 4 = death ever)
-    
-    #Declare as missing
-    ccc19x$der_ordinal_v1b <- NA
-    
-    #Start with none of the below
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 0 & 
-                                   ccc19x$der_ICU == 0 &
-                                   ccc19x$der_mv == 0 &
-                                   ccc19x$der_deadbinary == 0)] <- 0
-    
-    #Hospital (ever/never)
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 1)] <- 1
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
-    
-    #ICU (ever/never)
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 1)] <- 2
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
-    
-    #Mechanical ventilation (ever/never)
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 1)] <- 3
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
-    
-    #Death within 30 days
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 1)] <- 4
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
-    ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
-    
-    summary(factor(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == '']))
+    {
+      #Declare as missing
+      ccc19x$der_ordinal_v1b <- NA
+      
+      #Start with none of the below
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 0 & 
+                                     ccc19x$der_ICU == 0 &
+                                     ccc19x$der_mv == 0 &
+                                     ccc19x$der_deadbinary == 0)] <- 0
+      
+      #Hospital (ever/never)
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 1)] <- 1
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+      
+      #ICU (ever/never)
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 1)] <- 2
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_ICU == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+      
+      #Mechanical ventilation (ever/never)
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 1)] <- 3
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_mv == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+      
+      #Death within 30 days
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 1)] <- 4
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 0)] <- "At least 0"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 1)] <- "At least 1"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 2)] <- "At least 2"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & ccc19x$der_ordinal_v1b == 3)] <- "At least 3"
+      ccc19x$der_ordinal_v1b[which(ccc19x$der_deadbinary == 99 & is.na(ccc19x$der_ordinal_v1b))] <- 99
+      
+      ccc19x$der_ordinal_v1b <- as.factor(ccc19x$der_ordinal_v1b)
+      summary(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == ''])
+    }
     
     #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
-    
-    #Declare as missing
-    ccc19x$der_ordinal_v2 <- NA
-    
-    #Start with non-hospitalized
-    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 0)] <- 0
-    
-    #Hospitalized regardless of O2
-    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 1)] <- 1
-    ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 99)] <- 99
-    
-    #O2 required
-    #ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 0)]
-    ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 1)] <- 2
-    ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 99)] <- 99
+    {
+      #Declare as missing
+      ccc19x$der_ordinal_v2 <- NA
       
-    #ICU
-    #ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 0)]
-    ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 1)] <- 3
-    ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 99)] <- 99
-    
-    #Mechanical ventilation
-    #ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 0)]
-    ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 1)] <- 4
-    ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 99)] <- 99
-    
-    #Death within 30 days
-    ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 1)] <- 5
-    ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 99)] <- 99
-    
-    summary(factor(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == '']))
+      #Start with non-hospitalized
+      ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 0)] <- 0
+      
+      #Hospitalized regardless of O2
+      ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 1)] <- 1
+      ccc19x$der_ordinal_v2[which(ccc19x$der_hosp == 99)] <- 99
+      
+      #O2 required
+      #ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 0)]
+      ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 1)] <- 2
+      ccc19x$der_ordinal_v2[which(ccc19x$der_o2_ever == 99)] <- 99
+      
+      #ICU
+      #ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 0)]
+      ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 1)] <- 3
+      ccc19x$der_ordinal_v2[which(ccc19x$der_ICU == 99)] <- 99
+      
+      #Mechanical ventilation
+      #ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 0)]
+      ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 1)] <- 4
+      ccc19x$der_ordinal_v2[which(ccc19x$der_mv == 99)] <- 99
+      
+      #Death within 30 days
+      ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 1)] <- 5
+      ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 99)] <- 99
+      
+      ccc19x$der_ordinal_v2 <- as.integer(ccc19x$der_ordinal_v2)
+      summary(factor(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == '']))
+    }
     
     #O26. ordinal_v3 (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
     #                  2 = hospitalized and required O2; 3 = ICU; 4 = vent; 5 = death within 30d)
@@ -3667,6 +3675,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_ordinal_v3[which(ccc19x$der_dead30 == 1)] <- 5
     ccc19x$der_ordinal_v3[which(ccc19x$der_dead30 == 99)] <- 99
     
+    ccc19x$der_ordinal_v3 <- as.integer(ccc19x$der_ordinal_v3)
     summary(factor(ccc19x$der_ordinal_v3[ccc19x$redcap_repeat_instrument == '']))
     
     #O26a. ordinal_v3a (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
@@ -3699,6 +3708,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_ordinal_v3a[which(ccc19x$der_deadbinary == 1)] <- 5
     ccc19x$der_ordinal_v3a[which(ccc19x$der_deadbinary == 99)] <- 99
     
+    ccc19x$der_ordinal_v3a <- as.integer(ccc19x$der_ordinal_v3a)
     summary(factor(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == '']))
     
     #O27. ordinal_v4 (0 = ambulatory, 1 = hospitalized, 2= hospitalized with supplemental oxygen, 
@@ -3735,6 +3745,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 1)] <- 6
     ccc19x$der_ordinal_v4[which(ccc19x$der_deadbinary == 99)] <- 99
     
+    ccc19x$der_ordinal_v4 <- as.integer(ccc19x$der_ordinal_v4)
     summary(factor(ccc19x$der_ordinal_v4[ccc19x$redcap_repeat_instrument == '']))
   }
   print('Ordinal outcomes completed')
