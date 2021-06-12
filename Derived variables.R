@@ -7116,7 +7116,7 @@ suffix <- 'data with derived variables for analysis'
     #2. Receiving >20 mg/d prednisone equivalents at baseline
     ccc19x$der_immunosuppressed_v2[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
     
-    #3. Receiving "immunuosuppressants" at baseline
+    #3. Receiving "immunosuppressants" at baseline
     ccc19x$der_immunosuppressed_v2[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
     
     #4. Receiving cytotoxic chemotherapy within 3 months
@@ -9068,14 +9068,19 @@ suffix <- 'data with derived variables for analysis'
     
     #Fully vaccinated
     ccc19x$der_vax[which((ccc19x$sars_vax_which == 4 & ccc19x$sars_vax_when %in% 2:4)|
-                           ccc19x$sars_vax_which %in% c('1b','2b','3b') & ccc19x$sars_vax_when %in% 3:4)] <- 'Fully vaccinated'
+                           (ccc19x$sars_vax_which %in% c('1b','2b') & ccc19x$sars_vax_when %in% 3:4)|
+                           (ccc19x$sars_vax_which %in% c('3b') & ccc19x$sars_vax_when %in% 2:4))
+                     ] <- 'Fully vaccinated'
     
-    #Partial early (0-4 weeks)
-    ccc19x$der_vax[which(ccc19x$sars_vax_when == 1)] <- 'Partially vaccinated, early (0-4 wks)'
+    ccc19x$der_vax[which(ccc19x$sars_vax_when == 1|
+                           (ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax)))] <- 'Partially vaccinated'
     
-    #Partial late (4+ weeks)
-    ccc19x$der_vax[which(ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax))] <- 'Partially vaccinated, late (4+ weeks)'
-    
+    # #Partial early (0-4 weeks)
+    # ccc19x$der_vax[which(ccc19x$sars_vax_when == 1)] <- 'Partially vaccinated, early (0-4 wks)'
+    # 
+    # #Partial late (4+ weeks)
+    # ccc19x$der_vax[which(ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax))] <- 'Partially vaccinated, late (4+ weeks)'
+    # 
     #After COVID-19
     ccc19x$der_vax[which(ccc19x$sars_vax_when == 88)] <- 'After COVID-19'
     
