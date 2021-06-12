@@ -5548,107 +5548,110 @@ suffix <- 'data with derived variables for analysis'
     }
     
     #C01. BMI, with derived BMI for records that have height and weight recorded and not BMI
-    ccc19x$der_bmi <- ccc19x$bmi
-    
-    #Records with height/weight recorded, no BMI
-    temp.ref <- which(is.na(ccc19x$der_bmi) & grepl(ccc19x$height, pattern = '[0-9]') & grepl(ccc19x$weight, pattern = '[0-9]'))
-    
-    #removing rows that are missing height or weight
-    temp <- ccc19x[temp.ref,c('height','weight')]
-    temp$height <- trimws(temp$height)
-    temp$weight <- trimws(temp$weight)
-    
-    #fixing transposed data
-    temp[grepl("kg", temp$height, ignore.case = T), c("height", "weight")] <- temp[grepl("kg", temp$height, ignore.case = T), c("weight", "height")]
-    temp[grepl("lb", temp$height, fixed = TRUE), c("height", "weight")] <- temp[grepl("lb", temp$height, fixed = TRUE), c("weight", "height")]
-    temp[grepl("'", temp$weight, fixed = TRUE), c("height", "weight")] <- temp[grepl("'", temp$weight, fixed = TRUE), c("weight", "height")]
-    
-    #converting all heights to meters
-    
-    #fixing data in the format ft'in" (e.g 5'11"), could also be used in a similar way to fix data in format "x feet y inches"
-    x <- temp[grepl("'", temp$height, fixed = TRUE), "height"]
-    x <- gsub("'", "", x)
-    x <- gsub("\"", "", x)
-    x <- gsub(" ", "", x)
-    y <- strtoi(substr(x, 1, 1))
-    z <- strtoi(substr(x, 2, 3))
-    x <- y * 12 + z
-    x <- toString(x)
-    x <- strsplit(x, ", ")
-    x <- paste(x[[1]], 'inches')
-    temp[grepl("'", temp$height, fixed = TRUE), "height"] <- x
-    
-    #fixed the height entries in the format "x foot y inches"
-    temp$height <- gsub(temp$height, pattern = 'foot', replacement = 'feet')
-    temp$height[which(temp$height == '5 ft 2.5 in')] <- '62.5 inches'
-    temp$height[which(temp$height == '5 feet 1 inch')] <- '61 inches'
-    temp$height[which(temp$height == '5 feet 3 inches')] <- '63 inches'
-    temp$height[which(temp$height == '5 feet 4 inches')] <- '64 inches'
-    temp$height[which(temp$height == '5 feet 6 inches')] <- '66 inches'
-    temp$height[which(temp$height == '5 feet 7 inches')] <- '67 inches'
-    temp$height[which(temp$height == '5 feet 8 inches')] <- '68 inches'
-    temp$height[which(temp$height == '5 feet 9 inches')] <- '69 inches'
-    temp$height[which(temp$height == '5 feet 10 inches')] <- '70 inches'
-    temp$height[which(temp$height == '5 feet 11 inches')] <- '71 inches'
-    temp$height[which(temp$height == '6 feet')] <- '72 inches'
-    temp$height[which(temp$height == '6 feet 2 inches')] <- '74 inches'
-    
-    #converted height strings into double values and put them in a new column
-    temp$mheight <- temp$height
-    temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
-    if(any(grepl(temp$mheight, pattern = '[a-z]')))
     {
-      err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
-      out <- ccc19x$record_id[temp.ref[grep(temp$mheight, pattern = '[a-z]')]]
+      cc19x$der_bmi <- ccc19x$bmi
+      
+      #Records with height/weight recorded, no BMI
+      temp.ref <- which(is.na(ccc19x$der_bmi) & grepl(ccc19x$height, pattern = '[0-9]') & grepl(ccc19x$weight, pattern = '[0-9]'))
+      
+      #removing rows that are missing height or weight
+      temp <- ccc19x[temp.ref,c('height','weight')]
+      temp$height <- trimws(temp$height)
+      temp$weight <- trimws(temp$weight)
+      
+      #fixing transposed data
+      temp[grepl("kg", temp$height, ignore.case = T), c("height", "weight")] <- temp[grepl("kg", temp$height, ignore.case = T), c("weight", "height")]
+      temp[grepl("lb", temp$height, fixed = TRUE), c("height", "weight")] <- temp[grepl("lb", temp$height, fixed = TRUE), c("weight", "height")]
+      temp[grepl("'", temp$weight, fixed = TRUE), c("height", "weight")] <- temp[grepl("'", temp$weight, fixed = TRUE), c("weight", "height")]
+      
+      #converting all heights to meters
+      
+      #fixing data in the format ft'in" (e.g 5'11"), could also be used in a similar way to fix data in format "x feet y inches"
+      x <- temp[grepl("'", temp$height, fixed = TRUE), "height"]
+      x <- gsub("'", "", x)
+      x <- gsub("\"", "", x)
+      x <- gsub(" ", "", x)
+      y <- strtoi(substr(x, 1, 1))
+      z <- strtoi(substr(x, 2, 3))
+      x <- y * 12 + z
+      x <- toString(x)
+      x <- strsplit(x, ", ")
+      x <- paste(x[[1]], 'inches')
+      temp[grepl("'", temp$height, fixed = TRUE), "height"] <- x
+      
+      #fixed the height entries in the format "x foot y inches"
+      temp$height <- gsub(temp$height, pattern = 'foot', replacement = 'feet')
+      temp$height[which(temp$height == '5 ft 2.5 in')] <- '62.5 inches'
+      temp$height[which(temp$height == '5 feet 1 inch')] <- '61 inches'
+      temp$height[which(temp$height == '5 feet 3 inches')] <- '63 inches'
+      temp$height[which(temp$height == '5 feet 4 inches')] <- '64 inches'
+      temp$height[which(temp$height == '5 feet 6 inches')] <- '66 inches'
+      temp$height[which(temp$height == '5 feet 7 inches')] <- '67 inches'
+      temp$height[which(temp$height == '5 feet 8 inches')] <- '68 inches'
+      temp$height[which(temp$height == '5 feet 9 inches')] <- '69 inches'
+      temp$height[which(temp$height == '5 feet 10 inches')] <- '70 inches'
+      temp$height[which(temp$height == '5 feet 11 inches')] <- '71 inches'
+      temp$height[which(temp$height == '6 feet')] <- '72 inches'
+      temp$height[which(temp$height == '6 feet 2 inches')] <- '74 inches'
+      
+      #converted height strings into double values and put them in a new column
+      temp$mheight <- temp$height
+      temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
+      if(any(grepl(temp$mheight, pattern = '[a-z]')))
+      {
+        err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
+        out <- ccc19x$record_id[temp.ref[grep(temp$mheight, pattern = '[a-z]')]]
+      }
+      
+      temp$mheight <- as.numeric(temp$mheight)
+      
+      #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
+      temp.ref2 <- grep(temp$height, pattern = 'cm')
+      temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]/100
+      
+      temp.ref2 <- grep(temp$height, pattern = 'in')
+      temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]*0.0254
+      
+      temp.ref2 <- which(temp$mheight > 48 & temp$mheight < 100)
+      temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]*0.0254
+      
+      temp.ref2 <- which(temp$mheight >= 100)
+      temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]/100
+      
+      #converting weight value strings to double values and entering them into a new column
+      temp$kgweight <- temp$weight
+      temp$kgweight <- gsub(temp$kgweight, pattern = 'lbs[\\.]?|lb|pounds|kg| |', replacement = '', ignore.case = T)
+      if(any(grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T))) 
+        err <- data.frame(record_id = ccc19x$record_id[temp.ref[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)]],
+                          error = temp$kgweight[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)],
+                          stringsAsFactors = F)
+      
+      temp$kgweight <- as.double(temp$kgweight)
+      
+      #Convert lbs into kg
+      temp.ref2 <- grep(temp$weight, pattern = 'lb|pound')
+      temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
+      
+      #No units, height in English units
+      temp.ref2 <- which(!grepl(temp$weight, pattern = 'lb|pound|kg') & grepl(temp$height, pattern = 'in'))
+      temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
+      
+      #No units, magnitude of height >3 and <100
+      temp.ref2 <- which(!grepl(temp$weight, pattern = 'lb|pound|kg') &
+                           as.numeric(temp$mheight) > 3 & as.numeric(temp$mheight) < 100)
+      temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
+      
+      #calculating bmi and storing final result into a new copy
+      temp$bmi <- temp$kgweight / (temp$mheight)^2
+      
+      ccc19x$der_bmi[temp.ref] <- temp$bmi
+      
+      summary(ccc19x$der_bmi[ccc19x$redcap_repeat_instrument == ''])
     }
-    
-    temp$mheight <- as.numeric(temp$mheight)
-    
-    #converting each height in the mheight double value column into height in meters (values greater than 100 are assumed to be in centimeters)
-    temp.ref2 <- grep(temp$height, pattern = 'cm')
-    temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]/100
-    
-    temp.ref2 <- grep(temp$height, pattern = 'in')
-    temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]*0.0254
-    
-    temp.ref2 <- which(temp$mheight > 48 & temp$mheight < 100)
-    temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]*0.0254
-    
-    temp.ref2 <- which(temp$mheight >= 100)
-    temp$mheight[temp.ref2] <- temp$mheight[temp.ref2]/100
-    
-    #converting weight value strings to double values and entering them into a new column
-    temp$kgweight <- temp$weight
-    temp$kgweight <- gsub(temp$kgweight, pattern = 'lbs[\\.]?|lb|pounds|kg| |', replacement = '', ignore.case = T)
-    if(any(grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T))) 
-      err <- data.frame(record_id = ccc19x$record_id[temp.ref[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)]],
-                        error = temp$kgweight[grepl(temp$kgweight, pattern = '[a-z]', ignore.case = T)],
-                        stringsAsFactors = F)
-    
-    temp$kgweight <- as.double(temp$kgweight)
-    
-    #Convert lbs into kg
-    temp.ref2 <- grep(temp$weight, pattern = 'lb|pound')
-    temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
-    
-    #No units, height in English units
-    temp.ref2 <- which(!grepl(temp$weight, pattern = 'lb|pound|kg') & grepl(temp$height, pattern = 'in'))
-    temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
-    
-    #No units, magnitude of height >3 and <100
-    temp.ref2 <- which(!grepl(temp$weight, pattern = 'lb|pound|kg') &
-                         as.numeric(temp$mheight) > 3 & as.numeric(temp$mheight) < 100)
-    temp$kgweight[temp.ref2] <- temp$kgweight[temp.ref2]*0.454
-    
-    #calculating bmi and storing final result into a new copy
-    temp$bmi <- temp$kgweight / (temp$mheight)^2
-    
-    ccc19x$der_bmi[temp.ref] <- temp$bmi
-    
-    summary(ccc19x$der_bmi[ccc19x$redcap_repeat_instrument == ''])
-    
+   
     "obesity"
     ##C02a. derived variable coding the obesity status (binary)
+    {
     ccc19x$der_obesity <- NA
     
     ccc19x$der_obesity[which(ccc19x$significant_comorbidities___414916001 == 1 |
@@ -5676,8 +5679,10 @@ suffix <- 'data with derived variables for analysis'
     #Factor
     ccc19x$der_obesity <- as.factor(ccc19x$der_obesity)
     summary(ccc19x$der_obesity[ccc19x$redcap_repeat_instrument == ''])
+    }
     
     ##C02b. derived variable coding the morbid obesity status (binary)
+    {
     ccc19x$der_morbid_obesity <- NA
     
     ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
@@ -5703,8 +5708,10 @@ suffix <- 'data with derived variables for analysis'
     #Factor
     ccc19x$der_morbid_obesity <- as.factor(ccc19x$der_morbid_obesity)
     summary(ccc19x$der_morbid_obesity[ccc19x$redcap_repeat_instrument == ''])
+    }
     
     ##C02c. derived variable coding the morbid obesity status (binary, cutoff BMI 35)
+    {
     ccc19x$der_morbid_obesity_v2 <- NA
     
     ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
@@ -5730,6 +5737,23 @@ suffix <- 'data with derived variables for analysis'
     #Factor
     ccc19x$der_morbid_obesity_v2 <- as.factor(ccc19x$der_morbid_obesity_v2)
     summary(ccc19x$der_morbid_obesity_v2[ccc19x$redcap_repeat_instrument == ''])
+    }
+    
+    #C01a. BMI categorical
+    {
+      ccc19x$der_bmi_cat <- NA
+      
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi < 18.5)] <- 'Underweight (BMI < 18.5)'
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi >= 18.5 & ccc19x$der_bmi < 25)] <- 'Normal (BMI 18.5-24.9)'
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi >= 25 & ccc19x$der_bmi < 30)] <- 'Overweight (BMI 25-29.9)'
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi >= 30 & ccc19x$der_bmi < 35)] <- 'Obesity Class I (BMI 30-34.9)'
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi >= 35 & ccc19x$der_bmi < 40)] <- 'Obesity Class II (BMI 35-39.9)'
+      ccc19x$der_bmi_cat[which(ccc19x$der_bmi >= 40)] <- 'Obesity Class III (BMI 40+)'
+      
+      #Factor
+      ccc19x$der_bmi_cat <- factor(ccc19x$der_bmi_cat)
+      summary(ccc19x$der_bmi_cat[ccc19x$redcap_repeat_instrument == ''])
+    }
     
     #C03. Number of comorbidities (just factor)
     ccc19x$der_comorbid_no <- factor(ccc19x$comorbid_no)
