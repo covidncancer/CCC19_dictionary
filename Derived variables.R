@@ -5066,6 +5066,30 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_steroids_bl <- factor(ccc19x$der_steroids_bl)
     summary(ccc19x$der_steroids_bl[ccc19x$redcap_repeat_instrument == ''])
     
+    ###########################
+    #Rx24a. Steroids at baseline - simplified
+    ###########################
+    ccc19x$der_steroids_bl_simple <- NA
+    
+    #Yes
+    ccc19x$der_steroids_bl_simple[which(ccc19x$concomitant_meds___h02 == 1)] <- 1
+    
+    #No steroids
+    ccc19x$der_steroids_bl_simple[which(ccc19x$concomitant_meds___h02 == 0)] <- 0
+    
+    #Unknown
+    ccc19x$der_steroids_bl_simple[which(ccc19x$concomitant_meds___unk == 1 & 
+                                          (ccc19x$der_steroids_bl_simple == 0|is.na(ccc19x$der_steroids_bl_simple)))] <- 99
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_bl_simple[i] <- NA
+    
+    ccc19x$der_steroids_bl_simple <- factor(ccc19x$der_steroids_bl_simple)
+    summary(ccc19x$der_steroids_bl_simple[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###############################################################
     #Rx12. Aspirin or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_as_apa <- NA
     ccc19x$der_as_apa[which(ccc19x$concomitant_meds___n02ba == 1|
