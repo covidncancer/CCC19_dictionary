@@ -3225,23 +3225,63 @@ suffix <- 'data with derived variables for analysis'
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
     
     #First, extract month and year from the POSIXlt objects
-    x1 <- months(ccc19x$meta_lefttime[temp.ref])
-    xm <- months(ccc19x$meta_lefttime2[temp.ref])
-    x2 <- months(ccc19x$meta_lefttime3[temp.ref])
+    x1 <- months(ccc19x$meta_lefttime[temp.ref], abbreviate = T)
+    xm <- months(ccc19x$meta_lefttime2[temp.ref], abbreviate = T)
+    x2 <- months(ccc19x$meta_lefttime3[temp.ref], abbreviate = T)
     y1 <- format(ccc19x$meta_lefttime[temp.ref], format = '%Y')
     ym <- format(ccc19x$meta_lefttime2[temp.ref], format = '%Y')
     y2 <- format(ccc19x$meta_lefttime3[temp.ref], format = '%Y')
     
+    #Format months for table ordering later
+    x1[x1 == 'Jan'] <- '01 (Jan)'
+    x1[x1 == 'Feb'] <- '02 (Feb)'
+    x1[x1 == 'Mar'] <- '03 (Mar)'
+    x1[x1 == 'Apr'] <- '04 (Apr)'
+    x1[x1 == 'May'] <- '05 (May)'
+    x1[x1 == 'Jun'] <- '06 (Jun)'
+    x1[x1 == 'Jul'] <- '07 (Jul)'
+    x1[x1 == 'Aug'] <- '08 (Aug)'
+    x1[x1 == 'Sep'] <- '09 (Sep)'
+    x1[x1 == 'Oct'] <- '10 (Oct)'
+    x1[x1 == 'Nov'] <- '11 (Nov)'
+    x1[x1 == 'Dec'] <- '12 (Dec)'
+    
+    xm[xm == 'Jan'] <- '01 (Jan)'
+    xm[xm == 'Feb'] <- '02 (Feb)'
+    xm[xm == 'Mar'] <- '03 (Mar)'
+    xm[xm == 'Apr'] <- '04 (Apr)'
+    xm[xm == 'May'] <- '05 (May)'
+    xm[xm == 'Jun'] <- '06 (Jun)'
+    xm[xm == 'Jul'] <- '07 (Jul)'
+    xm[xm == 'Aug'] <- '08 (Aug)'
+    xm[xm == 'Sep'] <- '09 (Sep)'
+    xm[xm == 'Oct'] <- '10 (Oct)'
+    xm[xm == 'Nov'] <- '11 (Nov)'
+    xm[xm == 'Dec'] <- '12 (Dec)'
+    
+    x2[x2 == 'Jan'] <- '01 (Jan)'
+    x2[x2 == 'Feb'] <- '02 (Feb)'
+    x2[x2 == 'Mar'] <- '03 (Mar)'
+    x2[x2 == 'Apr'] <- '04 (Apr)'
+    x2[x2 == 'May'] <- '05 (May)'
+    x2[x2 == 'Jun'] <- '06 (Jun)'
+    x2[x2 == 'Jul'] <- '07 (Jul)'
+    x2[x2 == 'Aug'] <- '08 (Aug)'
+    x2[x2 == 'Sep'] <- '09 (Sep)'
+    x2[x2 == 'Oct'] <- '10 (Oct)'
+    x2[x2 == 'Nov'] <- '11 (Nov)'
+    x2[x2 == 'Dec'] <- '12 (Dec)'
+    
     ccc19x$der_month_dx <- NA
     temp.ref2 <- which(x1 == x2 & y1 == y2 & y1 != 2099)
     
-    ccc19x$der_month_dx[temp.ref[temp.ref2]] <- paste(x1[temp.ref2], y1[temp.ref2])
+    ccc19x$der_month_dx[temp.ref[temp.ref2]] <- paste(y1[temp.ref2], '-', x1[temp.ref2], sep = '')
     ccc19x$der_month_dx <- factor(ccc19x$der_month_dx)
     summary(ccc19x$der_month_dx[ccc19x$redcap_repeat_instrument == ''])
     
     #T09a Month and year of diagnosis, using the right side of the interval as the anchor
     ccc19x$der_month_rt_dx <- NA
-    ccc19x$der_month_rt_dx[temp.ref] <- paste(x2, y2)
+    ccc19x$der_month_rt_dx[temp.ref] <- paste(y2, '-', x2, sep = '')
     ccc19x$der_month_rt_dx <- factor(ccc19x$der_month_rt_dx)
     summary(ccc19x$der_month_rt_dx[ccc19x$redcap_repeat_instrument == ''])
     
