@@ -6289,6 +6289,12 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_ccc19cci_v3 <- factor(ccc19x$der_ccc19cci_v3)
     summary(ccc19x$der_ccc19cci_v3[ccc19x$redcap_repeat_instrument == ''])
     
+    #C12c. Modified Charlson with aggregated categories 2+
+    ccc19x$der_ccc19cci_v4 <- as.character(ccc19x$der_ccc19cci)
+    ccc19x$der_ccc19cci_v4[which(ccc19x$der_ccc19cci_v4 %in% 2:22)] <- '2+'
+    ccc19x$der_ccc19cci_v4 <- factor(ccc19x$der_ccc19cci_v4)
+    summary(ccc19x$der_ccc19cci_v4[ccc19x$redcap_repeat_instrument == ''])
+    
     ##############################
     #C13. CVD risk factor (binary)
     ##############################
