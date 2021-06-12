@@ -5243,14 +5243,35 @@ suffix <- 'data with derived variables for analysis'
     
     #D1a. Age re-categorized
     ccc19x$der_age_cat <- ccc19x$der_age
-    ccc19x$der_age_cat[which(ccc19x$der_age >= 18 & ccc19x$der_age < 40)] <- '18-39 years'
-    ccc19x$der_age_cat[which(ccc19x$der_age >= 40 & ccc19x$der_age < 60)] <- '40-59 years'
-    ccc19x$der_age_cat[which(ccc19x$der_age >= 60 & ccc19x$der_age < 70)] <- '60-69 years'
-    ccc19x$der_age_cat[which(ccc19x$der_age >= 70 & ccc19x$der_age < 80)] <- '70-79 years'
-    ccc19x$der_age_cat[which(ccc19x$der_age >= 80)] <- '80+ years'
+    temp <- ccc19x$der_age
+    temp[which(ccc19x$der_age == '18-')] <- 0
+    temp[which(ccc19x$der_age == '90+')] <- 90
+    temp <- as.numeric(temp)
+    ccc19x$der_age_cat[which(temp < 18)] <- 'Less than 18 years'
+    ccc19x$der_age_cat[which(temp >= 18 & temp < 40)] <- '18-39 years'
+    ccc19x$der_age_cat[which(temp >= 40 & temp < 60)] <- '40-59 years'
+    ccc19x$der_age_cat[which(temp >= 60 & temp < 70)] <- '60-69 years'
+    ccc19x$der_age_cat[which(temp >= 70 & temp < 80)] <- '70-79 years'
+    ccc19x$der_age_cat[which(temp >= 80)] <- '80+ years'
+    rm(temp)
     
     ccc19x$der_age_cat <- factor(ccc19x$der_age_cat)
     summary(ccc19x$der_age_cat[ccc19x$redcap_repeat_instrument == ''])
+    
+    #D1b. Age re-categorized v2
+    ccc19x$der_age_cat2 <- ccc19x$der_age
+    temp <- ccc19x$der_age
+    temp[which(ccc19x$der_age == '18-')] <- 0
+    temp[which(ccc19x$der_age == '90+')] <- 90
+    temp <- as.numeric(temp)
+    ccc19x$der_age_cat2[which(temp < 18)] <- 'Less than 18 years'
+    ccc19x$der_age_cat2[which(temp >= 18 & temp < 60)] <- '18-59 years'
+    ccc19x$der_age_cat2[which(temp >= 60 & temp < 75)] <- '60-74 years'
+    ccc19x$der_age_cat2[which(temp >= 75)] <- '75+ years'
+    rm(temp)
+    
+    ccc19x$der_age_cat2 <- factor(ccc19x$der_age_cat2)
+    summary(ccc19x$der_age_cat2[ccc19x$redcap_repeat_instrument == ''])
     
     "sex"
     #D2. Sex
