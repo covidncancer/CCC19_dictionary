@@ -2493,8 +2493,7 @@ suffix <- 'data with derived variables for analysis'
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
     ccc19x$meta_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$meta_righttime[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$meta_righttime[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_righttime[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -2637,8 +2636,7 @@ suffix <- 'data with derived variables for analysis'
     #T4 & T5 Median f/u in days anchored to actual dates
     ccc19x$meta_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$meta_righttime2[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$meta_righttime2[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_righttime2[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -2709,8 +2707,7 @@ suffix <- 'data with derived variables for analysis'
     #T7 & T8 Calculated time from diagnosis has to be at least 30 days
     ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$meta_righttime3[ccc19x$ts_2 != ''] <- as.POSIXct(ccc19x$ts_2[ccc19x$ts_2 != ''])
-    ccc19x$meta_righttime3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''] <- as.POSIXct(ccc19x$ts_3[ccc19x$ts_2 == '' & ccc19x$ts_3 != ''])
+    ccc19x$meta_righttime3[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
@@ -3241,6 +3238,12 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_month_dx[temp.ref[temp.ref2]] <- paste(x1[temp.ref2], y1[temp.ref2])
     ccc19x$der_month_dx <- factor(ccc19x$der_month_dx)
     summary(ccc19x$der_month_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T09a Month and year of diagnosis, using the right side of the interval as the anchor
+    ccc19x$der_month_rt_dx <- NA
+    ccc19x$der_month_rt_dx[temp.ref] <- paste(x2, y2)
+    ccc19x$der_month_rt_dx <- factor(ccc19x$der_month_rt_dx)
+    summary(ccc19x$der_month_rt_dx[ccc19x$redcap_repeat_instrument == ''])
     
     #T10 Quarter and year of diagnosis, accounting for interval bounds
     ccc19x$der_quarter_dx <- NA
