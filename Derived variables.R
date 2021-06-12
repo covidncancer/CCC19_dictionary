@@ -4994,6 +4994,38 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_steroids_hd_bl <- factor(ccc19x$der_steroids_hd_bl)
     summary(ccc19x$der_steroids_hd_bl[ccc19x$redcap_repeat_instrument == ''])
     
+    ###########################
+    #Rx24. Steroids at baseline
+    ###########################
+    ccc19x$der_steroids_bl <- NA
+    
+    #Low-dose
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% c(1,'1a','1b'))] <- 'Low-dose'
+    
+    #High-dose
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 'High-dose'
+    
+    #Dose unknown
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% 99)] <- 'Steroids, unknown dose'
+    
+    #Dose missing
+    ccc19x$der_steroids_bl[which(ccc19x$concomitant_meds___h02 == 1 & ccc19x$steroid_specific_2 == '')] <- 'Steroids, missing dose'
+    
+    #No steroids
+    ccc19x$der_steroids_bl[which(ccc19x$concomitant_meds___h02 == 0)] <- 'None'
+    
+    #Unknown
+    ccc19x$der_steroids_bl[which(ccc19x$concomitant_meds___unk == 1 & 
+                                   (ccc19x$der_steroids_bl == 'None'|is.na(ccc19x$der_steroids_bl)))] <- 'Unknown'
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_bl[i] <- NA
+    
+    ccc19x$der_steroids_bl <- factor(ccc19x$der_steroids_bl)
+    summary(ccc19x$der_steroids_bl[ccc19x$redcap_repeat_instrument == ''])
+    
     #Rx12. Aspirin or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_as_apa <- NA
     ccc19x$der_as_apa[which(ccc19x$concomitant_meds___n02ba == 1|
