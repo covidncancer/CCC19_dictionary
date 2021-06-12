@@ -7908,41 +7908,64 @@ suffix <- 'data with derived variables for analysis'
     summary(ccc19x$der_cd20[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4a1: CD20 drugs within 12 months
-    ccc19x$der_cd20_12m <- NA
+    ccc19x$der_cd20_12mo <- NA
     
-    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '' &
+                        (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))
     for(i in 1:length(temp.ref))
     {
       if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab')) &
-         (ccc19x$recent_treatment[temp.ref[i]] %in% 1:3|ccc19x$hx_treatment[temp.ref[i]] %in% 1:2)) ccc19x$der_cd20_12m[temp.ref[i]] <- 1 
+             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20_12mo[temp.ref[i]] <- 1 
     }
     
     #Another drug mentioned, within 12 months
-    ccc19x$der_cd20_12m[which(!is.na(ccc19x$drug1) & 
-                                (ccc19x$recent_treatment[temp.ref[i]] %in% 1:3|ccc19x$hx_treatment[temp.ref[i]] %in% 1:2) &
-                                is.na(ccc19x$der_cd20_12m))] <- 0
+    ccc19x$der_cd20_12mo[temp.ref[which(!is.na(ccc19x$drug1[temp.ref]) &
+                                is.na(ccc19x$der_cd20_12mo[temp.ref]))]] <- 0
     
     #Treatment more than 12 months ago, or after COVID-19
-    ccc19x$der_cd20_12m[which(ccc19x$recent_treatment == 98|ccc19x$hx_treatment %in% 3:88)] <- 0
+    ccc19x$der_cd20_12mo[which(ccc19x$recent_treatment == 98|ccc19x$hx_treatment %in% 3:88)] <- 0
     
     #Unknown
-    ccc19x$der_cd20_12m[which(ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99)] <- 99
+    ccc19x$der_cd20_12mo[which(ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99)] <- 99
     
-    ccc19x$der_cd20_12m <- factor(ccc19x$der_cd20_12m)
-    summary(ccc19x$der_cd20_12m[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_cd20_12mo <- factor(ccc19x$der_cd20_12mo)
+    summary(ccc19x$der_cd20_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4a2: CD20 drugs within 3 months
+    ccc19x$der_cd20_3mo <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '' &
+                        (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1))
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20_3mo[temp.ref[i]] <- 1 
+    }
+    
+    #Another drug mentioned, within 3 months
+    ccc19x$der_cd20_3mo[temp.ref[which(!is.na(ccc19x$drug1[temp.ref]) & is.na(ccc19x$der_cd20_3mo[temp.ref]))]] <- 0
+    
+    #Treatment more than 3 months ago, or after COVID-19
+    ccc19x$der_cd20_3mo[which(ccc19x$recent_treatment %in% c(88,98)|ccc19x$hx_treatment %in% 2:88)] <- 0
+    
+    #Unknown
+    ccc19x$der_cd20_3mo[which((ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99) &
+                                is.na(ccc19x$der_cd20_3mo))] <- 99
+    
+    ccc19x$der_cd20_3mo <- factor(ccc19x$der_cd20_3mo)
+    summary(ccc19x$der_cd20_3mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4a2: CD20 + chemo within 12 months
     ccc19x$der_cd20_cyto_12mo <- NA
-    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 1 & ccc19x$der_any_cyto_12mo == 1)] <- 1
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 1 & ccc19x$der_any_cyto_12mo == 1)] <- 1
     
     #Extra level if they were also receiving a steroid (e.g., R-CHOP)
     for(i in which(ccc19x$der_cd20_cyto_12mo == 1))
       if(any(ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
              c('Prednisone','Prednisolone','Methylprednisolone','Dexamethasone','Hydrocortisone'))) ccc19x$der_cd20_cyto_12mo[i] <- 2
     
-    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
-    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12m == 99|ccc19x$der_any_cyto_12mo == 99)] <- 99
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
+    ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 99|ccc19x$der_any_cyto_12mo == 99)] <- 99
     
     ccc19x$der_cd20_cyto_12mo <- factor(ccc19x$der_cd20_cyto_12mo)
     summary(ccc19x$der_cd20_cyto_12mo[ccc19x$redcap_repeat_instrument == ''])
