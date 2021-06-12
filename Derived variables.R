@@ -7389,56 +7389,53 @@ suffix <- 'data with derived variables for analysis'
     #Ca07a. cancer_status
     ##Recode to add "NA/unknowns, combining stable and responding into one category
     ccc19x$der_cancer_status <- ccc19x$cancer_status
-    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status == 1)] <- 'Remission/NED'
-    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status %in% c(2,3))] <- 'Active, stable/responding'
-    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status == 4)] <- 'Active, progressing'
-    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status %in% c(5,99))] <- 'Unknown'
+    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status == 1)] <- '0 - Remission/NED'
+    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status %in% c(2,3))] <- '1 - Active, stable/responding'
+    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status == 4)] <- '2 - Active, progressing'
+    ccc19x$der_cancer_status[which(ccc19x$der_cancer_status %in% c(5,99))] <- '99 - Unknown'
     
     #Factor
     ccc19x$der_cancer_status <- as.factor(ccc19x$der_cancer_status)
-    ccc19x$der_cancer_status <- relevel(ccc19x$der_cancer_status, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca07b. Cancer status without combining stable and responding
     ccc19x$der_cancer_status_v2 <- ccc19x$cancer_status
-    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 1)] <- 'Remission/NED'
-    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 2)] <- 'Active, responding'
-    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 3)] <- 'Active, stable'
-    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 4)] <- 'Active, progressing'
-    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 %in% c(5,99))] <- 'Unknown'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 1)] <- '0 - Remission/NED'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 2)] <- '1 - Active, responding'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 3)] <- '2 - Active, stable'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 == 4)] <- '3 - Active, progressing'
+    ccc19x$der_cancer_status_v2[which(ccc19x$der_cancer_status_v2 %in% c(5,99))] <- '99 - Unknown'
     
     #Factor
     ccc19x$der_cancer_status_v2 <- as.factor(ccc19x$der_cancer_status_v2)
-    ccc19x$der_cancer_status_v2 <- relevel(ccc19x$der_cancer_status_v2, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca07c. Cancer status without combining active unknown and unknown
     ccc19x$der_cancer_status_v3 <- ccc19x$cancer_status
-    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 1)] <- 'Remission/NED'
-    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 %in% c(2,3))] <- 'Active, stable/responding'
-    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 4)] <- 'Active, progressing'
-    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 5)] <- 'Active, unknown status'
-    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 99)] <- 'Unknown'
+    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 1)] <- '0 - Remission/NED'
+    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 %in% c(2,3))] <- '1- Active, stable/responding'
+    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 4)] <- '2 - Active, progressing'
+    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 5)] <- '2-99 - Active, unknown status'
+    ccc19x$der_cancer_status_v3[which(ccc19x$der_cancer_status_v3 == 99)] <- '99 - Unknown'
     
     #Factor
     ccc19x$der_cancer_status_v3 <- as.factor(ccc19x$der_cancer_status_v3)
-    ccc19x$der_cancer_status_v3 <- relevel(ccc19x$der_cancer_status_v3, ref = 'Remission/NED')
     summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca07d. Cancer status with remission conditioned on cancer timing
     ccc19x$der_cancer_status_v4 <- NA
     ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
-                                        ccc19x$cancer_timing %in% 1:2)] <- 'Remission/NED, recent diagnosis'
+                                        ccc19x$cancer_timing %in% 1:2)] <- '1- Remission/NED, recent diagnosis'
     ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 1 &
-                                        ccc19x$cancer_timing == 3)] <- 'Remission/NED, remote diagnosis'
-    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 2)] <- 'Active, responding'
-    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 3)] <- 'Active, stable'
-    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 4)] <- 'Active, progressing'
+                                        ccc19x$cancer_timing == 3)] <- '0 - Remission/NED, remote diagnosis'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 2)] <- '2 - Active, responding'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 3)] <- '3 - Active, stable'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status == 4)] <- '4 - Active, progressing'
     
     #Unknown status
-    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status %in% c(5,99))] <- 'Unknown'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_status %in% c(5,99))] <- '99 - Unknown'
     #Unknown timing
-    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_timing == 99 & is.na(ccc19x$der_cancer_status_v4))] <- 'Unknown'
+    ccc19x$der_cancer_status_v4[which(ccc19x$cancer_timing == 99 & is.na(ccc19x$der_cancer_status_v4))] <- '99 - Unknown'
     
     #Factor
     ccc19x$der_cancer_status_v4 <- as.factor(ccc19x$der_cancer_status_v4)
