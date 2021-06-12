@@ -7308,7 +7308,6 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
     summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
     
-    
     #Ca10d. Any endocrine therapy within 3 months
     ccc19x$der_any_endo <- ccc19x$der_anytx
     ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
@@ -7346,15 +7345,19 @@ suffix <- 'data with derived variables for analysis'
                                         (ccc19x$treatment_modality___58229 == 1|
                                            ccc19x$what_immunotherapy %in% c('45838','45446',
                                                                             '45170','45838-45446')))] <- 1
-    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1)] <- 0
+    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & (ccc19x$treatment_modality___58229 == 0|
+                                                                            !ccc19x$what_immunotherapy %in% c('45838','45446',
+                                                                                                             '45170','45838-45446')))] <- 0
     
     ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
     summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10i. Any transplant or cellular therapy within 3 months
     ccc19x$der_any_sct_cellular <- ccc19x$der_anytx
-    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1 & ccc19x$treatment_modality___45186 == 1)] <- 1
-    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1)] <- 0
+    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1 & ccc19x$treatment_modality___45186 == 0)] <- 0
+    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% c(0,3,4))] <- 0
+    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
+    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing == 99)] <- 99
     
     ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
     summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
@@ -7413,6 +7416,14 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
     summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10d1. Any cellular therapy within 12 months
+    ccc19x$der_any_sct_cellular_12mo <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_sct_cellular_12mo[which(ccc19x$der_any_sct_cellular_12mo == 1 & ccc19x$treatment_modality___45186 == 0)] <- 0
+    ccc19x$der_any_sct_cellular_12mo[which(ccc19x$transplant_cellular_timing %in% c(0,4))] <- 0
+    ccc19x$der_any_sct_cellular_12mo[which(ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
+    ccc19x$der_any_sct_cellular_12mo[which(ccc19x$transplant_cellular_timing == 99)] <- 99
+    summary(ccc19x$der_any_sct_cellular_12mo[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10l. Any intravesicular BCG therapy (no time restriction) - declare as none
     ccc19x$der_any_intravesicular_bcg <- 0
