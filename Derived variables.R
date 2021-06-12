@@ -8182,6 +8182,16 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_alc <- relevel(ccc19x$der_alc, ref = 'Normal')
     summary(ccc19x$der_alc[ccc19x$redcap_repeat_instrument == ''])
     
+    #L15a. lymphopenia
+    ccc19x$der_lymphopenia <- NA
+    ccc19x$der_lymphopenia[which(ccc19x$alc_range %in% c('WNL','HI'))] <- 'Not lymphopenic'
+    ccc19x$der_lymphopenia[which(ccc19x$alc_range == 'LO')] <- 'Lymphopenic'
+    ccc19x$der_lymphopenia[which(ccc19x$alc_range == 99)] <- 'Unknown'
+    ccc19x$der_lymphopenia[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_lymphopenia <- factor(ccc19x$der_lymphopenia)
+    ccc19x$der_lymphopenia <- relevel(ccc19x$der_lymphopenia, ref = 'Not lymphopenic')
+    summary(ccc19x$der_lymphopenia[ccc19x$redcap_repeat_instrument == ''])
+    
     #L16. anc
     ccc19x$der_anc <- NA
     ccc19x$der_anc[which(ccc19x$anc_range == 'WNL')] <- 'Normal'
