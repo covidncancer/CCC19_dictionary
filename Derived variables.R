@@ -6917,6 +6917,14 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_solid <- factor(ccc19x$der_solid)
     summary(ccc19x$der_solid[ccc19x$redcap_repeat_instrument == ''])
     
+    #Dx30. Simple single cancer type indicator
+    ccc19x$der_cancer_type <- NA
+    ccc19x$der_cancer_type[which(ccc19x$der_solid == 1)] <- 'Solid'
+    ccc19x$der_cancer_type[which(ccc19x$der_heme == 1)] <- 'Heme'
+    ccc19x$der_cancer_type[which(ccc19x$der_heme == 1 & ccc19x$der_solid == 1)] <- 'Both'
+    ccc19x$der_cancer_type <- factor(ccc19x$der_cancer_type)
+    summary(ccc19x$der_cancer_type[ccc19x$redcap_repeat_instrument == ''])
+    
   }
   print('Cancer types completed')
   
@@ -7401,6 +7409,11 @@ suffix <- 'data with derived variables for analysis'
     
     ccc19x$der_any_systemic_v2 <- factor(ccc19x$der_any_systemic_v2)
     summary(ccc19x$der_any_systemic_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca10k2. Any systemic therapy within 3-12 months
+    ccc19x$der_any_systemic_v3 <- ccc19x$der_any_systemic_v2
+    ccc19x$der_any_systemic_v3[which(ccc19x$der_any_systemic == 1)] <- 0
+    summary(ccc19x$der_any_systemic_v3[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10a1. Any cytotoxic chemotherapy within 12 months
     ccc19x$der_any_cyto_12mo <- ccc19x$der_any_systemic_v2
