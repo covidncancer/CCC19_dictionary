@@ -7500,6 +7500,23 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_cancer_status_v4 <- as.factor(ccc19x$der_cancer_status_v4)
     summary(ccc19x$der_cancer_status_v4[ccc19x$redcap_repeat_instrument == ''])
     
+    ############################################################
+    #Ca07e. Cancer progressing at the time of COVID-19 diagnosis
+    ccc19x$der_cancer_prog_bl <- NA
+    
+    #No
+    ccc19x$der_cancer_prog_bl[which(ccc19x$cancer_status %in% 1:3)] <- 0
+    
+    #Yes
+    ccc19x$der_cancer_prog_bl[which(ccc19x$cancer_status == 4)] <- 1
+    
+    #Unknown status
+    ccc19x$der_cancer_prog_bl[which(ccc19x$cancer_status %in% c(5,99))] <- 99
+    
+    #Factor
+    ccc19x$der_cancer_prog_bl <- as.factor(ccc19x$der_cancer_prog_bl)
+    summary(ccc19x$der_cancer_prog_bl[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca19. Metastatic status (only applicable to solid tumors)
     ccc19x$der_metastatic <- NA
     
