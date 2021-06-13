@@ -5039,11 +5039,14 @@ suffix <- 'data with derived variables for analysis'
     ###########################
     ccc19x$der_steroids_bl <- NA
     
-    #Low-dose
-    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% c(1,'1a','1b'))] <- 'Low-dose'
+    #Low-dose #1
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 == '1a')] <- 'Low-dose (<=10 mg PDE/day)'
+    
+    #Low-dose #2
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 == 1)] <- 'Low-dose (<=20 mg PDE/day)'
     
     #High-dose
-    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 'High-dose'
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% c('1b','2','3'))] <- 'High-dose (>10 mg PDE/day)'
     
     #Dose unknown
     ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% 99)] <- 'Steroids, unknown dose'
