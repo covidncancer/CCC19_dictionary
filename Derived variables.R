@@ -3653,7 +3653,7 @@ suffix <- 'data with derived variables for analysis'
       summary(ccc19x$der_ordinal_v1b[ccc19x$redcap_repeat_instrument == ''])
     }
     
-    #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized; 2 = required O2; 3 = ICU; 4 = vent; 5 = death)
+    #O23. ordinal_v2 (0 = never hospitalized; 1 = hospitalized; 2 = required O2; 3 = ICU; 4 = vent; 5 = death within 30 days)
     {
       #Declare as missing
       ccc19x$der_ordinal_v2 <- NA
