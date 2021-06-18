@@ -8213,7 +8213,7 @@ suffix <- 'data with derived variables for analysis'
                                           ccc19x$practice_setting___6[temp.ref] == 1)]] <- 'TCC'
     
     #Recode
-    ccc19x$der_site_type[which(ccc19x$der_site_type %in% c('NCI-CC','NCI-CCC'))] <- 'TCC'
+    ccc19x$der_site_type[which(ccc19x$der_site_type %in% c('NCI-CC','NCI-CCC','CCC'))] <- 'TCC'
     
     #Factor
     ccc19x$der_site_type <- as.factor(ccc19x$der_site_type)
