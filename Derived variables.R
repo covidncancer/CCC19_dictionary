@@ -521,7 +521,37 @@ suffix <- 'data with derived variables for analysis'
     #ccc19x$der_severe3 <- relevel(ccc19x$der_severe3, ref = '1')
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
    
-    
+    ####################
+    #O28. Cause of death
+    ####################
+    {
+      ccc19x$der_cause_of_death <- NA
+      
+      #COVID-19
+      temp <- ccc19x$record_id[which(ccc19x$cause_of_death == 1|ccc19x$cause_of_death_2 == 1|ccc19x$cause_of_death_fu == 1)]
+      ccc19x$der_cause_of_death[ccc19x$record_id %in% temp] <- 1
+      
+      #Cancer
+      temp <- ccc19x$record_id[which(ccc19x$cause_of_death == 2|ccc19x$cause_of_death_2 == 2|ccc19x$cause_of_death_fu == 2)]
+      ccc19x$der_cause_of_death[ccc19x$record_id %in% temp] <- 2
+      
+      #Both
+      temp <- ccc19x$record_id[which(ccc19x$cause_of_death == 3|ccc19x$cause_of_death_2 == 3|ccc19x$cause_of_death_fu == 3)]
+      ccc19x$der_cause_of_death[ccc19x$record_id %in% temp] <- 3
+      
+      #Other
+      temp <- ccc19x$record_id[which(ccc19x$cause_of_death == 88|ccc19x$cause_of_death_2 == 88|ccc19x$cause_of_death_fu == 88)]
+      ccc19x$der_cause_of_death[ccc19x$record_id %in% temp] <- 88
+      
+      #Unknown
+      temp <- ccc19x$record_id[which((ccc19x$cause_of_death == 99|ccc19x$cause_of_death_2 == 99|ccc19x$cause_of_death_fu == 99) &
+                                       is.na(ccc19x$der_cause_of_death))]
+      ccc19x$der_cause_of_death[ccc19x$record_id %in% temp] <- 99
+      
+      #Factor
+      ccc19x$der_cause_of_death <- as.factor(ccc19x$der_cause_of_death)
+      summary(ccc19x$der_cause_of_death[ccc19x$redcap_repeat_instrument == ''])
+    }
     
   }
   print('Outcomes completed')
