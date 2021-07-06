@@ -8219,6 +8219,22 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_her2 <- factor(ccc19x$der_her2)
     summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4m: Anthracycline
+    ccc19x$der_anthracycline <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Doxorubicin','Epirubicin','Daunorubicin','Mitoxantrone',
+               'Aclarubicin','Amrubicin','Vyxeos','Daunorubicin liposomal',
+               'Idarubicin','Pegylated liposomal doxorubicin','Valrubicin'))) ccc19x$der_anthracycline[temp.ref[i]] <- 1 else
+                 ccc19x$der_anthracycline[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_anthracycline <- factor(ccc19x$der_anthracycline)
+    summary(ccc19x$der_anthracycline[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
