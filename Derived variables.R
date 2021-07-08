@@ -2463,6 +2463,26 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_coinfection_bact_gram_neg <- factor(ccc19x$der_coinfection_bact_gram_neg)
     summary(ccc19x$der_coinfection_bact_gram_neg[ccc19x$redcap_repeat_instrument == ''])
     
+    #Comp38c Bacterial co-infection NOS within +/- 2 weeks of COVID-19 diagnosis
+    ccc19x$der_coinfection_bact_nos <- NA
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
+    
+    #Yes
+    ccc19x$der_coinfection_bact_nos[which(ccc19x$coinfection___409822003 == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_bact_nos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_nos))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_nos[i])) ccc19x$der_coinfection_bact_nos[i] <- 0 
+    
+    #Unknown
+    ccc19x$der_coinfection_bact_nos[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                            is.na(ccc19x$der_coinfection_bact_nos))] <- 99
+    
+    ccc19x$der_coinfection_bact_nos <- factor(ccc19x$der_coinfection_bact_nos)
+    summary(ccc19x$der_coinfection_bact_nos[ccc19x$redcap_repeat_instrument == ''])
+    
     #Comp39 Fungal co-infection within +/- 2 weeks of COVID-19 diagnosis
     ccc19x$der_coinfection_fungal <- NA
     
@@ -8219,7 +8239,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_her2 <- factor(ccc19x$der_her2)
     summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4m: Anthracycline
+    #Ca4n: Anthracycline
     ccc19x$der_anthracycline <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
