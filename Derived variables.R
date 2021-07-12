@@ -8924,7 +8924,7 @@ suffix <- 'data with derived variables for analysis'
     #Create density plot of missingness
     x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
     plot(x)
-    threshold <- 105
+    threshold <- 135
     abline(v = threshold)
     
     ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
