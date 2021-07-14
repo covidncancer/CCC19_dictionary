@@ -8839,6 +8839,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$meta_30d_due <- NA
     ccc19x$meta_90d_due <- NA
     ccc19x$meta_180d_due <- NA
+    ccc19x$meta_365d_due <- NA
     
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
     ccc19x$meta_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 30*24*60*60)
@@ -8847,6 +8848,8 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$meta_90d_due[temp.ref] <- gsub(ccc19x$meta_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
     ccc19x$meta_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 180*24*60*60)
     ccc19x$meta_180d_due[temp.ref] <- gsub(ccc19x$meta_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
+    ccc19x$meta_365d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 365*24*60*60)
+    ccc19x$meta_365d_due[temp.ref] <- gsub(ccc19x$meta_365d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
     
     
     #X8a-c. Completion of 30d, 90d, 180d forms
