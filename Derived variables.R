@@ -1199,40 +1199,52 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_CV_event <- as.factor(ccc19x$der_CV_event)
     summary(ccc19x$der_CV_event[ccc19x$redcap_repeat_instrument == ''])
     
-    #Comp10. Worst severity of complications 
+    #Comp10. Worst severity of COVID-19 complications 
     ccc19x$der_worst <- NA
     
-    #Serious
-    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 3|
-                                     ccc19x$complications_severity___3 == 1|
-                                     ccc19x$worst_complications_severity___3 == 1|
-                                     ccc19x$complications_severity_fu___3 == 1)]
-    ccc19x$der_worst[ccc19x$record_id %in% temp] <- 3
-    
     #Moderate
-    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 2|
-                                     (ccc19x$complications_severity___2 == 1 & ccc19x$complications_severity___3 == 0)|
+    temp <- ccc19x$record_id[which((ccc19x$complications_severity___2 == 1 & ccc19x$complications_severity___3 == 0)|
                                      (ccc19x$worst_complications_severity___2 == 1 & ccc19x$worst_complications_severity___3 == 0)|
+                                     ccc19x$worst_complications_severity_fu == 2|
                                      (ccc19x$complications_severity_fu___2 == 1 & ccc19x$complications_severity_fu___3 == 0))] 
-    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 2
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp & is.na(ccc19x$der_worst))] <- 'Moderate'
     
     #Mild
-    temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 1|
-                                     (ccc19x$complications_severity___1 == 1 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0)|
+    temp <- ccc19x$record_id[which((ccc19x$complications_severity___1 == 1 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0)|
                                      (ccc19x$worst_complications_severity___1 == 1 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0)|
+                                     ccc19x$worst_complications_severity_fu == 1|
                                      (ccc19x$complications_severity_fu___1 == 1 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))] 
-    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 1
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp & is.na(ccc19x$der_worst))] <- 'Mild'
     
-    #Other/unknown
+    #Other
+    temp <- ccc19x$record_id[which(ccc19x$complications_severity___oth ==1|
+                                     ccc19x$worst_complications_severity___oth ==1|
+                                     ccc19x$worst_complications_severity_fu == 'OTH'|
+                                     ccc19x$complications_severity_fu___oth ==1)]
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp & is.na(ccc19x$der_worst))] <- 'Other'
+    
+    #None
+    temp <- unique(ccc19x$record_id[which((ccc19x$complications_severity___0 == 1 & ccc19x$complications_severity___1 == 0 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0)|
+                                     (ccc19x$worst_complications_severity___0 == 1 & ccc19x$worst_complications_severity___1 == 0 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0)|
+                                     ccc19x$worst_complications_severity_fu == 0|
+                                     (ccc19x$complications_severity_fu___0 == 1 & ccc19x$complications_severity_fu___1 == 0 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))]) 
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp & is.na(ccc19x$der_worst))] <- 'None'
+    
+    #Unknown
     temp <- ccc19x$record_id[which(ccc19x$severity_of_covid_19_v2 == 99|
-                                     ((ccc19x$complications_severity___oth ==1|ccc19x$complications_severity___99 ==1) & 
-                                        ccc19x$complications_severity___1 == 0 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0) |
-                                     ((ccc19x$worst_complications_severity___oth ==1|ccc19x$worst_complications_severity___99 ==1) & 
-                                        ccc19x$worst_complications_severity___1 == 0 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0) |
-                                     ((ccc19x$complications_severity_fu___oth ==1|ccc19x$complications_severity_fu___99 ==1) & 
-                                        ccc19x$complications_severity_fu___1 == 0 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))]
-    ccc19x$der_worst[ccc19x$record_id %in% temp & is.na(ccc19x$der_worst)] <- 99
+                                     (ccc19x$complications_severity___99 == 1 & ccc19x$complications_severity___0 == 0 & ccc19x$complications_severity___1 == 0 & ccc19x$complications_severity___2 == 0 & ccc19x$complications_severity___3 == 0) |
+                                     (ccc19x$worst_complications_severity___99 == 1 & ccc19x$worst_complications_severity___0 == 0 & ccc19x$worst_complications_severity___1 == 0 & ccc19x$worst_complications_severity___2 == 0 & ccc19x$worst_complications_severity___3 == 0) |
+                                     ccc19x$worst_complications_severity_fu == 99|
+                                     (ccc19x$complications_severity_fu___99 == 1 & ccc19x$complications_severity_fu___0 == 0 & ccc19x$complications_severity_fu___1 == 0 & ccc19x$complications_severity_fu___2 == 0 & ccc19x$complications_severity_fu___3 == 0))]
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp & is.na(ccc19x$der_worst))] <- 'Unknown'
     
+    #Serious
+    temp <- ccc19x$record_id[which(ccc19x$complications_severity___3 == 1|
+                                     ccc19x$worst_complications_severity___3 == 1|
+                                     ccc19x$worst_complications_severity_fu == 3|
+                                     ccc19x$complications_severity_fu___3 == 1)]
+    ccc19x$der_worst[which(ccc19x$record_id %in% temp)] <- 'Serious'
+                                   
     ccc19x$der_worst <- factor(ccc19x$der_worst)
     summary(ccc19x$der_worst[ccc19x$redcap_repeat_instrument == ''])
     
