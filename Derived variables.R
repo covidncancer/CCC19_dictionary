@@ -6608,11 +6608,11 @@ suffix <- 'data with derived variables for analysis'
     
     #Dx1-9. Binary indicators for heme types
     ccc19x$der_HemeNOS <- 0
-    ccc19x$der_HemeNOS[which(ccc19x$cancer_type %in% c("C27134", "C9300","OTH_H")|
-                               ccc19x$cancer_type_2 %in% c("C27134", "C9300","OTH_H")|
-                               ccc19x$cancer_type_3 %in% c("C27134", "C9300","OTH_H")|
-                               ccc19x$cancer_type_4 %in% c("C27134", "C9300","OTH_H")|
-                               ccc19x$cancer_type_5 %in% c("C27134", "C9300","OTH_H"))] <- 1
+    ccc19x$der_HemeNOS[which(ccc19x$cancer_type %in% c("C27134","C9300","C3106","OTH_H")|
+                               ccc19x$cancer_type_2 %in% c("C27134","C9300","C3106","OTH_H")|
+                               ccc19x$cancer_type_3 %in% c("C27134","C9300","C3106","OTH_H")|
+                               ccc19x$cancer_type_4 %in% c("C27134","C9300","C3106","OTH_H")|
+                               ccc19x$cancer_type_5 %in% c("C27134","C9300","C3106","OTH_H"))] <- 1
     ccc19x$der_HemeNOS <- factor(ccc19x$der_HemeNOS)
     summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
     
