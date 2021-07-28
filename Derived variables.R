@@ -6968,6 +6968,61 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_Sarcoma <- factor(ccc19x$der_Sarcoma)
     summary(ccc19x$der_Sarcoma[ccc19x$redcap_repeat_instrument == ''])
     
+    #Sarcoma subtype
+    ccc19x$der_sarcoma_type <- NA
+    ccc19x$der_sarcoma_type[which(ccc19x$cancer_type == 'C4817'|ccc19x$cancer_type_2 == 'C4817'|ccc19x$cancer_type_3 == 'C4817'|ccc19x$cancer_type_4 == 'C4817'|ccc19x$cancer_type_5 == 'C4817')] <- 'Ewing sarcoma'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3868'|ccc19x$cancer_type_2 == 'C3868'|ccc19x$cancer_type_3 == 'C3868'|ccc19x$cancer_type_4 == 'C3868'|ccc19x$cancer_type_5 == 'C3868') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3868'|ccc19x$cancer_type_2 == 'C3868'|ccc19x$cancer_type_3 == 'C3868'|ccc19x$cancer_type_4 == 'C3868'|ccc19x$cancer_type_5 == 'C3868') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'GIST'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9145'|ccc19x$cancer_type_2 == 'C9145'|ccc19x$cancer_type_3 == 'C9145'|ccc19x$cancer_type_4 == 'C9145'|ccc19x$cancer_type_5 == 'C9145') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9145'|ccc19x$cancer_type_2 == 'C9145'|ccc19x$cancer_type_3 == 'C9145'|ccc19x$cancer_type_4 == 'C9145'|ccc19x$cancer_type_5 == 'C9145') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'Osteosarcoma'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3359'|ccc19x$cancer_type_2 == 'C3359'|ccc19x$cancer_type_3 == 'C3359'|ccc19x$cancer_type_4 == 'C3359'|ccc19x$cancer_type_5 == 'C3359') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3359'|ccc19x$cancer_type_2 == 'C3359'|ccc19x$cancer_type_3 == 'C3359'|ccc19x$cancer_type_4 == 'C3359'|ccc19x$cancer_type_5 == 'C3359') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'Rhabdomyosarcoma'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9306'|ccc19x$cancer_type_2 == 'C9306'|ccc19x$cancer_type_3 == 'C9306'|ccc19x$cancer_type_4 == 'C9306'|ccc19x$cancer_type_5 == 'C9306') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9306'|ccc19x$cancer_type_2 == 'C9306'|ccc19x$cancer_type_3 == 'C9306'|ccc19x$cancer_type_4 == 'C9306'|ccc19x$cancer_type_5 == 'C9306') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'Soft tisue sarcoma NOS'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C8538'|ccc19x$cancer_type_2 == 'C8538'|ccc19x$cancer_type_3 == 'C8538'|ccc19x$cancer_type_4 == 'C8538'|ccc19x$cancer_type_5 == 'C8538') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C8538'|ccc19x$cancer_type_2 == 'C8538'|ccc19x$cancer_type_3 == 'C8538'|ccc19x$cancer_type_4 == 'C8538'|ccc19x$cancer_type_5 == 'C8538') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'Vascular sarcoma NOS'
+    
+    #Soft tissue and vascular sarcoma subtypes
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C6496')] <- 'Undifferentiated pleomorphic sarcoma (UPS)/ Myxofibrosarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C6340')] <-	'Uterine leiomyosarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C3158')] <-	'Non-uterine Leiomyosarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C3704')] <-	'Dedifferentiated liposarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C4250')] <-	'Well differentiated liposarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C27781')] <- 'Myxoid/round cell liposarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C3400')] <-	'Synovial sarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C3798')] <-	'Malignant peripheral nerve sheath tumor (MPNST)'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C3088')] <-	'Angiosarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C27005')] <-	'Spindle cell/soft tissue sarcoma NOS'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'C9087')] <-	'Kaposi sarcoma'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'OTH')] <-	'STS or Vascular - Other'
+    ccc19x$der_sarcoma_type[which(ccc19x$sarcoma_type == 'UNK')] <-	'STS or Vascular - Unknown'
+    
+    #Check again for multiples
+    temp <- data.frame(s1 = rep(0, nrow(ccc19x)),
+                       s2 = rep(0, nrow(ccc19x)),
+                       s3 = rep(0, nrow(ccc19x)),
+                       s4 = rep(0, nrow(ccc19x)),
+                       s5 = rep(0, nrow(ccc19x)), stringsAsFactors = F)
+    temp$s1[which(ccc19x$cancer_type %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+    temp$s2[which(ccc19x$cancer_type_2 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+    temp$s3[which(ccc19x$cancer_type_3 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+    temp$s4[which(ccc19x$cancer_type_4 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+    temp$s5[which(ccc19x$cancer_type_5 %in% c("C9306", "C3868", "C9145","C9312","C4817","C3359","C8538"))] <- 1
+    ccc19x$der_sarcoma_type[which(rowSums(temp) > 1)] <- 'Multiple'
+    
+    ccc19x$der_sarcoma_type <- factor(ccc19x$der_sarcoma_type)
+    summary(ccc19x$der_sarcoma_type[ccc19x$redcap_repeat_instrument == ''])
+    
     #Neuro
     ccc19x$der_Neuro <- 0
     ccc19x$der_Neuro[which(ccc19x$cancer_type %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
