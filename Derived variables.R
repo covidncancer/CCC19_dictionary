@@ -6979,6 +6979,10 @@ suffix <- 'data with derived variables for analysis'
                                     !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
     ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9145'|ccc19x$cancer_type_2 == 'C9145'|ccc19x$cancer_type_3 == 'C9145'|ccc19x$cancer_type_4 == 'C9145'|ccc19x$cancer_type_5 == 'C9145') &
                                     is.na(ccc19x$der_sarcoma_type))] <- 'Osteosarcoma'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9312'|ccc19x$cancer_type_2 == 'C9312'|ccc19x$cancer_type_3 == 'C9312'|ccc19x$cancer_type_4 == 'C9312'|ccc19x$cancer_type_5 == 'C9312') &
+                                    !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
+    ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C9312'|ccc19x$cancer_type_2 == 'C9312'|ccc19x$cancer_type_3 == 'C9312'|ccc19x$cancer_type_4 == 'C9312'|ccc19x$cancer_type_5 == 'C9312') &
+                                    is.na(ccc19x$der_sarcoma_type))] <- 'Bone cancer, NOS'
     ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3359'|ccc19x$cancer_type_2 == 'C3359'|ccc19x$cancer_type_3 == 'C3359'|ccc19x$cancer_type_4 == 'C3359'|ccc19x$cancer_type_5 == 'C3359') &
                                     !is.na(ccc19x$der_sarcoma_type))] <- 'Multiple'
     ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3359'|ccc19x$cancer_type_2 == 'C3359'|ccc19x$cancer_type_3 == 'C3359'|ccc19x$cancer_type_4 == 'C3359'|ccc19x$cancer_type_5 == 'C3359') &
