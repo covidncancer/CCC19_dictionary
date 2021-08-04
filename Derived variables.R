@@ -6968,7 +6968,7 @@ suffix <- 'data with derived variables for analysis'
     ccc19x$der_Sarcoma <- factor(ccc19x$der_Sarcoma)
     summary(ccc19x$der_Sarcoma[ccc19x$redcap_repeat_instrument == ''])
     
-    #Sarcoma subtype
+    #Dx23a. Sarcoma subtype
     ccc19x$der_sarcoma_type <- NA
     ccc19x$der_sarcoma_type[which(ccc19x$cancer_type == 'C4817'|ccc19x$cancer_type_2 == 'C4817'|ccc19x$cancer_type_3 == 'C4817'|ccc19x$cancer_type_4 == 'C4817'|ccc19x$cancer_type_5 == 'C4817')] <- 'Ewing sarcoma'
     ccc19x$der_sarcoma_type[which((ccc19x$cancer_type == 'C3868'|ccc19x$cancer_type_2 == 'C3868'|ccc19x$cancer_type_3 == 'C3868'|ccc19x$cancer_type_4 == 'C3868'|ccc19x$cancer_type_5 == 'C3868') &
@@ -8325,6 +8325,20 @@ suffix <- 'data with derived variables for analysis'
     
     ccc19x$der_anthracycline <- factor(ccc19x$der_anthracycline)
     summary(ccc19x$der_anthracycline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4o: PARP inhibitor
+    ccc19x$der_parpi <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Olaparib','Niraparib','Rucaparib','Talazoparib','Veliparib'))) ccc19x$der_parpi[temp.ref[i]] <- 1 else
+                 ccc19x$der_parpi[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_parpi <- factor(ccc19x$der_parpi)
+    summary(ccc19x$der_parpi[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
