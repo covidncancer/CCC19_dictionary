@@ -6,6 +6,7 @@ ccc19x <- foo
 
 #Define the desired suffix for the save function
 suffix <- 'data with derived variables for analysis'
+suffix <- 'data with derived variables for site QA'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -5678,7 +5679,7 @@ suffix <- 'data with derived variables for analysis'
     
     #C01. BMI, with derived BMI for records that have height and weight recorded and not BMI
     {
-      cc19x$der_bmi <- ccc19x$bmi
+      ccc19x$der_bmi <- ccc19x$bmi
       
       #Records with height/weight recorded, no BMI
       temp.ref <- which(is.na(ccc19x$der_bmi) & grepl(ccc19x$height, pattern = '[0-9]') & grepl(ccc19x$weight, pattern = '[0-9]'))
@@ -8981,231 +8982,234 @@ suffix <- 'data with derived variables for analysis'
     ##############################################
     #X4. Quality score and X5. Enumerated problems
     ##############################################
-    
-    #Calculate a quality score for each case
-    ccc19x$meta_quality <- 0
-    ccc19x$meta_problems <- ''
-    
-    ###############
-    #Major problems
-    ###############
-    
-    #High levels of baseline missingness
-    dict <- read.csv(file = 'CCC19_DataDictionary.csv', header = T, stringsAsFactors = F)
-    colnames(dict)[1] <- 'name'
-    
-    ccc19x$missing <- 0
-    ref <- c(which(colnames(ccc19x) == 'timing_of_report'),
-             which(colnames(ccc19x) == 'dx_year'),
-             which(colnames(ccc19x) == 'covid_19_dx_interval'),
-             which(colnames(ccc19x) == 'ts_1'):which(colnames(ccc19x) == 'cancer_details_complete'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
     {
-      ccc19x$missing[i] <- sum(is.na(ccc19x[i,ref]))
-      for(j in which(dict$Field.Type == 'checkbox' & dict$Form.Name != 'followup'))
+      #Calculate a quality score for each case
+      ccc19x$meta_quality <- 0
+      ccc19x$meta_problems <- ''
+      
+      ###############
+      #Major problems
+      ###############
+      
+      #High levels of baseline missingness
+      setwd("~/HemOnc.org Dropbox/Jeremy Warner/CCC19 parent folder/CCC19 VUMC/Data dictionary/CCC19_dictionary_and_derived_variables/CCC19_dictionary")
+      dict <- read.csv(file = 'CCC19_DataDictionary.csv', header = T, stringsAsFactors = F)
+      setwd("~/Box Sync/CCC19 data")
+      colnames(dict)[1] <- 'name'
+      
+      ccc19x$missing <- 0
+      ref <- c(which(colnames(ccc19x) == 'timing_of_report'),
+               which(colnames(ccc19x) == 'dx_year'),
+               which(colnames(ccc19x) == 'covid_19_dx_interval'),
+               which(colnames(ccc19x) == 'ts_1'):which(colnames(ccc19x) == 'cancer_details_complete'))
+      for(i in which(ccc19x$redcap_repeat_instrument == ''))
       {
-        temp.ref <- grep(colnames(ccc19x), pattern = paste(dict$name[j], '___', sep = ''))
-        if(all(ccc19x[i,temp.ref] == 0)) ccc19x$missing[i] <- ccc19x$missing[i] + 1
+        ccc19x$missing[i] <- sum(is.na(ccc19x[i,ref]))
+        for(j in which(dict$Field.Type == 'checkbox' & dict$Form.Name != 'followup'))
+        {
+          temp.ref <- grep(colnames(ccc19x), pattern = paste(dict$name[j], '___', sep = ''))
+          if(all(ccc19x[i,temp.ref] == 0)) ccc19x$missing[i] <- ccc19x$missing[i] + 1
+        }
       }
+      
+      #Create density plot of missingness
+      x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
+      plot(x)
+      threshold <- 120
+      abline(v = threshold, col = 'red', lty = 2)
+      
+      ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
+      ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
+                                                                       '; High levels of baseline missingness', sep = '')
+      
+      #Large number of unknowns
+      dict.unk <- dict[grep(dict$Choices..Calculations..OR.Slider.Labels, pattern = 'Unknown'),]
+      
+      u1 <- dict.unk$name[dict.unk$Field.Type == 'radio']
+      temp <- dict.unk$name[dict.unk$Field.Type == 'checkbox']
+      u2 <- colnames(ccc19x)[colnames(ccc19x) %in% c(paste(temp,'___unk',sep = ''),
+                                                     paste(temp,'___99', sep = ''))]
+      
+      ccc19x$unknown <- 0
+      for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      {
+        ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK','99')))
+        ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
+      }
+      
+      ccc19x$meta_quality[which(ccc19x$unknown >= 20)] <- ccc19x$meta_quality[which(ccc19x$unknown >= 20)] + 5
+      ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
+                                                                 '; Large number of unknowns', sep = '')
+      
+      ##################
+      #Moderate problems
+      ##################
+      
+      #Cancer status missing
+      temp.ref <- which(is.na(ccc19x$der_cancer_status) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Cancer status missing', sep = '')
+      
+      #ECOG status missing
+      temp.ref <- which(is.na(ccc19x$der_ecogcat) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; ECOG PS missing', sep = '')
+      
+      #Death status missing/unk
+      temp.ref <- which((ccc19x$der_deadbinary == 99|is.na(ccc19x$der_deadbinary)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Death status missing or unknown', sep = '')
+      
+      #Baseline COVID-19 severity missing/unk
+      temp.ref <- which((ccc19x$severity_of_covid_19_v2 == 99|is.na(ccc19x$severity_of_covid_19_v2)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Baseline COVID-19 severity missing or unknown', sep = '')
+      
+      #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 30-day f/u is at least 60 days overdue', sep = '')
+      
+      #90-day f/u is 60+ days overdue (if applicable)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 90-day f/u is at least 60 days overdue', sep = '')
+      
+      ###############
+      #Minor problems
+      ###############
+      
+      #ADT (prostate)
+      temp.ref <- which((ccc19x$adt == 99|is.na(ccc19x$adt)) &
+                          !ccc19x$hx_treatment %in% c(3,88) &
+                          (ccc19x$cancer_type == 'C4863'|
+                             ccc19x$cancer_type_2 == 'C4863'|
+                             ccc19x$cancer_type_3 == 'C4863'|
+                             ccc19x$cancer_type_4 == 'C4863'|
+                             ccc19x$cancer_type_5 == 'C4863'))
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; ADT missing or unknown', sep = '')
+      
+      #Biomarkers (breast)
+      temp.ref <- which(((ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 0 &
+                            ccc19x$breast_biomarkers___tnbc == 0) | (ccc19x$breast_biomarkers___99 == 1)) &
+                          (ccc19x$cancer_type == 'C4872'|
+                             ccc19x$cancer_type_2 == 'C4872'|
+                             ccc19x$cancer_type_3 == 'C4872'|
+                             ccc19x$cancer_type_4 == 'C4872'|
+                             ccc19x$cancer_type_5 == 'C4872'))
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Breast cancer biomarkers missing or unknown', sep = '')
+      
+      #BCG (bladder) - DEPRECATED
+      # temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
+      #                     (ccc19x$cancer_type == 'C4912'|
+      #                        ccc19x$cancer_type_2 == 'C4912'|
+      #                        ccc19x$cancer_type_3 == 'C4912'|
+      #                        ccc19x$cancer_type_4 == 'C4912'|
+      #                        ccc19x$cancer_type_5 == 'C4912'))
+      # ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      # ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+      #                                        '; Intravesicular BCG missing or unknown', sep = '')
+      
+      #Cancer status unknown
+      temp.ref <- which(ccc19x$der_cancer_status == 'Unknown' &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Cancer status unknown', sep = '')
+      
+      #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
+      temp.ref <- which((ccc19x$mets_yn == 99|is.na(ccc19x$mets_yn)) &
+                          ccc19x$cancer_status != '1' &
+                          !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Metastatic status missing or unknown', sep = '')
+      
+      #ECOG status unknown
+      temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; ECOG PS unknown', sep = '')
+      
+      #ICU status missing/unk
+      temp.ref <- which((ccc19x$der_ICU == 99|is.na(ccc19x$der_ICU)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; ICU status missing or unknown', sep = '')
+      
+      #Hospital status missing/unk
+      temp.ref <- which((ccc19x$der_hosp == 99|is.na(ccc19x$der_hosp)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Hospital status missing or unknown', sep = '')
+      
+      #Intubation status missing/unk
+      temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Intubation status missing or unknown', sep = '')
+      
+      #O2 status missing/unk
+      temp.ref <- which((ccc19x$der_o2_ever == 99|is.na(ccc19x$der_o2_ever)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; O2 requirement missing or unknown', sep = '')
+      
+      #Days to death missing or 9999
+      temp.ref <- which(ccc19x$der_deadbinary == 1 & 
+                          (ccc19x$der_days_to_death_combined == 9999|is.na(ccc19x$der_days_to_death_combined)) &
+                          ccc19x$redcap_repeat_instrument == '')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; Days to death missing or unknown', sep = '')
+      
+      #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 30-day f/u is at least 30 days overdue', sep = '')
+      
+      #90-day f/u is 30+ days overdue (if applicable)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 90-day f/u is at least 30 days overdue', sep = '')
+      
+      #Remove leading semicolon
+      ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
     }
-    
-    #Create density plot of missingness
-    x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
-    plot(x)
-    threshold <- 135
-    abline(v = threshold)
-    
-    ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
-    ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
-                                                             '; High levels of baseline missingness', sep = '')
-    
-    #Large number of unknowns
-    dict.unk <- dict[grep(dict$Choices..Calculations..OR.Slider.Labels, pattern = 'Unknown'),]
-    
-    u1 <- dict.unk$name[dict.unk$Field.Type == 'radio']
-    temp <- dict.unk$name[dict.unk$Field.Type == 'checkbox']
-    u2 <- colnames(ccc19x)[colnames(ccc19x) %in% c(paste(temp,'___unk',sep = ''),
-                                                   paste(temp,'___99', sep = ''))]
-    
-    ccc19x$unknown <- 0
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    {
-      ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK','99')))
-      ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
-    }
-    
-    ccc19x$meta_quality[which(ccc19x$unknown >= 20)] <- ccc19x$meta_quality[which(ccc19x$unknown >= 20)] + 5
-    ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
-                                                              '; Large number of unknowns', sep = '')
-    
-    ##################
-    #Moderate problems
-    ##################
-    
-    #Cancer status missing
-    temp.ref <- which(is.na(ccc19x$der_cancer_status) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Cancer status missing', sep = '')
-    
-    #ECOG status missing
-    temp.ref <- which(is.na(ccc19x$der_ecogcat) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; ECOG PS missing', sep = '')
-    
-    #Death status missing/unk
-    temp.ref <- which((ccc19x$der_deadbinary == 99|is.na(ccc19x$der_deadbinary)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Death status missing or unknown', sep = '')
-    
-    #Baseline COVID-19 severity missing/unk
-    temp.ref <- which((ccc19x$severity_of_covid_19_v2 == 99|is.na(ccc19x$severity_of_covid_19_v2)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Baseline COVID-19 severity missing or unknown', sep = '')
-    
-    #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
-    temp <- as.numeric(temp.diff)
-    
-    temp.ref <- which(temp >= 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; 30-day f/u is at least 60 days overdue', sep = '')
-    
-    #90-day f/u is 60+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
-    temp <- as.numeric(temp.diff)
-    
-    temp.ref <- which(temp >= 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; 90-day f/u is at least 60 days overdue', sep = '')
-    
-    ###############
-    #Minor problems
-    ###############
-    
-    #ADT (prostate)
-    temp.ref <- which((ccc19x$adt == 99|is.na(ccc19x$adt)) &
-                        !ccc19x$hx_treatment %in% c(3,88) &
-                        (ccc19x$cancer_type == 'C4863'|
-                           ccc19x$cancer_type_2 == 'C4863'|
-                           ccc19x$cancer_type_3 == 'C4863'|
-                           ccc19x$cancer_type_4 == 'C4863'|
-                           ccc19x$cancer_type_5 == 'C4863'))
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; ADT missing or unknown', sep = '')
-    
-    #Biomarkers (breast)
-    temp.ref <- which(((ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 0 &
-                          ccc19x$breast_biomarkers___tnbc == 0) | (ccc19x$breast_biomarkers___99 == 1)) &
-                        (ccc19x$cancer_type == 'C4872'|
-                           ccc19x$cancer_type_2 == 'C4872'|
-                           ccc19x$cancer_type_3 == 'C4872'|
-                           ccc19x$cancer_type_4 == 'C4872'|
-                           ccc19x$cancer_type_5 == 'C4872'))
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Breast cancer biomarkers missing or unknown', sep = '')
-    
-    #BCG (bladder) - DEPRECATED
-    # temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
-    #                     (ccc19x$cancer_type == 'C4912'|
-    #                        ccc19x$cancer_type_2 == 'C4912'|
-    #                        ccc19x$cancer_type_3 == 'C4912'|
-    #                        ccc19x$cancer_type_4 == 'C4912'|
-    #                        ccc19x$cancer_type_5 == 'C4912'))
-    # ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    # ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-    #                                        '; Intravesicular BCG missing or unknown', sep = '')
-    
-    #Cancer status unknown
-    temp.ref <- which(ccc19x$der_cancer_status == 'Unknown' &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Cancer status unknown', sep = '')
-    
-    #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
-    temp.ref <- which((ccc19x$mets_yn == 99|is.na(ccc19x$mets_yn)) &
-                        ccc19x$cancer_status != '1' &
-                        !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Metastatic status missing or unknown', sep = '')
-    
-    #ECOG status unknown
-    temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; ECOG PS unknown', sep = '')
-    
-    #ICU status missing/unk
-    temp.ref <- which((ccc19x$der_ICU == 99|is.na(ccc19x$der_ICU)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; ICU status missing or unknown', sep = '')
-    
-    #Hospital status missing/unk
-    temp.ref <- which((ccc19x$der_hosp == 99|is.na(ccc19x$der_hosp)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Hospital status missing or unknown', sep = '')
-    
-    #Intubation status missing/unk
-    temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Intubation status missing or unknown', sep = '')
-    
-    #O2 status missing/unk
-    temp.ref <- which((ccc19x$der_o2_ever == 99|is.na(ccc19x$der_o2_ever)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; O2 requirement missing or unknown', sep = '')
-    
-    #Days to death missing or 9999
-    temp.ref <- which(ccc19x$der_deadbinary == 1 & 
-                        (ccc19x$der_days_to_death_combined == 9999|is.na(ccc19x$der_days_to_death_combined)) &
-                        ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; Days to death missing or unknown', sep = '')
-    
-    #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
-    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
-    temp <- as.numeric(temp.diff)
-    
-    temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; 30-day f/u is at least 30 days overdue', sep = '')
-    
-    #90-day f/u is 30+ days overdue (if applicable)
-    temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
-    temp <- as.numeric(temp.diff)
-    
-    temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
-    ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
-    ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                           '; 90-day f/u is at least 30 days overdue', sep = '')
-    
-    #Remove leading semicolon
-    ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
     
     #######################
     #X07. Breast biomarkers
