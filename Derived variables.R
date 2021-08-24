@@ -443,6 +443,63 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_o2_ever <- as.factor(ccc19x$der_o2_ever)
     summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
     
+    #O7a. supplemental O2 alternative definition, allowing some unknowns in the follow-up forms
+    ccc19x$der_o2_ever_v2 <- NA
+    
+    #Yes
+    ccc19x$der_o2_ever_v2[which(ccc19x$o2_requirement == 1)] <- 1
+    ccc19x$der_o2_ever_v2[which(ccc19x$o2_requirement_c19 == 1)] <- 1
+    ccc19x$der_o2_ever_v2[which(ccc19x$resp_failure_tx %in% c(1:6))] <- 1
+    ccc19x$der_o2_ever_v2[which(ccc19x$o2_requirement_fu == 1)] <- 1
+    ccc19x$der_o2_ever_v2[which(ccc19x$resp_failure_tx_fu %in% c(1:6))] <- 1
+    
+    #No
+    
+    #Baseline
+    ccc19x$der_o2_ever_v2[which(ccc19x$o2_requirement %in% c('',0,99) & 
+                                  ccc19x$o2_requirement_c19 == 0 &
+                                  ccc19x$c19_complications_pulm___409622000 == 0 &
+                                  is.na(ccc19x$der_o2_ever_v2))] <- 0
+    
+    #Follow-up
+    ccc19x$der_o2_ever_v2[which(ccc19x$o2_requirement_fu == 0 &
+                                  ccc19x$c19_complications_pulm_fu___409622000 == 0 &
+                                  is.na(ccc19x$der_o2_ever_v2))] <- 0
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_o2_ever_v2[which((ccc19x$o2_requirement_c19 == 99|
+                                   (ccc19x$c19_complications_pulm___409622000 == 1 &
+                                      ccc19x$resp_failure_tx == 99)) &
+                                  is.na(ccc19x$der_o2_ever_v2))] <- 99
+    
+    #Follow-up
+    ccc19x$der_o2_ever_v2[which((ccc19x$o2_requirement_fu == 99|
+                                   (ccc19x$c19_complications_pulm_fu___409622000 == 1 &
+                                      ccc19x$resp_failure_tx_fu == 99)) &
+                                  is.na(ccc19x$der_o2_ever_v2))] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_o2_ever_v2[temp.ref]
+      temp2 <- ccc19x$der_o2_ever_v2[temp.ref][2:length(temp.ref)]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp[!is.na(temp)]) > 0)
+      {
+        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever_v2[temp.ref] <- 1
+        if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+        {
+          if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_o2_ever_v2[temp.ref] <- 0
+        }
+      }
+    }
+    
+    #Factor
+    ccc19x$der_o2_ever_v2 <- as.factor(ccc19x$der_o2_ever_v2)
+    summary(ccc19x$der_o2_ever_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #O8a. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
