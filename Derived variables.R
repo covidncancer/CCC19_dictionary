@@ -346,6 +346,13 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_ICU_mv_pressors <- as.factor(ccc19x$der_ICU_mv_pressors)
     summary(ccc19x$der_ICU_mv_pressors[ccc19x$redcap_repeat_instrument == ''])
     
+    #O3c. Composite of ICU or mechanical ventilation
+    ccc19x$der_ICU_mv <- NA
+    ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 1 | ccc19x$der_mv == 1)] <- 1
+    ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0)] <- 0
+    ccc19x$der_ICU_mv <- as.factor(ccc19x$der_ICU_mv)
+    summary(ccc19x$der_ICU_mv[ccc19x$redcap_repeat_instrument == ''])
+    
     "recovered"                           
     #O5. Derived recovery variable
     ccc19x$der_recovered <- NA
@@ -5212,6 +5219,33 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_steroids_bl_simple <- factor(ccc19x$der_steroids_bl_simple)
     summary(ccc19x$der_steroids_bl_simple[ccc19x$redcap_repeat_instrument == ''])
     
+    ###########################
+    #Rx24b. Steroids at baseline dichotomized at 10 mg PDE/day
+    ###########################
+    ccc19x$der_steroids_bl_10 <- NA
+    
+    #None
+    ccc19x$der_steroids_bl_10[which(ccc19x$concomitant_meds___h02 == 0)] <- "None"
+    
+    #10 or less
+    ccc19x$der_steroids_bl_10[which(ccc19x$steroid_specific_2 %in% c('1a'))] <- "10 mg PDE or less per day"
+    
+    #More than 10
+    ccc19x$der_steroids_bl_10[which(ccc19x$steroid_specific_2 %in% c('1b','2','3'))] <- "More than 10 mg PDE per day"
+    
+    #Unknown
+    ccc19x$der_steroids_bl_10[which((ccc19x$concomitant_meds___unk == 1 & 
+                                       (ccc19x$der_steroids_bl_10 == 0|is.na(ccc19x$der_steroids_bl_10)))|
+                                      ccc19x$steroid_specific_2 %in% c(1,99))] <- 'Unknown'
+    
+    #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_bl_10[i] <- NA
+    
+    ccc19x$der_steroids_bl_10 <- factor(ccc19x$der_steroids_bl_10)
+    summary(ccc19x$der_steroids_bl_10[ccc19x$redcap_repeat_instrument == ''])
+    
     ###############################################################
     #Rx12. Aspirin or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_as_apa <- NA
@@ -8720,6 +8754,15 @@ suffix <- 'data with derived variables for site QA'
     summary(ccc19x$alc[ccc19x$redcap_repeat_instrument == ''])
     summary(ccc19x$transformed_alc[ccc19x$redcap_repeat_instrument == ''])
     boxplot(log10(ccc19x$transformed_alc))
+    
+    #L21a. Dichotomized transformed ALC
+    ccc19x$transformed_alc_v2 <- NA
+    ccc19x$transformed_alc_v2[which(ccc19x$transformed_alc <= 1000)] <- "<=1000"
+    ccc19x$transformed_alc_v2[which(ccc19x$transformed_alc > 1000|
+                                      ccc19x$der_lymphopenia == 'Not lymphopenic')] <- ">1000"
+    
+    ccc19x$transformed_alc_v2 <- factor(ccc19x$transformed_alc_v2)
+    summary(ccc19x$transformed_alc_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #L22. ANC value transformation, similar to ALC
     
