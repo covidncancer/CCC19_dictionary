@@ -7940,7 +7940,7 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_no_drugs <- NA
     
     #Count the drugs
-    drugs.ref <- which(colnames(drugs) == 'drug1'):which(colnames(drugs) == 'drug12')
+    drugs.ref <- which(colnames(drugs) == 'drug1'):which(colnames(drugs) == 'drug8')
     for(i in 1:nrow(drugs))
     {
       temp.ref <- which(ccc19x$record_id == drugs$record_id[i] & ccc19x$redcap_repeat_instrument == '')
