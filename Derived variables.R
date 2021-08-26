@@ -3416,23 +3416,23 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_quarter_dx <- NA
     
     #Q1
-    temp.ref2 <- which(x1 %in% c('January','February','March') & 
-                         x2 %in% c('January','February','March') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & 
+                         x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q1', y1[temp.ref2])
     
     #Q2
-    temp.ref2 <- which(x1 %in% c('April','May','June') & 
-                         x2 %in% c('April','May','June') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('04 (Apr)','05 (May)','06 (Jun)') & 
+                         x2 %in% c('04 (Apr)','05 (May)','06 (Jun)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q2', y1[temp.ref2])
     
     #Q3
-    temp.ref2 <- which(x1 %in% c('July','August','September') & 
-                         x2 %in% c('July','August','September') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & 
+                         x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q3', y1[temp.ref2])
     
     #Q4
-    temp.ref2 <- which(x1 %in% c('October','November','December') & 
-                         x2 %in% c('October','November','December') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & 
+                         x2 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q4', y1[temp.ref2])
     
     ccc19x$der_quarter_dx <- factor(ccc19x$der_quarter_dx)
@@ -3442,19 +3442,19 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_quarter_rt_dx <- NA
     
     #Q1
-    temp.ref2 <- which(x2 %in% c('January','February','March') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q1', y2[temp.ref2])
     
     #Q2
-    temp.ref2 <- which(x2 %in% c('April','May','June') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('04 (Apr)','05 (May)','06 (Jun)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q2', y2[temp.ref2])
     
     #Q3
-    temp.ref2 <- which(x2 %in% c('July','August','September') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q3', y2[temp.ref2])
     
     #Q4
-    temp.ref2 <- which(x2 %in% c('October','November','December') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & y2 != 2099)
     
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q4', y2[temp.ref2])
     ccc19x$der_quarter_rt_dx <- factor(ccc19x$der_quarter_rt_dx)
@@ -3464,15 +3464,15 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_tri_rt_dx <- NA
     
     #T1
-    temp.ref2 <- which(x2 %in% c('January','February','March','April') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)') & y2 != 2099)
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T1', y2[temp.ref2])
     
     #T2
-    temp.ref2 <- which(x2 %in% c('May','June','July','August') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('05 (May)','06 (Jun)','07 (Jul)','08 (Aug)') & y2 != 2099)
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T2', y2[temp.ref2])
     
     #T3
-    temp.ref2 <- which(x2 %in% c('September','October','November','December') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & y2 != 2099)
     
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T3', y2[temp.ref2])
     ccc19x$der_tri_rt_dx <- factor(ccc19x$der_tri_rt_dx)
@@ -3482,13 +3482,13 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_hemi_dx <- NA
     
     #H1
-    temp.ref2 <- which(x1 %in% c('January','February','March','April','May','June') & 
-                         x2 %in% c('January','February','March','April','May','June') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)','05 (May)','06 (Jun)') & 
+                         x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)','05 (May)','06 (Jun)') & y1 == y2 & y1 != 2099)
     ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H1', y1[temp.ref2])
     
     #H2
-    temp.ref2 <- which(x1 %in% c('July','August','September','October','November','December') & 
-                         x2 %in% c('July','August','September','October','November','December') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('07 (Jul)','08 (Aug)','09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & 
+                         x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & y1 == y2 & y1 != 2099)
     ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H2', y1[temp.ref2])
     
     ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
@@ -7929,7 +7929,7 @@ suffix <- 'data with derived variables for site QA'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-06-10.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-08-24.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
