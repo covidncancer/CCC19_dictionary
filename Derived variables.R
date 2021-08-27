@@ -2676,8 +2676,18 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_days_fu <- NA
     pts <- unique(ccc19x$record_id)
     
-    #Middle of follow-up intervals (from covid_19_dx_interval)
-    fu <- c(7/2, (7+14)/2, (14+28)/2, (28+56)/2, (56+84)/2, (90+180)/2, 180, (180+270)/2, (270+360)/2, 365)
+    #Middle of follow-up intervals or right side of open intervals (from covid_19_dx_interval)
+    fu <- c(7/2, #within the past week
+            (7+14)/2, #within the past 1-2 weeks
+            (14+28)/2, #within the past 2-4 weeks
+            (28+56)/2, #within the past 4-8 weeks
+            (56+84)/2, #within the past 8-12 weeks 
+            (90+180)/2, #within the past 3-6 months
+            180, #more than 6 months ago
+            (180+270)/2, #within the past 6-9 months
+            (270+360)/2, #within the past 9-12 months
+            365 #more than 12 months ago
+            )
     
     for(i in 1:length(pts))
     {
@@ -2726,21 +2736,61 @@ suffix <- 'data with derived variables for site QA'
       {
         temp <- unique(ccc19x$der_days_to_death_combined[temp.ref])
         temp <- temp[!is.na(temp)]
+        temp.ref2 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == '')
         #Check if days to death has data, if so use it
         if(length(temp) == 1) 
         {
           if(temp != 9999) 
           {
             ccc19x$der_days_fu[temp.ref] <- temp
+          } else #Default is the follow up time
+          {
+            temp <- ccc19x$fu_weeks[temp.ref]
+            if(any(temp == 'OTH'))
+            {
+              temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
+              #Attempt to address local site subversion of the required f/u in weeks field
+              if(any(is.na(temp[temp != ''])))
+              {
+                temp.ref3 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == 'followup')
+                t1 <- fu[ccc19x$covid_19_dx_interval[temp.ref[temp.ref2]]]
+                t2 <- max(as.POSIXct(ccc19x$ts_5[temp.ref[temp.ref3]]))
+                #Use the baseline timestamp, if it exists
+                if(ccc19x$ts_0[temp.ref[temp.ref2]] != '')
+                {
+                  t2 <- as.numeric(difftime(t2, 
+                                            as.POSIXct(ccc19x$ts_0[temp.ref[temp.ref2]]),
+                                            units = 'days'))
+                } else t2 <- 0
+                ccc19x$der_days_fu[temp.ref] <- t1 + t2
+              }
+            }
+            if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
           }
+            
         } else
         {
           temp <- ccc19x$fu_weeks[temp.ref]
           if(any(temp == 'OTH'))
           {
             temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
+            #Attempt to address local site subversion of the required f/u in weeks field
+            if(any(is.na(temp[temp != ''])))
+            {
+              temp.ref3 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == 'followup')
+              t1 <- fu[ccc19x$covid_19_dx_interval[temp.ref[temp.ref2]]]
+              t2 <- max(as.POSIXct(ccc19x$ts_5[temp.ref[temp.ref3]]))
+              #Use the baseline timestamp, if it exists
+              if(ccc19x$ts_0[temp.ref[temp.ref2]] != '')
+              {
+                t2 <- as.numeric(difftime(t2, 
+                                          as.POSIXct(ccc19x$ts_0[temp.ref[temp.ref2]]),
+                                          units = 'days'))
+              } else t2 <- 0
+              ccc19x$der_days_fu[temp.ref] <- t1 + t2
+            }
           }
-          if(length(temp[temp != '']) > 0) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
+          if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
         }
         
         #If patient is deceased and days are missing, check the mortality variables for floor adjustment
