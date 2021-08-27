@@ -8482,6 +8482,25 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_parpi <- factor(ccc19x$der_parpi)
     summary(ccc19x$der_parpi[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4p: Targeted not HER2 or CDK4/6i (focusing on drugs used in the patients with breast cancer)
+    ccc19x$der_targeted_not_her2_cdk46i <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Alpelisib','Bevacizumab','Bortezomib','Cetuximab','Daratumumab',
+               'Dasatinib','Erlotinib','Everolimus','Fedratinib','Gemtuzumab ozogamicin',
+               'Gilteritinib','Ibrutinib','Imatinib','Lenalidomide','Neratinib',
+               'Olaparib','Osimertinib','Rituximab','Rucaparib','Ruxolitinib',
+               'Sacituzimab','Sacituzimab govitecan','SAR439859','Selpercatinib','Sunitinib',
+               'Talazoparib','Tucatinib','Venetoclax','Zandelisib'))) ccc19x$der_targeted_not_her2_cdk46i[temp.ref[i]] <- 1 else
+                 ccc19x$der_targeted_not_her2_cdk46i[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_targeted_not_her2_cdk46i <- factor(ccc19x$der_targeted_not_her2_cdk46i)
+    summary(ccc19x$der_targeted_not_her2_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
