@@ -6479,6 +6479,30 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_hld_v2 <- factor(ccc19x$der_hld_v2)
     summary(ccc19x$der_hld_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    #########
+    #C16. HIV
+    #########
+    ccc19x$der_HIV <- NA
+    ccc19x$der_HIV[which( ccc19x$significant_comorbidities___62479008 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___62479008|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___62479008[i] == 0)
+      )) ccc19x$der_HIV[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_HIV[i] <- 99
+    }
+    
+    ccc19x$der_HIV <- factor(ccc19x$der_HIV)
+    summary(ccc19x$der_HIV[ccc19x$redcap_repeat_instrument == ''])
+    
     #######################
     #C10. Baseline dementia
     #######################
