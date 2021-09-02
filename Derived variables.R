@@ -2672,78 +2672,106 @@ suffix <- 'data with derived variables for site QA'
       }
     }
     
+    ###############
     #T3. Median f/u
-    ccc19x$der_days_fu <- NA
-    pts <- unique(ccc19x$record_id)
-    
-    #Middle of follow-up intervals or right side of open intervals (from covid_19_dx_interval)
-    fu <- c(7/2, #within the past week
-            (7+14)/2, #within the past 1-2 weeks
-            (14+28)/2, #within the past 2-4 weeks
-            (28+56)/2, #within the past 4-8 weeks
-            (56+84)/2, #within the past 8-12 weeks 
-            (90+180)/2, #within the past 3-6 months
-            180, #more than 6 months ago
-            (180+270)/2, #within the past 6-9 months
-            (270+360)/2, #within the past 9-12 months
-            365 #more than 12 months ago
-            )
-    
-    for(i in 1:length(pts))
+    ###############
     {
-      temp.ref <- which(ccc19x$record_id == pts[i])
-      #Check that f/u form has been completed, remove otherwise
-      temp <- ccc19x$followup_complete[temp.ref]
-      temp.ref <- temp.ref[which(is.na(temp) | temp == 2)]
-      if(length(temp.ref) == 1) #No follow-up forms
+      ccc19x$der_days_fu <- NA
+      pts <- unique(ccc19x$record_id)
+      
+      #Middle of follow-up intervals or right side of open intervals (from covid_19_dx_interval)
+      fu <- c(7/2, #within the past week
+              (7+14)/2, #within the past 1-2 weeks
+              (14+28)/2, #within the past 2-4 weeks
+              (28+56)/2, #within the past 4-8 weeks
+              (56+84)/2, #within the past 8-12 weeks 
+              (90+180)/2, #within the past 3-6 months
+              180, #more than 6 months ago
+              (180+270)/2, #within the past 6-9 months
+              (270+360)/2, #within the past 9-12 months
+              365 #more than 12 months ago
+      )
+      
+      for(i in 1:length(pts))
       {
-        #Check if days to death has data, if so use it
-        if(!is.na(ccc19x$der_days_to_death_combined[temp.ref])) 
+        temp.ref <- which(ccc19x$record_id == pts[i])
+        #Check that f/u form has been completed, remove otherwise
+        temp <- ccc19x$followup_complete[temp.ref]
+        temp.ref <- temp.ref[which(is.na(temp) | temp == 2)]
+        if(length(temp.ref) == 1) #No follow-up forms
         {
-          if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
+          #Check if days to death has data, if so use it
+          if(!is.na(ccc19x$der_days_to_death_combined[temp.ref])) 
           {
-            ccc19x$der_days_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
-          } else #Default is the median of the time interval of diagnosis
+            if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
+            {
+              ccc19x$der_days_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
+            } else #Default is the median of the time interval of diagnosis
+              ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+          } else
+          {
+            #Default is the median of the time interval of diagnosis
             ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+            
+            # #Check that LOS aren't longer than this
+            # if(!is.na(ccc19x$der_days_fu[temp.ref]))
+            # {
+            #   temp <- ccc19x[temp.ref,c('hosp_los','hosp_los_2','icu_los')]
+            #   temp <- sum(temp[!is.na(temp)])
+            #   if(temp > ccc19x$der_days_fu[temp.ref]) ccc19x$der_days_fu[temp.ref] <- temp
+            # }
+            
+            #If patient is deceased and days are missing, check the mortality variables for floor adjustment
+            temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 30 & 
+              ccc19x$mortality[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+            if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
+            
+            temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 90 & 
+              ccc19x$mortality_90[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+            if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
+            
+            temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 180 & 
+              ccc19x$mortality_180[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+            if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
+            
+          }
         } else
         {
-          #Default is the median of the time interval of diagnosis
-          ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
-          
-          # #Check that LOS aren't longer than this
-          # if(!is.na(ccc19x$der_days_fu[temp.ref]))
-          # {
-          #   temp <- ccc19x[temp.ref,c('hosp_los','hosp_los_2','icu_los')]
-          #   temp <- sum(temp[!is.na(temp)])
-          #   if(temp > ccc19x$der_days_fu[temp.ref]) ccc19x$der_days_fu[temp.ref] <- temp
-          # }
-          
-          #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 30 & 
-            ccc19x$mortality[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
-          
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 90 & 
-            ccc19x$mortality_90[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
-          
-          temp <- ccc19x$der_deadbinary[temp.ref] == 1 & ccc19x$der_days_fu[temp.ref] > 180 & 
-            ccc19x$mortality_180[temp.ref] == 0 & (is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
-          
-        }
-      } else
-      {
-        temp <- unique(ccc19x$der_days_to_death_combined[temp.ref])
-        temp <- temp[!is.na(temp)]
-        temp.ref2 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == '')
-        #Check if days to death has data, if so use it
-        if(length(temp) == 1) 
-        {
-          if(temp != 9999) 
+          temp <- unique(ccc19x$der_days_to_death_combined[temp.ref])
+          temp <- temp[!is.na(temp)]
+          temp.ref2 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == '')
+          #Check if days to death has data, if so use it
+          if(length(temp) == 1) 
           {
-            ccc19x$der_days_fu[temp.ref] <- temp
-          } else #Default is the follow up time
+            if(temp != 9999) 
+            {
+              ccc19x$der_days_fu[temp.ref] <- temp
+            } else #Default is the follow up time
+            {
+              temp <- ccc19x$fu_weeks[temp.ref]
+              if(any(temp == 'OTH'))
+              {
+                temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
+                #Attempt to address local site subversion of the required f/u in weeks field
+                if(any(is.na(temp[temp != ''])))
+                {
+                  temp.ref3 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == 'followup')
+                  t1 <- fu[ccc19x$covid_19_dx_interval[temp.ref[temp.ref2]]]
+                  t2 <- max(as.POSIXct(ccc19x$ts_5[temp.ref[temp.ref3]]))
+                  #Use the baseline timestamp, if it exists
+                  if(ccc19x$ts_0[temp.ref[temp.ref2]] != '')
+                  {
+                    t2 <- as.numeric(difftime(t2, 
+                                              as.POSIXct(ccc19x$ts_0[temp.ref[temp.ref2]]),
+                                              units = 'days'))
+                  } else t2 <- 0
+                  ccc19x$der_days_fu[temp.ref] <- t1 + t2
+                }
+              }
+              if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
+            }
+            
+          } else
           {
             temp <- ccc19x$fu_weeks[temp.ref]
             if(any(temp == 'OTH'))
@@ -2767,47 +2795,22 @@ suffix <- 'data with derived variables for site QA'
             }
             if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
           }
-            
-        } else
-        {
-          temp <- ccc19x$fu_weeks[temp.ref]
-          if(any(temp == 'OTH'))
-          {
-            temp[temp == 'OTH'] <- 7*ccc19x$timing_of_report_weeks[temp.ref[which(temp == 'OTH')]]
-            #Attempt to address local site subversion of the required f/u in weeks field
-            if(any(is.na(temp[temp != ''])))
-            {
-              temp.ref3 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == 'followup')
-              t1 <- fu[ccc19x$covid_19_dx_interval[temp.ref[temp.ref2]]]
-              t2 <- max(as.POSIXct(ccc19x$ts_5[temp.ref[temp.ref3]]))
-              #Use the baseline timestamp, if it exists
-              if(ccc19x$ts_0[temp.ref[temp.ref2]] != '')
-              {
-                t2 <- as.numeric(difftime(t2, 
-                                          as.POSIXct(ccc19x$ts_0[temp.ref[temp.ref2]]),
-                                          units = 'days'))
-              } else t2 <- 0
-              ccc19x$der_days_fu[temp.ref] <- t1 + t2
-            }
-          }
-          if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
+          
+          #If patient is deceased and days are missing, check the mortality variables for floor adjustment
+          temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 30) & 
+            any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
+          
+          temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 90) & 
+            any(ccc19x$d90_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
+          
+          temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 180) & 
+            any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
         }
-        
-        #If patient is deceased and days are missing, check the mortality variables for floor adjustment
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 30) & 
-          any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
-        
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 90) & 
-          any(ccc19x$d90_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 90
-        
-        temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 180) & 
-          any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
-        if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
       }
     }
-    
     summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
     
     #T4 & T5 Median f/u in days anchored to actual dates
@@ -8215,7 +8218,8 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_adt[which(ccc19x$on_treatment == 0 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 0
     
     #Unknown
-    ccc19x$der_adt[which(ccc19x$prostate_tx___unk == 1 & is.na(ccc19x$der_adt))] <- 99
+    ccc19x$der_adt[which((ccc19x$prostate_tx___unk == 1|ccc19x$orchiectomy == 99|ccc19x$adt == 99) & 
+                     is.na(x$der_adt))] <- 99
     
     ccc19x$der_adt <- factor(ccc19x$der_adt)
     summary(ccc19x$der_adt[ccc19x$der_Prostate == 1])
