@@ -9184,6 +9184,9 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_quality <- 0
       ccc19x$meta_problems <- ''
       
+      quality_report <- data.frame(class = character(), metric = character(), n = character(), stringsAsFactors = F)
+      n <- length(unique(ccc19x$record_id))
+      
       ###############
       #Major problems
       ###############
@@ -9219,6 +9222,15 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
                                                                        '; High levels of baseline missingness', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Major criteria',
+                                                   'Acceptable level of baseline missingness',
+                                                   paste(format(length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       #Large number of unknowns
       dict.unk <- dict[grep(dict$Choices..Calculations..OR.Slider.Labels, pattern = 'Unknown'),]
       
@@ -9238,6 +9250,15 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
                                                                  '; Large number of unknowns', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Major criteria',
+                                                   'Acceptable level of unknowns',
+                                                   paste(format(length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       ##################
       #Moderate problems
       ##################
@@ -9249,12 +9270,30 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Cancer status missing', sep = '')
       
-      #ECOG status missing
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+                                                   'Cancer status not missing',
+                                                   paste(format(length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
+      #ECOG performance status missing
       temp.ref <- which(is.na(ccc19x$der_ecogcat) &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ECOG PS missing', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+                                                   'ECOG performance status not missing',
+                                                   paste(format(length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #Death status missing/unk
       temp.ref <- which((ccc19x$der_deadbinary == 99|is.na(ccc19x$der_deadbinary)) &
@@ -9263,12 +9302,30 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Death status missing or unknown', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+                                                   'Death status not missing or unknown',
+                                                   paste(format(length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       #Baseline COVID-19 severity missing/unk
       temp.ref <- which((ccc19x$severity_of_covid_19_v2 == 99|is.na(ccc19x$severity_of_covid_19_v2)) &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 3
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Baseline COVID-19 severity missing or unknown', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+                                                   'Baseline COVID-19 severity not missing or unknown',
+                                                   paste(format(length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
       temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
@@ -9334,7 +9391,18 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Cancer status unknown', sep = '')
       
-      #Mets status unknown, unless patient has stage IV/disseminated cancer with active disease
+      n1 <- length(which(ccc19x$cancer_status %in% 1:99 & ccc19x$redcap_repeat_instrument == ''))
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Baseline cancer status non-missing with a known value',
+                                                   paste(format(length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n1, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == ''))/n1, digits = 2),
+                                                         '%)', sep = ''))
+      
+      #Mets status missing or unknown, unless patient has stage IV/disseminated cancer with active disease
       temp.ref <- which((ccc19x$mets_yn == 99|is.na(ccc19x$mets_yn)) &
                           ccc19x$cancer_status != '1' &
                           !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
@@ -9343,12 +9411,32 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Metastatic status missing or unknown', sep = '')
       
-      #ECOG status unknown
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Metastatic status with a known value',
+                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n - length(temp.ref))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
+      #ECOG performance status unknown
       temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ECOG PS unknown', sep = '')
+      
+      n1 <- length(which(ccc19x$ecog_status %in% 0:99 & ccc19x$redcap_repeat_instrument == ''))
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Baseline ECOG performance status non-missing with a known value, including not documented in the 3 months preceding COVID-19 diagnosis',
+                                                   paste(format(length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                         ' of ',
+                                                         format(n1, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == ''))/n1, digits = 2),
+                                                         '%)', sep = ''))
       
       #ICU status missing/unk
       temp.ref <- which((ccc19x$der_ICU == 99|is.na(ccc19x$der_ICU)) &
@@ -9357,12 +9445,30 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ICU status missing or unknown', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'ICU status with a known value',
+                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n - length(temp.ref))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       #Hospital status missing/unk
       temp.ref <- which((ccc19x$der_hosp == 99|is.na(ccc19x$der_hosp)) &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Hospital status missing or unknown', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Hospital status with a known value',
+                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n - length(temp.ref))/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #Intubation status missing/unk
       temp.ref <- which((ccc19x$der_mv == 99|is.na(ccc19x$der_mv)) &
@@ -9371,12 +9477,30 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Intubation status missing or unknown', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Intubation status with a known value',
+                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n - length(temp.ref))/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       #O2 status missing/unk
       temp.ref <- which((ccc19x$der_o2_ever == 99|is.na(ccc19x$der_o2_ever)) &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; O2 requirement missing or unknown', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Supplemental oxygen status with a known value',
+                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n - length(temp.ref))/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #Days to death missing or 9999
       temp.ref <- which(ccc19x$der_deadbinary == 1 & 
@@ -9385,6 +9509,17 @@ suffix <- 'data with derived variables for site QA'
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Days to death missing or unknown', sep = '')
+      
+      n1 <- length(which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == ''))
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+                                                   'Days to death non-missing with a known value',
+                                                   paste(format(n1 - length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n1, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*(n1 - length(temp.ref))/n1, digits = 2),
+                                                         '%)', sep = ''))
       
       #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
       temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
@@ -9407,6 +9542,8 @@ suffix <- 'data with derived variables for site QA'
       #Remove leading semicolon
       ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
     }
+    
+    write.csv(quality_report, file = paste('QA/', Sys.Date(), ' overall quality report.csv',sep=''), row.names = F)
     
     #######################
     #X07. Breast biomarkers
