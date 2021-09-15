@@ -7,6 +7,7 @@ ccc19x <- foo
 #Define the desired suffix for the save function
 suffix <- 'data with derived variables for analysis'
 suffix <- 'data with derived variables for site QA'
+suffix <- 'data with derived variables for local QA'
 
 ##DERIVED VARIABLES to recode:
 {
@@ -143,15 +144,53 @@ suffix <- 'data with derived variables for site QA'
     summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
     
     #O2a. Hospitalization within first 30 days
+    ccc19x$der_hosp_30 <- NA
+    
+    #Initial form
+    
+    #No
+    ccc19x$der_hosp_30[which(ccc19x$hosp_status == 0| 
+                            ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
+                            ccc19x$worst_status_clinical %in% c(0:3)|
+                              ccc19x$worst_complications_severity___0 == 1)] <- 0
+    
+    #Yes
+    ccc19x$der_hosp_30[which(ccc19x$hosp_status %in% c(1:3) | 
+                               ccc19x$current_status %in% c(5:8)|
+                               ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
+                               ccc19x$worst_status_clinical %in% c(5:8)| 
+                               ccc19x$labs == '2a'| #Labs drawn at time of hospitalization
+                               ccc19x$current_status_clinical %in% c(4:8))] <- 1
+    
+    #Interventions that could only happen in a hospital
+    ccc19x$der_hosp_30[which(ccc19x$resp_failure_tx %in% 2:6 |
+                               ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
+    
+    #Unknown
+    ccc19x$der_hosp_30[which((ccc19x$hosp_status == 99 |
+                             ccc19x$worst_status_clinical == 99) & 
+                            is.na(ccc19x$der_hosp_30))] <- 99
+    
+    #Followup ONLY if less than or equal to 30 days and for hospitalization
+    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
+                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
+                                        ccc19x$fu_weeks == 30))]
+    ccc19x$der_hosp_30[which(ccc19x$record_id %in% temp & ccc19x$redcap_repeat_instrument == '')] <- 1
+    
+    #Factor
+    ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
+    summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
+    
+    #O2b. Hospitalization based on baseline form only
     ccc19x$der_hosp_bl <- NA
     
     #Initial form
     
     #No
     ccc19x$der_hosp_bl[which(ccc19x$hosp_status == 0| 
-                            ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
-                            ccc19x$worst_status_clinical %in% c(0:3)|
-                              ccc19x$worst_complications_severity___0 == 1)] <- 0
+                               ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
+                               ccc19x$worst_status_clinical %in% c(0:3)|
+                               ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
     ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:3) | 
@@ -167,14 +206,8 @@ suffix <- 'data with derived variables for site QA'
     
     #Unknown
     ccc19x$der_hosp_bl[which((ccc19x$hosp_status == 99 |
-                             ccc19x$worst_status_clinical == 99) & 
-                            is.na(ccc19x$der_hosp_bl))] <- 99
-    
-    #Followup ONLY if less than or equal to 30 days and for hospitalization
-    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
-                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
-                                        ccc19x$fu_weeks == 30))]
-    ccc19x$der_hosp_bl[which(ccc19x$record_id %in% temp & ccc19x$redcap_repeat_instrument == '')] <- 1
+                                ccc19x$worst_status_clinical == 99) & 
+                               is.na(ccc19x$der_hosp_bl))] <- 99
     
     #Factor
     ccc19x$der_hosp_bl <- as.factor(ccc19x$der_hosp_bl)
@@ -7827,7 +7860,9 @@ suffix <- 'data with derived variables for site QA'
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
     summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
     
+    ##############
     #Ca3a. ecogcat
+    ##############
     #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
     ccc19x$der_ecogcat <- NA
     ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(0,1))] <- '0 or 1'
@@ -8088,7 +8123,7 @@ suffix <- 'data with derived variables for site QA'
         out <- concept_relationship_stage$concept_code_1[concept_relationship_stage$concept_code_2 %in% concept_stage$concept_code[list.match] &
                                                            concept_relationship_stage$relationship_id == 'Has anti-cancer drugs']
         if(length(out) > 1) out <- paste(out, collapse = '|')
-        ccc19x$der_regimen[i] <- out
+        if(length(out) > 0) ccc19x$der_regimen[i] <- out else ccc19x$der_regimen[i] <- 'No match'
       } else ccc19x$der_regimen[i] <- 'No match'      
     }
     
@@ -9817,7 +9852,9 @@ for(i in 1:length(temp.ref))
     out$values[i] <- paste(paste(names(temp), temp, sep = ': '), collapse = '; ')
   } else out$values[i] <- 'Not a factor or an integer variable'
 }
-write.csv(out, file = paste(Sys.time(),'.summary of derived variables results.csv', sep = ''), row.names = F)
+write.csv(out, file = paste(stamp,'.summary of derived variables results.csv', sep = ''), row.names = F)
 
 #Save here
-save(ccc19x, file = paste(Sys.time(),'.',suffix,'.RData', sep = ''))
+save(ccc19x, file = paste(stamp,'.',suffix,'.RData', sep = ''))
+
+
