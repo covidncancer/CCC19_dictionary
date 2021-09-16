@@ -7495,36 +7495,6 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_activetx3mo_v2 <- relevel(ccc19x$der_activetx3mo_v2, ref = 'None')
     summary(ccc19x$der_activetx3mo_v2[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca02. Line of active therapy
-    ccc19x$der_txline<- NA
-    
-    #Untreated in last 12 months (context variable only triggers for treatment within 12 months)
-    ccc19x$der_txline[which(ccc19x$hx_treatment %in% c(3,88)|
-                              (ccc19x$on_treatment == 0 & !ccc19x$hx_treatment %in% 1:2))] <- 'Untreated in last 12 months'
-    
-    #First-line
-    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(5250,2618,3175,813,1526,1901))] <- 'First line'
-    
-    #Second-line or later
-    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(14900,1874))] <- 'Second line or greater'
-    
-    #Curative NOS
-    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(46235))] <- 'Curative NOS'
-    
-    #Non-curative NOS
-    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(2648))] <- 'Non-curative NOS'
-    
-    #Other
-    ccc19x$der_txline[which(ccc19x$treatment_context == 'OTH')] <- 'Other'
-    
-    #Unknown
-    ccc19x$der_txline[which(ccc19x$treatment_context == 'UNK')] <- 'Unknown'
-    
-    #Factor
-    ccc19x$der_txline <- as.factor(ccc19x$der_txline)
-    ccc19x$der_txline <- relevel(ccc19x$der_txline, ref = 'Untreated in last 12 months')
-    summary(ccc19x$der_txline[ccc19x$redcap_repeat_instrument == ''])
-    
     ############################################
     #Ca10. Any cancer treatment in past 3 months
     ############################################
@@ -7860,10 +7830,70 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
     summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
     
-    ##############
-    #Ca3a. ecogcat
-    ##############
-    #categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
+    ################
+    #Line of therapy
+    ################
+    
+    #Ca02. Line of active therapy (includes non-systemic therapies)
+    ccc19x$der_txline<- NA
+    
+    #Untreated in last 12 months (context variable only triggers for treatment within 12 months)
+    ccc19x$der_txline[which(ccc19x$hx_treatment %in% c(3,88)|
+                              (ccc19x$on_treatment == 0 & !ccc19x$hx_treatment %in% 1:2))] <- 'Untreated in last 12 months'
+    
+    #First-line
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(5250,2618,3175,813,1526,1901))] <- 'First line'
+    
+    #Second-line or later
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(14900,1874))] <- 'Second line or greater'
+    
+    #Curative NOS
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(46235))] <- 'Curative NOS'
+    
+    #Non-curative NOS
+    ccc19x$der_txline[which(ccc19x$treatment_context %in% c(2648))] <- 'Non-curative NOS'
+    
+    #Other
+    ccc19x$der_txline[which(ccc19x$treatment_context == 'OTH')] <- 'Other'
+    
+    #Unknown
+    ccc19x$der_txline[which(ccc19x$treatment_context == 'UNK')] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_txline <- as.factor(ccc19x$der_txline)
+    ccc19x$der_txline <- relevel(ccc19x$der_txline, ref = 'Untreated in last 12 months')
+    summary(ccc19x$der_txline[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca02a. Line of systemic therapy for patients who received treatment within 12 months
+    ccc19x$der_txline_systemic_12 <- NA
+    
+    #First-line
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context %in% c(5250,2618,3175,813,1526,1901))] <- 'First line'
+    
+    #Second-line or later
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context %in% c(14900,1874))] <- 'Second line or greater'
+    
+    #Curative NOS
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context %in% c(46235))] <- 'Curative NOS'
+    
+    #Non-curative NOS
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context %in% c(2648))] <- 'Non-curative NOS'
+    
+    #Other
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context == 'OTH')] <- 'Other'
+    
+    #Unknown
+    ccc19x$der_txline_systemic_12[which(ccc19x$der_any_systemic_v2 == 1 & ccc19x$treatment_context == 'UNK')] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_txline_systemic_12 <- as.factor(ccc19x$der_txline_systemic_12)
+    summary(ccc19x$der_txline_systemic_12[ccc19x$redcap_repeat_instrument == ''])
+    
+    ########################
+    #ECOG Performance Status
+    ########################
+    
+    #Ca3a. categorical ecog variable, lumping 1 = 0/1, 2 = 2, and 3 = 3/4, 4 = unknown
     ccc19x$der_ecogcat <- NA
     ccc19x$der_ecogcat[which(ccc19x$ecog_status %in% c(0,1))] <- '0 or 1'
     ccc19x$der_ecogcat[which(ccc19x$ecog_status == 2)] <- 2
