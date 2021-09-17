@@ -2618,20 +2618,26 @@ suffix <- 'data with derived variables for local QA'
     #Comp40 Any co-infection 
     ccc19x$der_coinfection_any <- NA
     
-    #Yes
+    #Yes, known organism
     ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 1|
                                        ccc19x$der_coinfection_fungal == 1|
                                        ccc19x$der_coinfection_viral == 1)] <- 1
     
+    #Yes, organism remains undefined
+    ccc19x$der_coinfection_any[which(ccc19x$coinfection___oth == 1 & is.na(ccc19x$der_coinfection_any))] <- 88
+    
     #No
-    ccc19x$der_coinfection_any[which(ccc19x$der_coinfection_bacterial == 0 &
+    ccc19x$der_coinfection_any[which(((ccc19x$der_coinfection_bacterial == 0 &
                                        ccc19x$der_coinfection_fungal == 0 &
-                                       ccc19x$der_coinfection_viral == 0)] <- 0
+                                       ccc19x$der_coinfection_viral == 0)|
+                                        ccc19x$coinfection___none == 1) &
+                                       is.na(ccc19x$der_coinfection_any))] <- 0
     
     #Unknown
     ccc19x$der_coinfection_any[which((ccc19x$der_coinfection_bacterial == 99|
                                         ccc19x$der_coinfection_fungal == 99|
-                                        ccc19x$der_coinfection_viral == 99) & is.na(ccc19x$der_coinfection_any))] <- 99
+                                        ccc19x$der_coinfection_viral == 99|
+                                        ccc19x$coinfection___unk == 1) & is.na(ccc19x$der_coinfection_any))] <- 99
     
     ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
     summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
