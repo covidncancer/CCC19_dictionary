@@ -461,6 +461,27 @@ suffix <- 'data with derived variables for local QA'
                                    ccc19x$resp_failure_tx_fu == 99)) &
                                is.na(ccc19x$der_o2_ever))] <- 99
     
+    #Create a temporal table
+    temp <- max(ccc19x$redcap_repeat_instance[ccc19x$redcap_repeat_instrument == 'followup'])
+    time.df <- as.data.frame(matrix(nrow = length(unique(ccc19x$record_id)), ncol = temp+2), stringsAsFactors = F)
+    colnames(time.df)[1] <- 'record_id'
+    colnames(time.df)[2:ncol(time.df)] <- paste('t', 0:temp, sep = '')
+    time.df$record_id <- unique(ccc19x$record_id)
+    
+    #Baseline
+    temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instrument == '', c('record_id','der_o2_ever')], all.x = T)
+    temp <- temp[order(time.df$record_id),]
+    time.df[,2] <- temp$der_o2_ever
+    
+    #Followup
+    for(i in 3:ncol(time.df))
+    {
+      temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instance == i - 2, c('record_id','der_o2_ever')], all.x = T)
+      temp <- temp[order(time.df$record_id),]
+      time.df[,i] <- temp$der_o2_ever
+    }
+    rm(temp)  
+    
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
