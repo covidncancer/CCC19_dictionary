@@ -2519,7 +2519,7 @@ suffix <- 'data with derived variables for local QA'
                                          ccc19x$coinfection___6415009 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_viral[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_viral))] <- 0
+    ccc19x$der_coinfection_viral[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_viral))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_viral[i])) ccc19x$der_coinfection_viral[i] <- 0 
     
@@ -2542,7 +2542,7 @@ suffix <- 'data with derived variables for local QA'
                                              ccc19x$coinfection___81325006 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_bacterial[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bacterial))] <- 0
+    ccc19x$der_coinfection_bacterial[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_bacterial))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bacterial[i])) ccc19x$der_coinfection_bacterial[i] <- 0 
     
@@ -2563,7 +2563,7 @@ suffix <- 'data with derived variables for local QA'
                                                  ccc19x$coinfection___233607000 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_bact_gram_pos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 0
+    ccc19x$der_coinfection_bact_gram_pos[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_bact_gram_pos))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_pos[i])) ccc19x$der_coinfection_bact_gram_pos[i] <- 0 
     
@@ -2583,7 +2583,7 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection___81325006 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_bact_gram_neg[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 0
+    ccc19x$der_coinfection_bact_gram_neg[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_bact_gram_neg))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_gram_neg[i])) ccc19x$der_coinfection_bact_gram_neg[i] <- 0 
     
@@ -2603,7 +2603,7 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_coinfection_bact_nos[which(ccc19x$coinfection___409822003 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_bact_nos[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_bact_nos))] <- 0
+    ccc19x$der_coinfection_bact_nos[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_bact_nos))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_bact_nos[i])) ccc19x$der_coinfection_bact_nos[i] <- 0 
     
@@ -2625,7 +2625,7 @@ suffix <- 'data with derived variables for local QA'
                                           ccc19x$coinfection___709601002 == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_fungal[which(ccc19x$coinfection_yn == 0 & is.na(ccc19x$der_coinfection_fungal))] <- 0
+    ccc19x$der_coinfection_fungal[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_fungal))] <- 0
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_fungal[i])) ccc19x$der_coinfection_fungal[i] <- 0 
     
@@ -2635,6 +2635,28 @@ suffix <- 'data with derived variables for local QA'
     
     ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
     summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Comp41 Other co-infection
+    ccc19x$der_coinfection_other <- NA
+    
+    #Yes
+    ccc19x$der_coinfection_other[which(ccc19x$coinfection___oth == 1)] <- 1
+    
+    #No
+    ccc19x$der_coinfection_other[which(((ccc19x$der_coinfection_bacterial == 0 &
+                                           ccc19x$der_coinfection_fungal == 0 &
+                                           ccc19x$der_coinfection_viral == 0)|
+                                          ccc19x$coinfection___none == 1) &
+                                         is.na(ccc19x$der_coinfection_other))] <- 0
+    
+    #Unknown
+    ccc19x$der_coinfection_other[which((ccc19x$der_coinfection_bacterial == 99|
+                                          ccc19x$der_coinfection_fungal == 99|
+                                          ccc19x$der_coinfection_viral == 99|
+                                          ccc19x$coinfection___unk == 1) & is.na(ccc19x$der_coinfection_other))] <- 99
+    
+    ccc19x$der_coinfection_other <- factor(ccc19x$der_coinfection_other)
+    summary(ccc19x$der_coinfection_other[ccc19x$redcap_repeat_instrument == ''])
     
     #Comp40 Any co-infection 
     ccc19x$der_coinfection_any <- NA
