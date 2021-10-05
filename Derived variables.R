@@ -6991,6 +6991,26 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
     summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
     
+    #Myeloproliferative neoplasms
+    ccc19x$der_MPN <- 0
+    ccc19x$der_MPN[which(ccc19x$cancer_type %in% c("C4345")|
+                               ccc19x$cancer_type_2 %in% c("C4345")|
+                               ccc19x$cancer_type_3 %in% c("C4345")|
+                               ccc19x$cancer_type_4 %in% c("C4345")|
+                               ccc19x$cancer_type_5 %in% c("C4345"))] <- 1
+    ccc19x$der_MPN <- factor(ccc19x$der_MPN)
+    summary(ccc19x$der_MPN[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Myelodysplastic syndrome
+    ccc19x$der_MDS <- 0
+    ccc19x$der_MDS[which(ccc19x$cancer_type %in% c("C3247")|
+                           ccc19x$cancer_type_2 %in% c("C3247")|
+                           ccc19x$cancer_type_3 %in% c("C3247")|
+                           ccc19x$cancer_type_4 %in% c("C3247")|
+                           ccc19x$cancer_type_5 %in% c("C3247"))] <- 1
+    ccc19x$der_MDS <- factor(ccc19x$der_MDS)
+    summary(ccc19x$der_MDS[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca8 Heme indicator
     ccc19x$der_heme <- NA
     ccc19x$der_heme[ccc19x$redcap_repeat_instrument == ''] <- 0
