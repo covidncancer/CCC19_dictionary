@@ -2638,22 +2638,19 @@ suffix <- 'data with derived variables for local QA'
     
     #Comp41 Other co-infection
     ccc19x$der_coinfection_other <- NA
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'coinfection___') & !grepl(colnames(ccc19x), pattern = 'unk|none|442376007'))
     
     #Yes
     ccc19x$der_coinfection_other[which(ccc19x$coinfection___oth == 1)] <- 1
     
     #No
-    ccc19x$der_coinfection_other[which(((ccc19x$der_coinfection_bacterial == 0 &
-                                           ccc19x$der_coinfection_fungal == 0 &
-                                           ccc19x$der_coinfection_viral == 0)|
-                                          ccc19x$coinfection___none == 1) &
-                                         is.na(ccc19x$der_coinfection_other))] <- 0
+    ccc19x$der_coinfection_other[which((ccc19x$coinfection_yn == 0|ccc19x$coinfection___none == 1) & is.na(ccc19x$der_coinfection_other))] <- 0
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(any(ccc19x[i,temp.ref] == 1) & is.na(ccc19x$der_coinfection_other[i])) ccc19x$der_coinfection_other[i] <- 0 
     
     #Unknown
-    ccc19x$der_coinfection_other[which((ccc19x$der_coinfection_bacterial == 99|
-                                          ccc19x$der_coinfection_fungal == 99|
-                                          ccc19x$der_coinfection_viral == 99|
-                                          ccc19x$coinfection___unk == 1) & is.na(ccc19x$der_coinfection_other))] <- 99
+    ccc19x$der_coinfection_other[which((ccc19x$coinfection_yn == 99|ccc19x$coinfection___unk == 1) &
+                                          is.na(ccc19x$der_coinfection_other))] <- 99
     
     ccc19x$der_coinfection_other <- factor(ccc19x$der_coinfection_other)
     summary(ccc19x$der_coinfection_other[ccc19x$redcap_repeat_instrument == ''])
