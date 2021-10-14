@@ -7177,6 +7177,56 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_Gyn <- factor(ccc19x$der_Gyn)
     summary(ccc19x$der_Gyn[ccc19x$redcap_repeat_instrument == ''])
     
+    #Cervix
+    ccc19x$der_Cervix <- 0
+    ccc19x$der_Cervix[which(ccc19x$cancer_type %in% c("C9039")|
+                              ccc19x$cancer_type_2 %in% c("C9039")|
+                              ccc19x$cancer_type_3 %in% c("C9039")|
+                              ccc19x$cancer_type_4 %in% c("C9039")|
+                              ccc19x$cancer_type_5 %in% c("C9039"))] <- 1
+    ccc19x$der_Cervix <- factor(ccc19x$der_Cervix)
+    summary(ccc19x$der_Cervix[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ovarian + Fallopian
+    ccc19x$der_Ovary <- 0
+    ccc19x$der_Ovary[which(ccc19x$cancer_type %in% c("C7431","C3867")|
+                             ccc19x$cancer_type_2 %in% c("C7431","C3867")|
+                             ccc19x$cancer_type_3 %in% c("C7431","C3867")|
+                             ccc19x$cancer_type_4 %in% c("C7431","C3867")|
+                             ccc19x$cancer_type_5 %in% c("C7431","C3867"))] <- 1
+    ccc19x$der_Ovary <- factor(ccc19x$der_Ovary)
+    summary(ccc19x$der_Ovary[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Uterine
+    ccc19x$der_Uterine <- 0
+    ccc19x$der_Uterine[which(ccc19x$cancer_type %in% c("C7558")|
+                               ccc19x$cancer_type_2 %in% c("C7558")|
+                               ccc19x$cancer_type_3 %in% c("C7558")|
+                               ccc19x$cancer_type_4 %in% c("C7558")|
+                               ccc19x$cancer_type_5 %in% c("C7558"))] <- 1
+    ccc19x$der_Uterine <- factor(ccc19x$der_Uterine)
+    summary(ccc19x$der_Uterine[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Vagina
+    ccc19x$der_Vagina <- 0
+    ccc19x$der_Vagina[which(ccc19x$cancer_type %in% c("C3917")|
+                              ccc19x$cancer_type_2 %in% c("C3917")|
+                              ccc19x$cancer_type_3 %in% c("C3917")|
+                              ccc19x$cancer_type_4 %in% c("C3917")|
+                              ccc19x$cancer_type_5 %in% c("C3917"))] <- 1
+    ccc19x$der_Vagina <- factor(ccc19x$der_Vagina)
+    summary(ccc19x$der_Vagina[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Vulva
+    ccc19x$der_Vulva <- 0
+    ccc19x$der_Vulva[which(ccc19x$cancer_type %in% c("C4866")|
+                             ccc19x$cancer_type_2 %in% c("C4866")|
+                             ccc19x$cancer_type_3 %in% c("C4866")|
+                             ccc19x$cancer_type_4 %in% c("C4866")|
+                             ccc19x$cancer_type_5 %in% c("C4866"))] <- 1
+    ccc19x$der_Vulva <- factor(ccc19x$der_Vulva)
+    summary(ccc19x$der_Vulva[ccc19x$redcap_repeat_instrument == ''])
+    
     #Endocrine
     ccc19x$der_Endo <- 0
     ccc19x$der_Endo[which(ccc19x$cancer_type %in% c("C4815", "C9325", "C3809", "C4906")|
@@ -8350,7 +8400,7 @@ suffix <- 'data with derived variables for local QA'
     
     #Unknown
     ccc19x$der_adt[which((ccc19x$prostate_tx___unk == 1|ccc19x$orchiectomy == 99|ccc19x$adt == 99) & 
-                     is.na(x$der_adt))] <- 99
+                     is.na(ccc19x$der_adt))] <- 99
     
     ccc19x$der_adt <- factor(ccc19x$der_adt)
     summary(ccc19x$der_adt[ccc19x$der_Prostate == 1])
@@ -9951,6 +10001,8 @@ for(i in 1:length(temp.ref))
 write.csv(out, file = paste(stamp,'.summary of derived variables results.csv', sep = ''), row.names = F)
 
 #Save here
-save(ccc19x, file = paste(stamp,'.',suffix,'.RData', sep = ''))
-
-
+save(ccc19x, stamp, file = paste(stamp,'.',
+                              suffix,
+                              ' saved on ',
+                              gsub(Sys.time(), pattern = ':', replacement = '-'),
+                              '.RData', sep = ''))
