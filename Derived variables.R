@@ -83,7 +83,7 @@ suffix <- 'data with derived variables for local QA'
                             ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
-    ccc19x$der_hosp[which(ccc19x$hosp_status %in% c(1:3) | 
+    ccc19x$der_hosp[which(ccc19x$hosp_status %in% c(1:88) | 
                             ccc19x$current_status %in% c(5:8)|
                             ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
                             ccc19x$worst_status_clinical %in% c(5:8)|
@@ -155,7 +155,7 @@ suffix <- 'data with derived variables for local QA'
                               ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
-    ccc19x$der_hosp_30[which(ccc19x$hosp_status %in% c(1:3) | 
+    ccc19x$der_hosp_30[which(ccc19x$hosp_status %in% c(1:88) | 
                                ccc19x$current_status %in% c(5:8)|
                                ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
                                ccc19x$worst_status_clinical %in% c(5:8)| 
@@ -193,7 +193,7 @@ suffix <- 'data with derived variables for local QA'
                                ccc19x$worst_complications_severity___0 == 1)] <- 0
     
     #Yes
-    ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:3) | 
+    ccc19x$der_hosp_bl[which(ccc19x$hosp_status %in% c(1:88) | 
                                ccc19x$current_status %in% c(5:8)|
                                ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
                                ccc19x$worst_status_clinical %in% c(5:8)| 
