@@ -7697,7 +7697,7 @@ suffix <- 'data with derived variables for local QA'
     summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
     
     ############################################################################################
-    #C05a. Immunosuppressed version 3 - with cytotoxic chemotherapy, lymphodepletion, transplant
+    #C05b. Immunosuppressed version 3 - with cytotoxic chemotherapy, lymphodepletion, transplant
     ############################################################################################
     ccc19x$der_immunosuppressed_v3 <- NA
     
