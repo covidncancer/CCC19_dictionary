@@ -8187,13 +8187,13 @@ suffix <- 'data with derived variables for local QA'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-08-24.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-10-13 with modalities.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
     
-    for(i in 3:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
+    for(i in 5:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
     
     ccc19x$der_no_drugs <- NA
     
@@ -8253,24 +8253,27 @@ suffix <- 'data with derived variables for local QA'
      
     #Ca24: Regimen match - this will only work if the HemOnc ontology is in the workspace
     ccc19x$der_regimen <- NA
-    for(i in which(!is.na(ccc19x$drug1)))
+    if(exists('concept_stage'))
     {
-      #Get list of drugs
-      temp <- ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
-      temp <- temp[temp != '']
-      temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
-      
-      #Look for match
-      list.match <- which(concept_stage$concept_name == temp)
-      
-      #If there is a match, pull the potential regimens that contain these drugs
-      if(length(list.match) > 0)
+      for(i in which(!is.na(ccc19x$drug1)))
       {
-        out <- concept_relationship_stage$concept_code_1[concept_relationship_stage$concept_code_2 %in% concept_stage$concept_code[list.match] &
-                                                           concept_relationship_stage$relationship_id == 'Has anti-cancer drugs']
-        if(length(out) > 1) out <- paste(out, collapse = '|')
-        if(length(out) > 0) ccc19x$der_regimen[i] <- out else ccc19x$der_regimen[i] <- 'No match'
-      } else ccc19x$der_regimen[i] <- 'No match'      
+        #Get list of drugs
+        temp <- ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
+        temp <- temp[temp != '']
+        temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
+        
+        #Look for match
+        list.match <- which(concept_stage$concept_name == temp)
+        
+        #If there is a match, pull the potential regimens that contain these drugs
+        if(length(list.match) > 0)
+        {
+          out <- concept_relationship_stage$concept_code_1[concept_relationship_stage$concept_code_2 %in% concept_stage$concept_code[list.match] &
+                                                             concept_relationship_stage$relationship_id == 'Has anti-cancer drugs']
+          if(length(out) > 1) out <- paste(out, collapse = '|')
+          if(length(out) > 0) ccc19x$der_regimen[i] <- out else ccc19x$der_regimen[i] <- 'No match'
+        } else ccc19x$der_regimen[i] <- 'No match'      
+      }
     }
     
     #Ca14. 1st generation ARA (only fill for prostate cancer patients, for now)
