@@ -7696,6 +7696,49 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_immunosuppressed_v2 <- factor(ccc19x$der_immunosuppressed_v2)
     summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    ############################################################################################
+    #C05a. Immunosuppressed version 3 - with cytotoxic chemotherapy, lymphodepletion, transplant
+    ############################################################################################
+    ccc19x$der_immunosuppressed_v3 <- NA
+    
+    #First, determine NOT immunosuppressed per comorbidity variable
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38013005[i] == 0) ccc19x$der_immunosuppressed_v3[i] <- 0
+    }
+    
+    #Next, rule in immunosuppression
+    
+    #1. Immunosuppression comorbidity checked
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$significant_comorbidities___38013005 == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Receiving "immunosuppressants" at baseline
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #4. Received cytotoxic chemotherapy within 3 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto == 1)] <- 1
+    
+    #5. Received BTKi within 3 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_btki == 1 & ccc19x$der_anytx == 1)] <- 1
+    
+    #6. Received anti-CD20 within 12 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_cd20_12mo == 1)] <- 1
+    
+    #7. Received SCT or cellular treatment within 12 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_sct_cellular_12mo == 1)] <- 1
+    
+    #Unknown
+    ccc19x$der_immunosuppressed_v3[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
+                                           is.na(ccc19x$der_immunosuppressed_v3))] <- 99
+    
+    ccc19x$der_immunosuppressed_v3 <- factor(ccc19x$der_immunosuppressed_v3)
+    summary(ccc19x$der_immunosuppressed_v3[ccc19x$redcap_repeat_instrument == ''])
+    
     ###################################
     #Ca22. Recency of cytotoxic therapy
     ###################################
