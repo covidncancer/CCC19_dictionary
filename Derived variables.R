@@ -4420,15 +4420,19 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_monoclonals[which(ccc19x$covid_19_treatment___db_15718 == 1|
                                    ccc19x$covid_19_treatment___bam_et == 1|
                                    ccc19x$covid_19_treatment___regen_cov2 == 1|
+                                   ccc19x$covid_19_treatment___rxcui_2550731 == 1|
                                    ccc19x$covid_19_trial_tx___db_15718 == 1|
                                    ccc19x$covid_19_trial_tx___bam_et == 1|
                                    ccc19x$covid_19_trial_tx___regen_cov2 == 1|
+                                   ccc19x$covid_19_trial_tx___rxcui_2550731 == 1|
                                    ccc19x$covid_19_treatment_fu___db_15718 == 1|
                                    ccc19x$covid_19_treatment_fu___bam_et == 1|
                                    ccc19x$covid_19_treatment_fu___regen_cov2 == 1|
+                                   ccc19x$covid_19_treatment_fu___rxcui_2550731 == 1|
                                    ccc19x$covid_19_trial_tx_fu___db_15718 == 1|
                                    ccc19x$covid_19_trial_tx_fu___bam_et == 1|
-                                   ccc19x$covid_19_trial_tx_fu___regen_cov2 == 1)] <- 1
+                                   ccc19x$covid_19_trial_tx_fu___regen_cov2 == 1|
+                                   ccc19x$covid_19_trial_tx_fu___rxcui_2550731 == 1)] <- 1
     
     #Never
     ccc19x$der_monoclonals[which((ccc19x$covid_19_treatment___db_15718 == 0 & 
