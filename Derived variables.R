@@ -8740,7 +8740,7 @@ suffix <- 'data with derived variables for local QA'
     {
       if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
              c('Nivolumab','Pembrolizumab','Atezolizumab','Avelumab',
-               'Durvalumab','Cemiplimab'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
+               'Durvalumab','Cemiplimab','Anti-PD-1 antibody','Anti-PD-L1 antibody'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
                  ccc19x$der_pd1_l1[temp.ref[i]] <- 0
     }
     
