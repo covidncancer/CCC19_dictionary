@@ -8811,6 +8811,36 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_targeted_not_her2_cdk46i <- factor(ccc19x$der_targeted_not_her2_cdk46i)
     summary(ccc19x$der_targeted_not_her2_cdk46i[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca4q: BiTE antibodies
+    ccc19x$der_BiTE <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Blinatumomab','Amivantamab'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
+               ccc19x$der_BiTE[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_BiTE <- factor(ccc19x$der_BiTE)
+    summary(ccc19x$der_BiTE[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4r. CAR-T
+    ccc19x$der_cart <- NA
+    ccc19x$der_cart[which(ccc19x$transplant_cellular_therapy == 6|
+                            grepl(ccc19x$drug1, pattern = 'leucel')|
+                            grepl(ccc19x$drug2, pattern = 'leucel')|
+                            grepl(ccc19x$drug3, pattern = 'leucel')|
+                            grepl(ccc19x$drug4, pattern = 'leucel')|
+                            grepl(ccc19x$drug5, pattern = 'leucel')|
+                            grepl(ccc19x$drug6, pattern = 'leucel')|
+                            grepl(ccc19x$drug7, pattern = 'leucel')|
+                            grepl(ccc19x$drug8, pattern = 'leucel'))] <- 1
+    ccc19x$der_cart[which(ccc19x$transplant_cellular_therapy == 99)] <- 99
+    
+    ccc19x$der_cart <- factor(ccc19x$der_cart)
+    summary(ccc19x$der_cart[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
@@ -9399,6 +9429,41 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
     ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
     summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
+    
+    #####################
+    #X3a. Modified Khorana with order of levels re-arranged
+    #####################
+    ccc19x$der_VTE_risk_v2 <- NA
+    
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                    ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                    ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                    ccc19x$cancer_type_4 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+                                    ccc19x$cancer_type_5 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                    ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                    ccc19x$cancer_type_3 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                    ccc19x$cancer_type_4 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+                                    ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
+                                    ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
+                                    ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
+                                    ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
+                                    ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
+    
+    ccc19x$der_VTE_risk_v2 <- factor(ccc19x$der_VTE_risk_v2)
+    ccc19x$der_VTE_risk_v2 <- relevel(ccc19x$der_VTE_risk_v2, ref = 'Low-risk VTE malignancy')
+    summary(ccc19x$der_VTE_risk_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
     ccc19x$meta_30d_due <- NA
