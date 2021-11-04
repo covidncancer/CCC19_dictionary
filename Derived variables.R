@@ -9401,6 +9401,15 @@ suffix <- 'data with derived variables for local QA'
     #X3. Modified Khorana
     #####################
     ccc19x$der_VTE_risk <- NA
+    
+    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+    if(is.null(ccc19x$cancer_type_3))
+    {
+      ccc19x$cancer_type_3 <- ''
+      ccc19x$cancer_type_4 <- ''
+      ccc19x$cancer_type_5 <- ''
+    }
+    
     ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
                                  ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
                                  ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
@@ -9435,6 +9444,14 @@ suffix <- 'data with derived variables for local QA'
     #####################
     ccc19x$der_VTE_risk_v2 <- NA
     
+    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+    if(is.null(ccc19x$cancer_type_3))
+    {
+      ccc19x$cancer_type_3 <- ''
+      ccc19x$cancer_type_4 <- ''
+      ccc19x$cancer_type_5 <- ''
+    }
+    
     ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
                                     ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
                                     ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
@@ -9464,6 +9481,72 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_VTE_risk_v2 <- factor(ccc19x$der_VTE_risk_v2)
     ccc19x$der_VTE_risk_v2 <- relevel(ccc19x$der_VTE_risk_v2, ref = 'Low-risk VTE malignancy')
     summary(ccc19x$der_VTE_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    ######################
+    #X3b. Khorana low-risk
+    ######################
+    ccc19x$der_VTE_risk_low <- 0
+    
+    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+    if(is.null(ccc19x$cancer_type_3))
+    {
+      ccc19x$cancer_type_3 <- ''
+      ccc19x$cancer_type_4 <- ''
+      ccc19x$cancer_type_5 <- ''
+    }
+    
+    ccc19x$der_VTE_risk_low[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+                                    ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 1
+    
+    ccc19x$der_VTE_risk_low <- factor(ccc19x$der_VTE_risk_low)
+    summary(ccc19x$der_VTE_risk_low[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###############################
+    #X3c. Khorana intermediate-risk
+    ###############################
+    ccc19x$der_VTE_risk_int <- 0
+    
+    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+    if(is.null(ccc19x$cancer_type_3))
+    {
+      ccc19x$cancer_type_3 <- ''
+      ccc19x$cancer_type_4 <- ''
+      ccc19x$cancer_type_5 <- ''
+    }
+    
+    ccc19x$der_VTE_risk_int[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                     ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                     ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                     ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
+                                     ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 1
+    
+    ccc19x$der_VTE_risk_int <- factor(ccc19x$der_VTE_risk_int)
+    summary(ccc19x$der_VTE_risk_int[ccc19x$redcap_repeat_instrument == ''])
+    
+    ###############################
+    #X3d. Khorana high-risk cancers
+    ###############################
+    ccc19x$der_VTE_risk_high <- 0
+    
+    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+    if(is.null(ccc19x$cancer_type_3))
+    {
+      ccc19x$cancer_type_3 <- ''
+      ccc19x$cancer_type_4 <- ''
+      ccc19x$cancer_type_5 <- ''
+    }
+    
+    ccc19x$der_VTE_risk_high[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
+                                      ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
+                                      ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
+                                      ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
+                                      ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 1
+    
+    ccc19x$der_VTE_risk_high <- factor(ccc19x$der_VTE_risk_high)
+    summary(ccc19x$der_VTE_risk_high[ccc19x$redcap_repeat_instrument == ''])
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
     ccc19x$meta_30d_due <- NA
