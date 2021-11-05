@@ -8735,6 +8735,7 @@ suffix <- 'data with derived variables for local QA'
     #Ca4k: PD-1/PD-L1 antibodies
     ccc19x$der_pd1_l1 <- NA
     
+    #Named exposure in the drug table
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
@@ -8744,8 +8745,29 @@ suffix <- 'data with derived variables for local QA'
                  ccc19x$der_pd1_l1[temp.ref[i]] <- 0
     }
     
+    #Structured data is present
+    ccc19x$der_pd1_l1[which(ccc19x$what_immunotherapy %in% c('45446','45170','45838-45446'))] <- 1
+    
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
     summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4s: CTLA4 antibodies
+    ccc19x$der_ctla4 <- NA
+    
+    #Named exposure in the drug table
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Ipilimumab','Tremilimumab','Anti-CTLA4 antibody'))) ccc19x$der_ctla4[temp.ref[i]] <- 1 else
+               ccc19x$der_ctla4[temp.ref[i]] <- 0
+    }
+    
+    #Structured data is present
+    ccc19x$der_ctla4[which(ccc19x$what_immunotherapy %in% c('45838','45838-45446'))] <- 1
+    
+    ccc19x$der_ctla4 <- factor(ccc19x$der_ctla4)
+    summary(ccc19x$der_ctla4[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca4l: Anti-HER2
     ccc19x$der_her2 <- NA
@@ -8840,6 +8862,117 @@ suffix <- 'data with derived variables for local QA'
     
     ccc19x$der_cart <- factor(ccc19x$der_cart)
     summary(ccc19x$der_cart[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca25a: IO within 3 months
+    ccc19x$der_IO_3mo <- NA
+    
+    #ICI or BiTE with known timing within 3 months
+    ccc19x$der_IO_3mo[which((ccc19x$der_pd1_l1 == 1|ccc19x$der_ctla4 == 1|ccc19x$der_BiTE == 1) &
+                              (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1))] <- 1
+    
+    #No exposure to the three therapy types
+    ccc19x$der_IO_3mo[which(((ccc19x$der_pd1_l1 == 0 & 
+                                ccc19x$der_ctla4 == 0 &
+                                ccc19x$der_BiTE == 0)|ccc19x$hx_treatment == 88) &
+                              is.na(ccc19x$der_IO_3mo))] <- 0
+    
+    #Not "on treatment" regardless of exposure
+    ccc19x$der_IO_3mo[which(ccc19x$on_treatment == 0)] <- 0
+    
+    #CAR-T with known timing within 3 months (100 days)
+    ccc19x$der_IO_3mo[which(ccc19x$der_cart == 1 &
+                              ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
+    
+    #CAR-T, wrong timing
+    ccc19x$der_IO_3mo[which(ccc19x$der_cart == 1 &
+                              ccc19x$transplant_cellular_timing %in% c(0,3:4) &
+                              is.na(ccc19x$der_IO_3mo))] <- 0
+    
+    #CAR-T, unknown timing
+    ccc19x$der_IO_3mo[which(ccc19x$der_cart == 1 &
+                              ccc19x$transplant_cellular_timing == 99 &
+                              is.na(ccc19x$der_IO_3mo))] <- 99
+    
+    #Wrong timing
+    ccc19x$der_IO_3mo[which((ccc19x$recent_treatment %in% 88:98|ccc19x$hx_treatment %in% c(2:3,98)) &
+                              is.na(ccc19x$der_IO_3mo))] <- 0
+    
+    #Unknown exposure
+    ccc19x$der_IO_3mo[which(ccc19x$on_treatment == 99 & is.na(ccc19x$der_IO_3mo))] <- 99
+    
+    #Unknown timing
+    ccc19x$der_IO_3mo[which((ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99) & 
+                               is.na(ccc19x$der_IO_3mo))] <- 99
+    
+    #Default to unexposed if on treatment with some other modality and this variable remains NA
+    ccc19x$der_IO_3mo[which((ccc19x$treatment_modality___685 == 1|
+                               ccc19x$treatment_modality___58229 == 1|
+                               ccc19x$treatment_modality___691 == 1|
+                               ccc19x$treatment_modality___695 == 1|
+                               ccc19x$treatment_modality___14051 == 1|
+                               ccc19x$treatment_modality___45215 == 1|
+                               ccc19x$treatment_modality___oth == 1) &
+                              (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1) &
+                              is.na(ccc19x$der_IO_3mo))] <- 0
+    
+    ccc19x$der_IO_3mo <- factor(ccc19x$der_IO_3mo)
+    summary(ccc19x$der_IO_3mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca25b: IO within 12 months
+    ccc19x$der_IO_12mo <- NA
+    
+    #ICI or BiTE with known timing within 12 months
+    ccc19x$der_IO_12mo[which((ccc19x$der_pd1_l1 == 1|ccc19x$der_ctla4 == 1|ccc19x$der_BiTE == 1) &
+                               (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))] <- 1
+    
+    #No exposure to the three therapy types
+    ccc19x$der_IO_12mo[which(((ccc19x$der_pd1_l1 == 0 & 
+                                 ccc19x$der_ctla4 == 0 &
+                                 ccc19x$der_BiTE == 0)|ccc19x$hx_treatment == 88) &
+                               is.na(ccc19x$der_IO_12mo))] <- 0
+    
+    #Not "on treatment" and history of treatment more than 1 year prior
+    ccc19x$der_IO_12mo[which(ccc19x$on_treatment == 0 & ccc19x$hx_treatment == 3)] <- 0
+    
+    #CAR-T with known timing within 12 months
+    ccc19x$der_IO_12mo[which(ccc19x$der_cart == 1 &
+                               ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
+    
+    #CAR-T, wrong timing
+    ccc19x$der_IO_12mo[which(ccc19x$der_cart == 1 &
+                               ccc19x$transplant_cellular_timing %in% c(0,4) &
+                               is.na(ccc19x$der_IO_12mo))] <- 0
+    
+    #CAR-T, unknown timing
+    ccc19x$der_IO_12mo[which(ccc19x$der_cart == 1 &
+                               ccc19x$transplant_cellular_timing == 99 &
+                               is.na(ccc19x$der_IO_12mo))] <- 99
+    
+    #Wrong timing
+    ccc19x$der_IO_12mo[which((ccc19x$recent_treatment %in% 98|ccc19x$hx_treatment %in% c(3,98)) &
+                               is.na(ccc19x$der_IO_12mo))] <- 0
+    
+    #Unknown exposure
+    ccc19x$der_IO_12mo[which(ccc19x$on_treatment == 99 & is.na(ccc19x$der_IO_12mo))] <- 99
+    
+    #Unknown timing
+    ccc19x$der_IO_12mo[which((ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99) & 
+                               is.na(ccc19x$der_IO_12mo))] <- 99
+    
+    #Default to unexposed if on treatment with some other modality and this variable remains NA
+    ccc19x$der_IO_12mo[which((ccc19x$treatment_modality___685 == 1|
+                                ccc19x$treatment_modality___58229 == 1|
+                                ccc19x$treatment_modality___691 == 1|
+                                ccc19x$treatment_modality___695 == 1|
+                                ccc19x$treatment_modality___14051 == 1|
+                                ccc19x$treatment_modality___45215 == 1|
+                                ccc19x$treatment_modality___oth == 1) &
+                               (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2) &
+                               is.na(ccc19x$der_IO_12mo))] <- 0
+    
+    ccc19x$der_IO_12mo <- factor(ccc19x$der_IO_12mo)
+    summary(ccc19x$der_IO_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
     
     #Ca6: Center type
     sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
