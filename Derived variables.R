@@ -6849,6 +6849,51 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_CVD_risk_v2 <- factor(ccc19x$der_CVD_risk_v2)
     summary(ccc19x$der_CVD_risk_v2[ccc19x$redcap_repeat_instrument == ''])
     
+    #########################
+    #C13b. CVD risk factor v3 
+    #########################
+    ccc19x$der_CVD_risk_v3 <- NA
+    
+    #Hypertension
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_htn == 1)] <- 1
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_htn == 0 &
+                                   is.na(ccc19x$der_CVD_risk_v3))] <- 0
+    
+    #Hyperlipidemia
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_hld == 1)] <- 1
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_hld == 0 &
+                                   is.na(ccc19x$der_CVD_risk_v3))] <- 0
+    
+    #Diabetes
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_dm2 == 1)] <- 1
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_dm2 == 0 &
+                                   is.na(ccc19x$der_CVD_risk_v3))] <- 0
+    
+    #Tobacco use
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking == 'Current')] <- 1
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking %in% c('Never','Former') &
+                                   is.na(ccc19x$der_CVD_risk_v3))] <- 0
+    
+    #Removals
+    
+    #Too young
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Male' & ccc19x$der_age < 55)] <- 0
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Female' & ccc19x$der_age < 60)] <- 0
+    
+    #Unknowns
+    ccc19x$der_CVD_risk_v3[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   (ccc19x$significant_comorbidities___55822004 == 0 & ccc19x$significant_comorbidities___unk == 1)|
+                                   ccc19x$der_dm2 == 99|
+                                   ccc19x$der_smoking == 'Unknown')
+    ] <- 'Unknown'
+    
+    #Already has CVD
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
+    
+    ccc19x$der_CVD_risk_v3 <- factor(ccc19x$der_CVD_risk_v3)
+    summary(ccc19x$der_CVD_risk_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    
     }
   print('Comorbidities completed')
   
