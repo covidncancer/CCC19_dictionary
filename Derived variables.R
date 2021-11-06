@@ -362,24 +362,7 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_mv <- as.factor(ccc19x$der_mv)
     summary(ccc19x$der_mv[ccc19x$redcap_repeat_instrument == ''])
     
-    #O3b. composite of ICU + mechanical ventilation + vasopressors/inotropes
-    
-    #Declare as missing
-    ccc19x$der_ICU_mv_pressors <- NA
-    
-    #Yes
-    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1 & ccc19x$der_pressors == 1)] <- 1
-    
-    #No
-    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0 & ccc19x$der_pressors == 0)] <- 0
-    
-    #Unknown (any component)
-    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 99| ccc19x$der_mv == 99| ccc19x$der_pressors == 99)] <- 99
-    
-    ccc19x$der_ICU_mv_pressors <- as.factor(ccc19x$der_ICU_mv_pressors)
-    summary(ccc19x$der_ICU_mv_pressors[ccc19x$redcap_repeat_instrument == ''])
-    
-    #O3c. Composite of ICU or mechanical ventilation
+    #O3c. Composite of ICU or mechanical ventilation [Needs unknowns added]
     ccc19x$der_ICU_mv <- NA
     ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 1 | ccc19x$der_mv == 1)] <- 1
     ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0)] <- 0
@@ -405,9 +388,9 @@ suffix <- 'data with derived variables for local QA'
     #Factor
     ccc19x$der_recovered <- as.factor(ccc19x$der_recovered)
     
-    length(unique(ccc19x$record_id))
-    
+    ###########################
     #O6. Combined days to death
+    ###########################
     ccc19x$der_days_to_death_combined <- NA
     temp <- unique(ccc19x$record_id)
     for(i in 1:length(temp))
@@ -637,7 +620,6 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_severe3 <- as.factor(ccc19x$der_severe3)
-    #ccc19x$der_severe3 <- relevel(ccc19x$der_severe3, ref = '1')
     summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
    
     ####################
@@ -1538,6 +1520,23 @@ suffix <- 'data with derived variables for local QA'
     
     ccc19x$der_pressors <- as.factor(ccc19x$der_pressors)
     summary(ccc19x$der_pressors[ccc19x$redcap_repeat_instrument == ''])
+    
+    #O3b. composite of ICU + mechanical ventilation + vasopressors/inotropes
+    
+    #Declare as missing
+    ccc19x$der_ICU_mv_pressors <- NA
+    
+    #Yes
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 1 & ccc19x$der_mv == 1 & ccc19x$der_pressors == 1)] <- 1
+    
+    #No
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0 & ccc19x$der_pressors == 0)] <- 0
+    
+    #Unknown (any component)
+    ccc19x$der_ICU_mv_pressors[which(ccc19x$der_ICU == 99| ccc19x$der_mv == 99| ccc19x$der_pressors == 99)] <- 99
+    
+    ccc19x$der_ICU_mv_pressors <- as.factor(ccc19x$der_ICU_mv_pressors)
+    summary(ccc19x$der_ICU_mv_pressors[ccc19x$redcap_repeat_instrument == ''])
     
     #Comp13 Bleeding: 50960005 (der_bleeding_comp)
     
