@@ -9,6 +9,12 @@ suffix <- 'data with derived variables for analysis'
 suffix <- 'data with derived variables for site QA'
 suffix <- 'data with derived variables for local QA'
 
+#Create a table to log the variables as they are created
+var.log <- data.frame(name = character(),
+                      timestamp = character(),
+                      values = character(),
+                      stringsAsFactors = F)
+
 ##DERIVED VARIABLES to recode:
 {
   #########
@@ -68,10 +74,16 @@ suffix <- 'data with derived variables for local QA'
     #Factor
     ccc19x$der_deadbinary <- as.factor(ccc19x$der_deadbinary)
     
-    summary(ccc19x$der_deadbinary[ccc19x$redcap_repeat_instrument == ''])
+    temp <- summary(ccc19x$der_deadbinary[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_deadbinary',
+                          timestamp = Sys.time(),
+                          values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                          stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
-    "hosp"
+    ####################
     #O2. Hospitalization
+    ####################
     ccc19x$der_hosp <- NA
     
     #Initial form
@@ -141,7 +153,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_hosp <- as.factor(ccc19x$der_hosp)
-    summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_hosp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hosp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O2a. Hospitalization within first 30 days
     ccc19x$der_hosp_30 <- NA
@@ -179,7 +197,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
-    summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hosp_30',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O2b. Hospitalization based on baseline form only
     ccc19x$der_hosp_bl <- NA
@@ -211,7 +235,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_hosp_bl <- as.factor(ccc19x$der_hosp_bl)
-    summary(ccc19x$der_hosp_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_hosp_bl[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hosp_bl',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     "ICU"
     #O3. Derived variable indicating time in the ICU (ever/never)
@@ -274,12 +304,24 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_ICU <- as.factor(ccc19x$der_ICU)
-    summary(ccc19x$der_ICU[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ICU[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ICU',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O3a. Direct admission to ICU at baseline
     ccc19x$der_ICU_direct <- ccc19x$der_ICU
     ccc19x$der_ICU_direct[which(ccc19x$hosp_status != 3 & ccc19x$der_ICU_direct == 1)] <- 0
-    summary(ccc19x$der_ICU_direct[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ICU_direct[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ICU_direct',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     "mv"
     #O4. derived variable indicating if patients were intubated or not
@@ -360,17 +402,31 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_mv <- as.factor(ccc19x$der_mv)
-    summary(ccc19x$der_mv[ccc19x$redcap_repeat_instrument == ''])
     
-    #O3c. Composite of ICU or mechanical ventilation [Needs unknowns added]
+    temp <- summary(ccc19x$der_mv[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_mv',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #O3c. Composite of ICU or mechanical ventilation
     ccc19x$der_ICU_mv <- NA
     ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 1 | ccc19x$der_mv == 1)] <- 1
+    ccc19x$der_ICU_mv[which((ccc19x$der_ICU == 99 | ccc19x$der_mv == 99) &
+                              is.na(ccc19x$der_ICU_mv))] <- 99
     ccc19x$der_ICU_mv[which(ccc19x$der_ICU == 0 & ccc19x$der_mv == 0)] <- 0
     ccc19x$der_ICU_mv <- as.factor(ccc19x$der_ICU_mv)
-    summary(ccc19x$der_ICU_mv[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ICU_mv[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ICU_mv',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     "recovered"                           
-    #O5. Derived recovery variable
+    #O5. Derived recovery variable [needs unknown added]
     ccc19x$der_recovered <- NA
     
     #initial form
@@ -387,6 +443,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_recovered <- as.factor(ccc19x$der_recovered)
+    
+    temp <- summary(ccc19x$der_recovered[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_recovered',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ###########################
     #O6. Combined days to death
@@ -406,6 +469,19 @@ suffix <- 'data with derived variables for local QA'
     }
     
     summary(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1)])
+    
+    temp <- summary(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1 &
+                                                              ccc19x$der_days_to_death_combined != 9999)])
+    temp2 <- sum(is.na(ccc19x$der_days_to_death_combined[which(ccc19x$der_deadbinary == 1)]))
+    
+    temp.var.log <- data.frame(name = 'der_days_to_death_combined',
+                               timestamp = Sys.time(),
+                               values = paste(c(paste('Median:', temp[3], 'days'),
+                                                paste('IQR:', temp[2], '-', temp[5]),
+                                                paste('9999:', length(which(ccc19x$der_days_to_death_combined == 9999))),
+                                                paste('NA:', temp2)), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O7. supplemental O2
     ccc19x$der_o2_ever <- NA
@@ -485,7 +561,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_o2_ever <- as.factor(ccc19x$der_o2_ever)
-    summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_o2_ever[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_o2_ever',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O7a. supplemental O2 alternative definition, allowing some unknowns in the follow-up forms
     ccc19x$der_o2_ever_v2 <- NA
@@ -543,7 +625,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_o2_ever_v2 <- as.factor(ccc19x$der_o2_ever_v2)
-    summary(ccc19x$der_o2_ever_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_o2_ever_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_o2_ever_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O8a. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
@@ -570,7 +658,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_severe <- as.factor(ccc19x$der_severe)
-    summary(ccc19x$der_severe[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_severe[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_severe',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O8b. Severe composite outcome v2 - mechanical ventilation, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe2 <- NA
@@ -594,7 +688,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_severe2 <- as.factor(ccc19x$der_severe2)
-    summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_severe2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_severe2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #O8c. Severe composite outcome v3 - death, hospitalization with oxygen requirement, ICU admission/need for mechanical ventilation
     ccc19x$der_severe3 <- NA
@@ -620,7 +720,13 @@ suffix <- 'data with derived variables for local QA'
     
     #Factor
     ccc19x$der_severe3 <- as.factor(ccc19x$der_severe3)
-    summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_severe3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_severe3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
    
     ####################
     #O28. Cause of death
@@ -5938,21 +6044,22 @@ suffix <- 'data with derived variables for local QA'
       #fixed the height entries in the format "x foot y inches"
       temp$height <- gsub(temp$height, pattern = 'foot', replacement = 'feet')
       temp$height[which(temp$height == '5 ft 2.5 in')] <- '62.5 inches'
-      temp$height[which(temp$height == '5 feet 1 inch')] <- '61 inches'
-      temp$height[which(temp$height == '5 feet 3 inches')] <- '63 inches'
-      temp$height[which(temp$height == '5 feet 4 inches')] <- '64 inches'
-      temp$height[which(temp$height == '5 feet 6 inches')] <- '66 inches'
-      temp$height[which(temp$height == '5 feet 7 inches')] <- '67 inches'
-      temp$height[which(temp$height == '5 feet 8 inches')] <- '68 inches'
-      temp$height[which(temp$height == '5 feet 9 inches')] <- '69 inches'
-      temp$height[which(temp$height == '5 feet 10 inches')] <- '70 inches'
-      temp$height[which(temp$height == '5 feet 11 inches')] <- '71 inches'
-      temp$height[which(temp$height == '6 feet')] <- '72 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 1 in')] <- '61 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 3 in')] <- '63 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 4 in')] <- '64 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 5 in')] <- '65 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 6 in')] <- '66 inches'
+      temp$height[grep(temp$height, pattern = '5[ ]?f[e]{0,2}t[ ]?7[ ]?in')] <- '67 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 8 in')] <- '68 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 9 in')] <- '69 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 10 in')] <- '70 inches'
+      temp$height[grep(temp$height, pattern = '5 f[e]{0,2}t 11 in')] <- '71 inches'
+      temp$height[grep(temp$height, pattern = '6 f[e]{0,2}t')] <- '72 inches'
       temp$height[which(temp$height == '6 feet 2 inches')] <- '74 inches'
       
       #converted height strings into double values and put them in a new column
       temp$mheight <- temp$height
-      temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]| |in|inches', replacement = '', ignore.case = T)
+      temp$mheight <- gsub(temp$mheight, pattern = 'cm|[mM]|meters| |in|inches', replacement = '', ignore.case = T)
       if(any(grepl(temp$mheight, pattern = '[a-z]')))
       {
         err <- temp[grepl(temp$mheight, pattern = '[a-z]'),]
@@ -6812,9 +6919,14 @@ suffix <- 'data with derived variables for local QA'
     #Two or more risk factors
     temp <- rep(0, nrow(ccc19x))
     
+    temp.age <- ccc19x$der_age
+    temp.age[which(temp.age == '18-')] <- 18
+    temp.age[which(temp.age == '90+')] <- 90
+    temp.age <- as.numeric(temp.age)
+    
     #Sex and age
-    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
-    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    temp[which(ccc19x$der_sex == 'Male' & temp.age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & temp.age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
     
     #Hypertension
     temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
@@ -6833,8 +6945,8 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_CVD_risk_v2[which(temp == 1 & is.na(ccc19x$der_CVD_risk_v2) & ccc19x$redcap_repeat_instrument == '')] <- 0
     
     #Too young
-    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & ccc19x$der_age < 55)] <- 0
-    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & ccc19x$der_age < 60)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & temp.age < 55)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & temp.age < 60)] <- 0
     
     #Unknowns
     ccc19x$der_CVD_risk_v2[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
@@ -6847,7 +6959,13 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_CVD_risk_v2[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
     
     ccc19x$der_CVD_risk_v2 <- factor(ccc19x$der_CVD_risk_v2)
-    summary(ccc19x$der_CVD_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_CVD_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CVD_risk_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #########################
     #C13b. CVD risk factor v3 
@@ -6874,24 +6992,34 @@ suffix <- 'data with derived variables for local QA'
     ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking %in% c('Never','Former') &
                                    is.na(ccc19x$der_CVD_risk_v3))] <- 0
     
+    #Unknowns
+    ccc19x$der_CVD_risk_v3[which((ccc19x$der_htn == 99|
+                                   ccc19x$der_hld == 99|
+                                   ccc19x$der_dm2 == 99|
+                                   ccc19x$der_smoking == 'Unknown') &
+                                   (ccc19x$der_CVD_risk_v3 == 0|is.na(ccc19x$der_CVD_risk_v3)))] <- 'Unknown'
+    
     #Removals
     
     #Too young
-    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Male' & ccc19x$der_age < 55)] <- 0
-    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Female' & ccc19x$der_age < 60)] <- 0
-    
-    #Unknowns
-    ccc19x$der_CVD_risk_v3[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
-                                   (ccc19x$significant_comorbidities___55822004 == 0 & ccc19x$significant_comorbidities___unk == 1)|
-                                   ccc19x$der_dm2 == 99|
-                                   ccc19x$der_smoking == 'Unknown')
-    ] <- 'Unknown'
+    temp.age <- ccc19x$der_age
+    temp.age[which(temp.age == '18-')] <- 18
+    temp.age[which(temp.age == '90+')] <- 90
+    temp.age <- as.numeric(temp.age)
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Male' & temp.age < 55)] <- 0
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Female' & temp.age < 60)] <- 0
     
     #Already has CVD
     ccc19x$der_CVD_risk_v3[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
     
     ccc19x$der_CVD_risk_v3 <- factor(ccc19x$der_CVD_risk_v3)
-    summary(ccc19x$der_CVD_risk_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_CVD_risk_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CVD_risk_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     
     }
@@ -7139,7 +7267,7 @@ suffix <- 'data with derived variables for local QA'
     
     #GI cancers
     
-    #Lower GI
+    #Lower GI (including appendix and small bowel)
     ccc19x$der_LowerGI <- 0
     ccc19x$der_LowerGI[which(ccc19x$cancer_type %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
                                ccc19x$cancer_type_2 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
@@ -7178,6 +7306,16 @@ suffix <- 'data with derived variables for local QA'
                                ccc19x$cancer_type_5 %in% c("C3844","C3850","C4436","C4911", "C3099", "C3513"))] <- 1
     ccc19x$der_UpperGI <- factor(ccc19x$der_UpperGI)
     summary(ccc19x$der_UpperGI[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Upper GI excluding pancreaticohepatobiliary and including appendix, small bowel
+    ccc19x$der_UpperGI_v2 <- 0
+    ccc19x$der_UpperGI_v2[which(ccc19x$cancer_type %in% c("C4911","C3513","C9330","C7724")|
+                                  ccc19x$cancer_type_2 %in% c("C4911","C3513","C9330","C7724")|
+                                  ccc19x$cancer_type_3 %in% c("C4911","C3513","C9330","C7724")|
+                                  ccc19x$cancer_type_4 %in% c("C4911","C3513","C9330","C7724")|
+                                  ccc19x$cancer_type_5 %in% c("C4911","C3513","C9330","C7724"))] <- 1
+    ccc19x$der_UpperGI_v2 <- factor(ccc19x$der_UpperGI_v2)
+    summary(ccc19x$der_UpperGI_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Hepatobiliary (excluding pancreas)
     ccc19x$der_hepatobiliary <- 0
@@ -8329,7 +8467,7 @@ suffix <- 'data with derived variables for local QA'
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-10-13 with modalities.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-11-07 with modalities.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
@@ -9799,7 +9937,7 @@ suffix <- 'data with derived variables for local QA'
       ###############
       
       #High levels of baseline missingness
-      setwd("~/HemOnc.org Dropbox/Jeremy Warner/CCC19 parent folder/CCC19 VUMC/Data dictionary/CCC19_dictionary_and_derived_variables/CCC19_dictionary")
+      setwd("~/HemOnc.org Dropbox/Jeremy Warner/CCC19 parent folder/CCC19 RCC/Data dictionary/CCC19_dictionary_and_derived_variables/CCC19_dictionary")
       dict <- read.csv(file = 'CCC19_DataDictionary.csv', header = T, stringsAsFactors = F)
       setwd("~/Box Sync/CCC19 data")
       colnames(dict)[1] <- 'name'
@@ -10155,25 +10293,27 @@ suffix <- 'data with derived variables for local QA'
     #######################
     #X07. Breast biomarkers
     #######################
-    ccc19x$der_breast_biomarkers <- NA
-    
-    #HR+, HER2-
-    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 0)] <- 1
-    
-    #HR+, HER2+
-    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 1)] <- 2
-    
-    #HR-, HER2+
-    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 1)] <- 3
-    
-    #Triple negative
-    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___tnbc == 1)] <- 4
-    
-    #Unknown
-    ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___99 == 1 & is.na(ccc19x$der_breast_biomarkers))] <- 99
-    
-    ccc19x$der_breast_biomarkers <- factor(ccc19x$der_breast_biomarkers)
-    summary(ccc19x$der_breast_biomarkers[ccc19x$der_Breast == 1])
+    {
+      ccc19x$der_breast_biomarkers <- NA
+      
+      #HR+, HER2-
+      ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 0)] <- 1
+      
+      #HR+, HER2+
+      ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 1 & ccc19x$breast_biomarkers___her2 == 1)] <- 2
+      
+      #HR-, HER2+
+      ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 1)] <- 3
+      
+      #Triple negative
+      ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___tnbc == 1)] <- 4
+      
+      #Unknown
+      ccc19x$der_breast_biomarkers[which(ccc19x$breast_biomarkers___99 == 1 & is.na(ccc19x$der_breast_biomarkers))] <- 99
+      
+      ccc19x$der_breast_biomarkers <- factor(ccc19x$der_breast_biomarkers)
+      summary(ccc19x$der_breast_biomarkers[ccc19x$der_Breast == 1])
+    }
     
     #############
     #X08. Gleason
@@ -10193,135 +10333,139 @@ suffix <- 'data with derived variables for local QA'
     ####################
     #X09. Cytokine storm
     ####################
-    ccc19x$der_cytokine_storm <- NA
-    
-    temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
-    
-    #Yes
-    
-    #At least one marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
-    x1 <- rep(F, length(temp.ref))
-    x1[which(ccc19x$der_il6[temp.ref] == 'Abnormal'|ccc19x$der_crp[temp.ref] == 'Abnormal'|ccc19x$der_ddimer[temp.ref] == 'Abnormal')] <- T
-    
-    #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS
-    x2 <- rep(F, length(temp.ref))
-    x2[which(ccc19x$der_hotn_comp[temp.ref] == 1|ccc19x$der_sepsis_comp[temp.ref] == 1|ccc19x$der_sepsis_comp_v2[temp.ref] == 1|
-               ccc19x$der_ARDS_comp[temp.ref] == 1|ccc19x$der_pneumonitis_comp[temp.ref] == 1)] <- T
-    
-    #At least one of fever, abnormal AST or ALT or creatinine
-    x3 <- rep(F, length(temp.ref))
-    x3[which(ccc19x$symptoms___386661006[temp.ref] == 1|ccc19x$ast[temp.ref] == 1|ccc19x$alt[temp.ref] == 1|ccc19x$der_creat[temp.ref] == 'Abnormal')] <- T
-    
-    ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 1
-    
-    #No
-    #No marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
-    x1 <- rep(F, length(temp.ref))
-    x1[which(ccc19x$der_il6[temp.ref] != 'Abnormal' & ccc19x$der_crp[temp.ref] != 'Abnormal' & ccc19x$der_ddimer[temp.ref] != 'Abnormal')] <- T
-    
-    #No hypotension/sepsis/pressors or pneumonitis/ARDS
-    x2 <- rep(F, length(temp.ref))
-    x2[which(ccc19x$der_hotn_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp_v2[temp.ref] == 0 &
-               ccc19x$der_ARDS_comp[temp.ref] == 0 & ccc19x$der_pneumonitis_comp[temp.ref] == 0)] <- T
-    
-    #No fever, abnormal AST or ALT or creatinine
-    x3 <- rep(F, length(temp.ref))
-    x3[which(ccc19x$symptoms___386661006[temp.ref] == 0 & ccc19x$ast[temp.ref] != 1 & ccc19x$alt[temp.ref] != 1 & ccc19x$der_creat[temp.ref] != 'Abnormal')] <- T
-    
-    ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 0
-    
-    #Unknown
-    #At least one marker of inflammation (IL-6, CRP, or D-dimer) is unknown
-    x1 <- rep(F, length(temp.ref))
-    x1[which((ccc19x$der_il6[temp.ref] == 'Unknown'|ccc19x$der_crp[temp.ref] == 'Unknown'|ccc19x$der_ddimer[temp.ref] == 'Unknown') &
-               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
-    
-    #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS is unknown
-    x2 <- rep(F, length(temp.ref))
-    x2[which((ccc19x$der_hotn_comp[temp.ref] == 99|ccc19x$der_sepsis_comp[temp.ref] == 99|ccc19x$der_sepsis_comp_v2[temp.ref] == 99|
-               ccc19x$der_ARDS_comp[temp.ref] == 99|ccc19x$der_pneumonitis_comp[temp.ref] == 99) &
-               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
-    
-    #At least one of unknown AST or ALT or creatinine
-    x3 <- rep(F, length(temp.ref))
-    x3[which((ccc19x$ast[temp.ref] == 99|ccc19x$alt[temp.ref] == 99|ccc19x$der_creat[temp.ref] == 'Unknown') &
-               is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
-    
-    ccc19x$der_cytokine_storm[temp.ref][x1|x2|x3] <- 99
-    
-    ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
-    summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+    {
+      ccc19x$der_cytokine_storm <- NA
+      
+      temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
+      
+      #Yes
+      
+      #At least one marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
+      x1 <- rep(F, length(temp.ref))
+      x1[which(ccc19x$der_il6[temp.ref] == 'Abnormal'|ccc19x$der_crp[temp.ref] == 'Abnormal'|ccc19x$der_ddimer[temp.ref] == 'Abnormal')] <- T
+      
+      #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS
+      x2 <- rep(F, length(temp.ref))
+      x2[which(ccc19x$der_hotn_comp[temp.ref] == 1|ccc19x$der_sepsis_comp[temp.ref] == 1|ccc19x$der_sepsis_comp_v2[temp.ref] == 1|
+                 ccc19x$der_ARDS_comp[temp.ref] == 1|ccc19x$der_pneumonitis_comp[temp.ref] == 1)] <- T
+      
+      #At least one of fever, abnormal AST or ALT or creatinine
+      x3 <- rep(F, length(temp.ref))
+      x3[which(ccc19x$symptoms___386661006[temp.ref] == 1|ccc19x$ast[temp.ref] == 1|ccc19x$alt[temp.ref] == 1|ccc19x$der_creat[temp.ref] == 'Abnormal')] <- T
+      
+      ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 1
+      
+      #No
+      #No marker of inflammation (IL-6, CRP, or D-dimer) is abnormal
+      x1 <- rep(F, length(temp.ref))
+      x1[which(ccc19x$der_il6[temp.ref] != 'Abnormal' & ccc19x$der_crp[temp.ref] != 'Abnormal' & ccc19x$der_ddimer[temp.ref] != 'Abnormal')] <- T
+      
+      #No hypotension/sepsis/pressors or pneumonitis/ARDS
+      x2 <- rep(F, length(temp.ref))
+      x2[which(ccc19x$der_hotn_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp[temp.ref] == 0 & ccc19x$der_sepsis_comp_v2[temp.ref] == 0 &
+                 ccc19x$der_ARDS_comp[temp.ref] == 0 & ccc19x$der_pneumonitis_comp[temp.ref] == 0)] <- T
+      
+      #No fever, abnormal AST or ALT or creatinine
+      x3 <- rep(F, length(temp.ref))
+      x3[which(ccc19x$symptoms___386661006[temp.ref] == 0 & ccc19x$ast[temp.ref] != 1 & ccc19x$alt[temp.ref] != 1 & ccc19x$der_creat[temp.ref] != 'Abnormal')] <- T
+      
+      ccc19x$der_cytokine_storm[temp.ref][x1 & x2 & x3] <- 0
+      
+      #Unknown
+      #At least one marker of inflammation (IL-6, CRP, or D-dimer) is unknown
+      x1 <- rep(F, length(temp.ref))
+      x1[which((ccc19x$der_il6[temp.ref] == 'Unknown'|ccc19x$der_crp[temp.ref] == 'Unknown'|ccc19x$der_ddimer[temp.ref] == 'Unknown') &
+                 is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+      
+      #At least one of hypotension/sepsis/pressors or pneumonitis/ARDS is unknown
+      x2 <- rep(F, length(temp.ref))
+      x2[which((ccc19x$der_hotn_comp[temp.ref] == 99|ccc19x$der_sepsis_comp[temp.ref] == 99|ccc19x$der_sepsis_comp_v2[temp.ref] == 99|
+                  ccc19x$der_ARDS_comp[temp.ref] == 99|ccc19x$der_pneumonitis_comp[temp.ref] == 99) &
+                 is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+      
+      #At least one of unknown AST or ALT or creatinine
+      x3 <- rep(F, length(temp.ref))
+      x3[which((ccc19x$ast[temp.ref] == 99|ccc19x$alt[temp.ref] == 99|ccc19x$der_creat[temp.ref] == 'Unknown') &
+                 is.na(ccc19x$der_cytokine_storm[temp.ref]))] <- T
+      
+      ccc19x$der_cytokine_storm[temp.ref][x1|x2|x3] <- 99
+      
+      ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
+      summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+    }
     
     #####################################
     #X10. Lower respiratory tract disease
     #####################################
-    ccc19x$der_lrtd <- NA
-    
-    #Yes
-    ccc19x$der_lrtd[which(ccc19x$der_mv == 1)] <- 1 #Intubated
-    
-    #Baseline
-    ccc19x$der_lrtd[which(ccc19x$resp_failure_tx %in% 2:6 | 
-                          ccc19x$c19_complications_pulm___205237003 == 1 | 
-                          ccc19x$c19_complications_pulm___233604007 == 1 |
-                          ccc19x$c19_complications_pulm___67782005 == 1)] <- 1
-    
-    #Follow-up
-    ccc19x$der_lrtd[which(ccc19x$resp_failure_tx_fu %in% 2:6 | 
-                          ccc19x$who_ordinal_scale %in% 5:7 | 
-                          ccc19x$c19_complications_pulm_fu___205237003 == 1 | 
-                          ccc19x$c19_complications_pulm_fu___233604007 == 1 |
-                          ccc19x$c19_complications_pulm_fu___67782005 == 1)] <- 1
-    
-    #No
-    
-    #Baseline
-    ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 0 |
-                           ccc19x$resp_failure_tx == 1 |
-                             ccc19x$c19_complications_pulm___none == 1) &
-                          is.na(ccc19x$der_lrtd))] <- 0
-    
-    #Follow-up
-    ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 0 |
-                           ccc19x$resp_failure_tx_fu == 1|
-                             ccc19x$c19_complications_pulm_fu___none == 1|
-                             ccc19x$who_ordinal_scale %in% c(1,3,4)) &
-                          is.na(ccc19x$der_lrtd))] <- 0
-    
-    #Unknown
-    
-    #Baseline
-    ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 99 |
-                           ccc19x$resp_failure_tx == 99 |
-                           ccc19x$c19_complications_pulm___unk == 1) &
-                          is.na(ccc19x$der_lrtd))] <- 99
-    
-    #Followup
-    ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 99 |
-                           ccc19x$resp_failure_tx_fu == 99 |
-                           ccc19x$c19_complications_pulm_fu___unk == 1) &
-                          is.na(ccc19x$der_lrtd))] <- 99
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_lrtd[temp.ref]
-      temp2 <- ccc19x$der_lrtd[temp.ref][2:length(temp.ref)]
-      temp2 <- temp2[!is.na(temp2)]
-      if(length(temp[!is.na(temp)]) > 0)
+      ccc19x$der_lrtd <- NA
+      
+      #Yes
+      ccc19x$der_lrtd[which(ccc19x$der_mv == 1)] <- 1 #Intubated
+      
+      #Baseline
+      ccc19x$der_lrtd[which(ccc19x$resp_failure_tx %in% 2:6 | 
+                              ccc19x$c19_complications_pulm___205237003 == 1 | 
+                              ccc19x$c19_complications_pulm___233604007 == 1 |
+                              ccc19x$c19_complications_pulm___67782005 == 1)] <- 1
+      
+      #Follow-up
+      ccc19x$der_lrtd[which(ccc19x$resp_failure_tx_fu %in% 2:6 | 
+                              ccc19x$who_ordinal_scale %in% 5:7 | 
+                              ccc19x$c19_complications_pulm_fu___205237003 == 1 | 
+                              ccc19x$c19_complications_pulm_fu___233604007 == 1 |
+                              ccc19x$c19_complications_pulm_fu___67782005 == 1)] <- 1
+      
+      #No
+      
+      #Baseline
+      ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 0 |
+                               ccc19x$resp_failure_tx == 1 |
+                               ccc19x$c19_complications_pulm___none == 1) &
+                              is.na(ccc19x$der_lrtd))] <- 0
+      
+      #Follow-up
+      ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 0 |
+                               ccc19x$resp_failure_tx_fu == 1|
+                               ccc19x$c19_complications_pulm_fu___none == 1|
+                               ccc19x$who_ordinal_scale %in% c(1,3,4)) &
+                              is.na(ccc19x$der_lrtd))] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      ccc19x$der_lrtd[which((ccc19x$o2_requirement_c19 == 99 |
+                               ccc19x$resp_failure_tx == 99 |
+                               ccc19x$c19_complications_pulm___unk == 1) &
+                              is.na(ccc19x$der_lrtd))] <- 99
+      
+      #Followup
+      ccc19x$der_lrtd[which((ccc19x$o2_requirement_fu == 99 |
+                               ccc19x$resp_failure_tx_fu == 99 |
+                               ccc19x$c19_complications_pulm_fu___unk == 1) &
+                              is.na(ccc19x$der_lrtd))] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
       {
-        if(any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 1 else
-          if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
-          {
-            if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 0
-            if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 99
-          }
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_lrtd[temp.ref]
+        temp2 <- ccc19x$der_lrtd[temp.ref][2:length(temp.ref)]
+        temp2 <- temp2[!is.na(temp2)]
+        if(length(temp[!is.na(temp)]) > 0)
+        {
+          if(any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 1 else
+            if(length(temp[2:length(temp)][!is.na(temp[2:length(temp)])]) > 0)
+            {
+              if((is.na(temp[1])|temp[1] == 0) & all(temp2 == 0) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 0
+              if((is.na(temp[1])|temp[1] == 0) & any(temp2 == 99) & !any(temp[!is.na(temp)] == 1)) ccc19x$der_lrtd[temp.ref] <- 99
+            }
+        }
       }
+      
+      ccc19x$der_lrtd <- factor(ccc19x$der_lrtd)
+      summary(ccc19x$der_lrtd[ccc19x$redcap_repeat_instrument == ''])
     }
-    
-    ccc19x$der_lrtd <- factor(ccc19x$der_lrtd)
-    summary(ccc19x$der_lrtd[ccc19x$redcap_repeat_instrument == ''])
     
     ###############
     #X11. PASC (v1)
