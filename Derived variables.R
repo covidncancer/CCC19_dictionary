@@ -2785,8 +2785,144 @@ var.log <- data.frame(name = character(),
     ccc19x$der_coinfection_any <- factor(ccc19x$der_coinfection_any)
     summary(ccc19x$der_coinfection_any[ccc19x$redcap_repeat_instrument == ''])
     
+    ########################
+    #Composite complications
+    ########################
     
+    #Comp42. Combined cardiovascular event (more comprehensive than der_CV_event)
+    ccc19x$der_CV_event_v2 <- NA
+    
+    #Yes
+    ccc19x$der_CV_event_v2[which(ccc19x$der_hotn_comp == 1|
+                                       ccc19x$der_MI_comp == 1|
+                                       ccc19x$der_card_isch_comp == 1|
+                                       ccc19x$der_AFib_comp == 1|
+                                       ccc19x$der_VF_comp == 1|
+                                       ccc19x$der_arry_oth_comp == 1|
+                                       ccc19x$der_CMY_comp == 1|
+                                       ccc19x$der_CHF_comp == 1|
+                                       ccc19x$der_PE_comp == 1|
+                                       ccc19x$der_DVT_comp == 1|
+                                       ccc19x$der_stroke_comp == 1|
+                                       ccc19x$der_thrombosis_NOS_comp == 1)] <- 1
+
+    #No
+    ccc19x$der_CV_event_v2[which(ccc19x$der_hotn_comp == 0 &
+                                       ccc19x$der_MI_comp == 0 &
+                                       ccc19x$der_card_isch_comp == 0 &
+                                       ccc19x$der_AFib_comp == 0 &
+                                       ccc19x$der_VF_comp == 0 &
+                                       ccc19x$der_arry_oth_comp == 0 &
+                                       ccc19x$der_CMY_comp == 0 &
+                                       ccc19x$der_CHF_comp == 0 &
+                                       ccc19x$der_PE_comp == 0 &
+                                       ccc19x$der_DVT_comp == 0 &
+                                       ccc19x$der_stroke_comp == 0 &
+                                       ccc19x$der_thrombosis_NOS_comp == 0 &
+                                       is.na(ccc19x$der_CV_event_v2))] <- 0
+    
+    #Unknown
+    ccc19x$der_CV_event_v2[which((ccc19x$der_hotn_comp == 99|
+                                        ccc19x$der_MI_comp == 99|
+                                        ccc19x$der_card_isch_comp == 99|
+                                        ccc19x$der_AFib_comp == 99|
+                                        ccc19x$der_VF_comp == 99|
+                                        ccc19x$der_arry_oth_comp == 99|
+                                        ccc19x$der_CMY_comp == 99|
+                                        ccc19x$der_CHF_comp == 99|
+                                        ccc19x$der_PE_comp == 99|
+                                        ccc19x$der_DVT_comp == 99|
+                                        ccc19x$der_stroke_comp == 99|
+                                        ccc19x$der_thrombosis_NOS_comp == 99) & 
+                                       is.na(ccc19x$der_CV_event_v2))] <- 99
   
+    ccc19x$der_CV_event_v2 <- factor(ccc19x$der_CV_event_v2)
+    
+    temp <- summary(ccc19x$der_CV_event_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CV_event_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Comp43. Combined pulmonary event
+    ccc19x$der_pulm_event <- NA
+    
+    #Yes
+    ccc19x$der_pulm_event[which(ccc19x$der_resp_failure_comp == 1|
+                                  ccc19x$der_pneumonitis_comp == 1|
+                                  ccc19x$der_pneumonia_comp == 1|
+                                  ccc19x$der_ARDS_comp == 1|
+                                  ccc19x$der_PE_comp == 1|
+                                  ccc19x$der_pleural_eff_comp == 1|
+                                  ccc19x$der_empyema_comp == 1)] <- 1
+    
+    #No
+    ccc19x$der_pulm_event[which(ccc19x$der_resp_failure_comp == 0 &
+                                  ccc19x$der_pneumonitis_comp == 0 &
+                                  ccc19x$der_pneumonia_comp == 0 &
+                                  ccc19x$der_ARDS_comp == 0 &
+                                  ccc19x$der_PE_comp == 0 &
+                                  ccc19x$der_pleural_eff_comp == 0 &
+                                  ccc19x$der_empyema_comp == 0 &
+                                  is.na(ccc19x$der_pulm_event))] <- 0
+    
+    #Unknown
+    ccc19x$der_pulm_event[which((ccc19x$der_resp_failure_comp == 99|
+                                   ccc19x$der_pneumonitis_comp == 99|
+                                   ccc19x$der_pneumonia_comp == 99|
+                                   ccc19x$der_ARDS_comp == 99|
+                                   ccc19x$der_PE_comp == 99|
+                                   ccc19x$der_pleural_eff_comp == 99|
+                                   ccc19x$der_empyema_comp == 99) & 
+                                  is.na(ccc19x$der_pulm_event))] <- 99
+    
+    ccc19x$der_pulm_event <- factor(ccc19x$der_pulm_event)
+    
+    temp <- summary(ccc19x$der_pulm_event[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pulm_event',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Comp44. Combined GI event
+    ccc19x$der_GI_event <- NA
+    
+    #Yes
+    ccc19x$der_GI_event[which(ccc19x$der_AHI_comp == 1|
+                                ccc19x$der_ascites_comp == 1|
+                                ccc19x$der_BO_comp == 1|
+                                ccc19x$der_bowelPerf_comp == 1|
+                                ccc19x$der_ileus_comp == 1|
+                                ccc19x$der_peritonitis_comp == 1)] <- 1
+    
+    #No
+    ccc19x$der_GI_event[which(ccc19x$der_AHI_comp == 0 &
+                                ccc19x$der_ascites_comp == 0 &
+                                ccc19x$der_BO_comp == 0 &
+                                ccc19x$der_bowelPerf_comp == 0 &
+                                ccc19x$der_ileus_comp == 0 &
+                                ccc19x$der_peritonitis_comp == 0 &
+                                is.na(ccc19x$der_GI_event))] <- 0
+    
+    #Unknown
+    ccc19x$der_GI_event[which((ccc19x$der_AHI_comp == 99|
+                                 ccc19x$der_ascites_comp == 99|
+                                 ccc19x$der_BO_comp == 99|
+                                 ccc19x$der_bowelPerf_comp == 99|
+                                 ccc19x$der_ileus_comp == 99|
+                                 ccc19x$der_peritonitis_comp == 99) & 
+                                is.na(ccc19x$der_GI_event))] <- 99
+    
+    ccc19x$der_GI_event <- factor(ccc19x$der_GI_event)
+    
+    temp <- summary(ccc19x$der_GI_event[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_GI_event',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     rm(master_comp)
     }
@@ -3987,14 +4123,18 @@ var.log <- data.frame(name = character(),
       
       #Death at any time
       ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 1)] <- 4
-      #Only declare unknown if patient not know to be alive at 30, 90, or 180 days
+      #Only declare unknown if patient not known to be alive at 30, 90, or 180 days
       ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 &
                                      !(ccc19x$der_dead30 == 0|ccc19x$der_dead90 == 0|ccc19x$der_dead180 == 0))] <- 99
       
-      length(ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 & ccc19x$der_dead30 == 99)])
-      
       ccc19x$der_ordinal_v1a <- as.integer(ccc19x$der_ordinal_v1a)
-      summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
+      
+      temp <- summary(factor(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == '']))
+      temp.var.log <- data.frame(name = 'der_ordinal_v1a',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
     
     #O22b. ordinal_v1b -- including "at least" - so it is actually a categorical
