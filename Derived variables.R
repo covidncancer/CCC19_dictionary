@@ -7505,7 +7505,29 @@ var.log <- data.frame(name = character(),
                                ccc19x$cancer_type_4 %in% c("C9291","C4910","C9330","C7724","C2955","C9382")|
                                ccc19x$cancer_type_5 %in% c("C9291","C4910","C9330","C7724","C2955","C9382"))] <- 1
     ccc19x$der_LowerGI <- factor(ccc19x$der_LowerGI)
-    summary(ccc19x$der_LowerGI[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_LowerGI[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_LowerGI',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Lower GI v2 (not including appendix and small bowel)
+    ccc19x$der_LowerGI_v2 <- 0
+    ccc19x$der_LowerGI_v2[which(ccc19x$cancer_type %in% c("C9291","C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_2 %in% c("C9291","C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_3 %in% c("C9291","C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_4 %in% c("C9291","C4910","C2955","C9382")|
+                                  ccc19x$cancer_type_5 %in% c("C9291","C4910","C2955","C9382"))] <- 1
+    ccc19x$der_LowerGI_v2 <- factor(ccc19x$der_LowerGI_v2)
+    
+    temp <- summary(ccc19x$der_LowerGI_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_LowerGI_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Colorectal
     ccc19x$der_colorectal <- 0
