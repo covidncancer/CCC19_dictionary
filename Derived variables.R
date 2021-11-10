@@ -8203,33 +8203,6 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$der_activetx3mo_v2[ccc19x$redcap_repeat_instrument == ''])
     
     ############################################
-    #Dep01. Any cancer treatment in past 3 months - DEPRECATED
-    ############################################
-    ccc19x$der_anytx <- NA
-    
-    ccc19x$der_anytx[which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
-                             ccc19x$hx_treatment == 1)] <- 1
-    
-    ccc19x$der_anytx[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
-                             (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 88 & ccc19x$hx_treatment != 1)|
-                             ccc19x$recent_treatment == 98)] <- 0
-    
-    ccc19x$der_anytx[which((ccc19x$on_treatment == 99 | 
-                              ccc19x$recent_treatment == 99 |
-                              ccc19x$hx_treatment == 99 |
-                              (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))) &
-                             is.na(ccc19x$der_anytx))] <- 99
-    
-    ccc19x$der_anytx <- factor(ccc19x$der_anytx)
-    
-    temp <- summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_anytx',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    ############################################
     #Ca10. Any cancer treatment in past 3 months
     ############################################
     ccc19x$der_anytx_3mo <- NA
@@ -8268,6 +8241,133 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    ##########################################################
+    #Second-order derived variables for timing within 3 months
+    ##########################################################
+    {
+      #####################################
+      #Ca10a. Any cytotoxic within 3 months
+      #####################################
+      ccc19x$der_any_cyto_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_cyto_3mo[which(ccc19x$der_any_cyto_3mo == 1 & 
+                                      ((ccc19x$treatment_modality___685 == 0 & ccc19x$treatment_modality___45186 == 0)|
+                                         (ccc19x$treatment_modality___694 == 0 &
+                                            ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
+      
+      temp <- summary(ccc19x$der_any_cyto_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_cyto_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10b. Any immunotherapy within 3 months
+      ccc19x$der_any_immuno_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_immuno_3mo[which(ccc19x$der_any_immuno_3mo == 1 & 
+                                        ((ccc19x$treatment_modality___694 == 0 & ccc19x$treatment_modality___45186 == 0)|
+                                           (ccc19x$treatment_modality___694 == 0 &
+                                              ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy == 1)))] <- 0
+      
+      temp <- summary(ccc19x$der_any_immuno_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_immuno_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10c. Any targeted therapy within 3 months
+      ccc19x$der_any_targeted_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_targeted_3mo[which(ccc19x$der_any_targeted_3mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+      
+      temp <- summary(ccc19x$der_any_targeted_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_targeted_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10d. Any endocrine therapy within 3 months
+      ccc19x$der_any_endo_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_endo_3mo[which(ccc19x$der_any_endo_3mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+      
+      temp <- summary(ccc19x$der_any_endo_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_endo_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10e. Any radiation therapy within 3 months
+      ccc19x$der_any_rt_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_rt_3mo[which(ccc19x$der_any_rt_3mo == 1 & ccc19x$treatment_modality___695 == 0)] <- 0
+      
+      temp <- summary(ccc19x$der_any_rt_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_rt_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10f. Any cancer surgery within 3 months
+      ccc19x$der_any_ca_surgery_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_ca_surgery_3mo[which(ccc19x$der_any_ca_surgery_3mo == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
+      
+      temp <- summary(ccc19x$der_any_ca_surgery_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_ca_surgery_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10g. Any other therapy within 3 months
+      ccc19x$der_any_other_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_other_3mo[which(ccc19x$der_any_other_3mo == 1 & 
+                                       ccc19x$treatment_modality___45215 == 0 &
+                                       ccc19x$treatment_modality___oth == 0)] <- 0
+      
+      temp <- summary(ccc19x$der_any_other_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_other_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10h. Any targeted therapy or ICI within 3 months
+      ccc19x$der_any_targeted_ici_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_targeted_ici_3mo[which(ccc19x$der_any_targeted_ici_3mo == 1 & 
+                                              (ccc19x$treatment_modality___58229 == 1|
+                                                 ccc19x$what_immunotherapy %in% c('45838','45446',
+                                                                                  '45170','45838-45446')))] <- 1
+      ccc19x$der_any_targeted_ici_3mo[which(ccc19x$der_any_targeted_ici_3mo == 1 & (ccc19x$treatment_modality___58229 == 0|
+                                                                                      !ccc19x$what_immunotherapy %in% c('45838','45446',
+                                                                                                                        '45170','45838-45446')))] <- 0
+      
+      ccc19x$der_any_targeted_ici_3mo <- factor(ccc19x$der_any_targeted_ici_3mo)
+      
+      temp <- summary(ccc19x$der_any_targeted_ici_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_targeted_ici_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Ca10i. Any transplant or cellular therapy within 3 months
+      ccc19x$der_any_sct_cellular_3mo <- ccc19x$der_anytx_3mo
+      ccc19x$der_any_sct_cellular_3mo[which(ccc19x$der_any_sct_cellular_3mo == 1 & ccc19x$treatment_modality___45186 == 0)] <- 0
+      ccc19x$der_any_sct_cellular_3mo[which(ccc19x$transplant_cellular_timing %in% c(0,3,4))] <- 0
+      ccc19x$der_any_sct_cellular_3mo[which(ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
+      ccc19x$der_any_sct_cellular_3mo[which(ccc19x$transplant_cellular_timing == 99)] <- 99
+      
+      ccc19x$der_any_sct_cellular_3mo <- factor(ccc19x$der_any_sct_cellular_3mo)
+      
+      temp <- summary(ccc19x$der_any_sct_cellular_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_sct_cellular_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+    }
+    
     ############################################
     #Ca10x. Any cancer treatment in past 4 weeks
     ############################################
@@ -8287,22 +8387,6 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_anytx_4wk <- factor(ccc19x$der_anytx_4wk)
     summary(ccc19x$der_anytx_4wk[ccc19x$redcap_repeat_instrument == ''])
-    
-    #####################################
-    #Ca10a. Any cytotoxic within 3 months
-    #####################################
-    ccc19x$der_any_cyto <- ccc19x$der_anytx
-    ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 1 & 
-                                ((ccc19x$treatment_modality___685 == 0 & ccc19x$treatment_modality___45186 == 0)|
-                                   (ccc19x$treatment_modality___694 == 0 &
-                                      ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
-    
-    temp <- summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_cyto',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
     
     ###############################################################
     #C05a. Immunosuppressed version 2 - with cytotoxic chemotherapy
@@ -8329,7 +8413,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_immunosuppressed_v2[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
     
     #4. Receiving cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v2[which(ccc19x$der_any_cyto == 1)] <- 1
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
     
     #Unknown
     ccc19x$der_immunosuppressed_v2[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
@@ -8354,7 +8438,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_immunosuppressed_v2a[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
     
     #3. Receiving cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto == 1)] <- 1
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
     
     #Unknown
     
@@ -8368,7 +8452,7 @@ var.log <- data.frame(name = character(),
                                             ccc19x$der_immunosuppressed_v2a == 0)] <- 99
     
     #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto == 99 &
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 99 &
                                             ccc19x$der_immunosuppressed_v2a == 0)] <- 99
     
     ccc19x$der_immunosuppressed_v2a <- factor(ccc19x$der_immunosuppressed_v2a)
@@ -8390,10 +8474,10 @@ var.log <- data.frame(name = character(),
     ccc19x$der_immunosuppressed_v3[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
     
     #3. Received cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto == 1)] <- 1
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
     
     #4. Received BTKi within 3 months
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_btki == 1 & ccc19x$der_anytx == 1)] <- 1
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_btki == 1 & ccc19x$der_anytx_3mo == 1)] <- 1
     
     #5. Received anti-CD20 within 12 months
     ccc19x$der_immunosuppressed_v3[which(ccc19x$der_cd20_12mo == 1)] <- 1
@@ -8415,7 +8499,7 @@ var.log <- data.frame(name = character(),
                                            ccc19x$der_immunosuppressed_v3 == 0)] <- 99
     
     #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto == 99 &
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 99 &
                                            ccc19x$der_immunosuppressed_v3 == 0)] <- 99
     
     #4. Received BTKi or anti-CD20 but unknown when
@@ -8474,53 +8558,6 @@ var.log <- data.frame(name = character(),
     ccc19x$der_cyto_timing <- relevel(ccc19x$der_cyto_timing, ref = 'None within a year')
     summary(ccc19x$der_cyto_timing[ccc19x$redcap_repeat_instrument == ''])
     
-    
-    #Ca10b. Any immunotherapy within 3 months
-    ccc19x$der_any_immuno <- ccc19x$der_anytx
-    ccc19x$der_any_immuno[which(ccc19x$der_any_immuno == 1 & 
-                                  ((ccc19x$treatment_modality___694 == 0 & ccc19x$treatment_modality___45186 == 0)|
-                                     (ccc19x$treatment_modality___694 == 0 &
-                                        ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy == 1)))] <- 0
-    
-    temp <- summary(ccc19x$der_any_immuno[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_immuno',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10c. Any targeted therapy within 3 months
-    ccc19x$der_any_targeted <- ccc19x$der_anytx
-    ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
-    
-    temp <- summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_targeted',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10d. Any endocrine therapy within 3 months
-    ccc19x$der_any_endo <- ccc19x$der_anytx
-    ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
-    
-    temp <- summary(ccc19x$der_any_endo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_endo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10e. Any radiation therapy within 3 months
-    ccc19x$der_any_rt <- ccc19x$der_anytx
-    ccc19x$der_any_rt[which(ccc19x$der_any_rt == 1 & ccc19x$treatment_modality___695 == 0)] <- 0
-    summary(ccc19x$der_any_rt[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Ca10f. Any cancer surgery within 3 months
-    ccc19x$der_any_ca_surgery <- ccc19x$der_anytx
-    ccc19x$der_any_ca_surgery[which(ccc19x$der_any_ca_surgery == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
-    summary(ccc19x$der_any_ca_surgery[ccc19x$redcap_repeat_instrument == ''])
-    
     #Ca10f1. Any ***surgery*** within 30 days
     ccc19x$der_any_surgery_1mo <- ccc19x$der_anytx_4wk
     ccc19x$der_any_surgery_1mo[which(ccc19x$der_any_surgery_1mo == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
@@ -8530,95 +8567,61 @@ var.log <- data.frame(name = character(),
     ccc19x$der_any_surgery_1mo[which(ccc19x$surgery_timing == 'UNK' & ccc19x$der_any_surgery_1mo == 0)] <- 99
     summary(ccc19x$der_any_surgery_1mo[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca10g. Any other therapy within 3 months
-    ccc19x$der_any_other <- ccc19x$der_anytx
-    ccc19x$der_any_other[which(ccc19x$der_any_other == 1 & 
-                                 ccc19x$treatment_modality___45215 == 0 &
-                                 ccc19x$treatment_modality___oth == 0)] <- 0
-    
-    temp <- summary(ccc19x$der_any_other[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_other',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10h. Any targeted therapy or ICI within 3 months
-    ccc19x$der_any_targeted_ici <- ccc19x$der_anytx
-    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & 
-                                        (ccc19x$treatment_modality___58229 == 1|
-                                           ccc19x$what_immunotherapy %in% c('45838','45446',
-                                                                            '45170','45838-45446')))] <- 1
-    ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & (ccc19x$treatment_modality___58229 == 0|
-                                                                            !ccc19x$what_immunotherapy %in% c('45838','45446',
-                                                                                                             '45170','45838-45446')))] <- 0
-    
-    ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
-    summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
-    
-    #Ca10i. Any transplant or cellular therapy within 3 months
-    ccc19x$der_any_sct_cellular <- ccc19x$der_anytx
-    ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1 & ccc19x$treatment_modality___45186 == 0)] <- 0
-    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% c(0,3,4))] <- 0
-    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
-    ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing == 99)] <- 99
-    
-    ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
-    summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
-    
     #Ca10j. Any local therapy within 3 months (surgery or radiation)
-    ccc19x$der_any_local <- ccc19x$der_any_ca_surgery
-    ccc19x$der_any_local[which(ccc19x$der_any_rt == 1)] <- 1
+    ccc19x$der_any_local_3mo <- ccc19x$der_any_ca_surgery_3mo
+    ccc19x$der_any_local_3mo[which(ccc19x$der_any_rt_3mo == 1)] <- 1
     
-    temp <- summary(ccc19x$der_any_local[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_local',
+    temp <- summary(ccc19x$der_any_local_3mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_local_3mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
     #Ca10k. Any systemic therapy within 3 months
-    ccc19x$der_any_systemic <- ccc19x$der_any_cyto
-    ccc19x$der_any_systemic[which(ccc19x$der_any_endo == 1|
-                                      ccc19x$der_any_immuno == 1|
-                                      ccc19x$der_any_targeted == 1)] <- 1
-    summary(ccc19x$der_any_systemic[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_any_systemic_3mo <- ccc19x$der_any_cyto_3mo
+    ccc19x$der_any_systemic_3mo[which(ccc19x$der_any_endo_3mo == 1|
+                                    ccc19x$der_any_immuno_3mo == 1|
+                                    ccc19x$der_any_targeted_3mo == 1)] <- 1
+    
+    temp <- summary(ccc19x$der_any_systemic_3mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_systemic_3mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca10z. No cancer therapy within 3 months
-    ccc19x$der_cancertr_none <- NA
+    ccc19x$der_cancertr_none_3mo <- NA
     
     #Yes
-    ccc19x$der_cancertr_none[which(ccc19x$der_any_cyto == 0 &
-                                     ccc19x$der_any_targeted == 0 &
-                                     ccc19x$der_any_endo == 0 &
-                                     ccc19x$der_any_immuno == 0 &
-                                     ccc19x$der_any_local == 0 &
-                                     ccc19x$der_any_other == 0)] <- 1
+    ccc19x$der_cancertr_none_3mo[which(ccc19x$der_any_cyto_3mo == 0 &
+                                     ccc19x$der_any_targeted_3mo == 0 &
+                                     ccc19x$der_any_endo_3mo == 0 &
+                                     ccc19x$der_any_immuno_3mo == 0 &
+                                     ccc19x$der_any_local_3mo == 0 &
+                                     ccc19x$der_any_other_3mo == 0)] <- 1
     
     #No
-    ccc19x$der_cancertr_none[which(ccc19x$der_any_cyto == 1|
-                                     ccc19x$der_any_targeted == 1|
-                                     ccc19x$der_any_endo == 1|
-                                     ccc19x$der_any_immuno == 1|
-                                     ccc19x$der_any_local == 1|
-                                     ccc19x$der_any_other == 1)] <- 0
+    ccc19x$der_cancertr_none_3mo[which(ccc19x$der_any_cyto_3mo == 1|
+                                     ccc19x$der_any_targeted_3mo == 1|
+                                     ccc19x$der_any_endo_3mo == 1|
+                                     ccc19x$der_any_immuno_3mo == 1|
+                                     ccc19x$der_any_local_3mo == 1|
+                                     ccc19x$der_any_other_3mo == 1)] <- 0
     
     #Unknown
-    ccc19x$der_cancertr_none[which(ccc19x$der_any_cyto == 99|
-                                     ccc19x$der_any_targeted == 99|
-                                     ccc19x$der_any_endo == 99|
-                                     ccc19x$der_any_immuno == 99|
-                                     ccc19x$der_any_local == 99|
-                                     ccc19x$der_any_other == 99)] <- 99
+    ccc19x$der_cancertr_none_3mo[which(ccc19x$der_any_cyto_3mo == 99|
+                                     ccc19x$der_any_targeted_3mo == 99|
+                                     ccc19x$der_any_endo_3mo == 99|
+                                     ccc19x$der_any_immuno_3mo == 99|
+                                     ccc19x$der_any_local_3mo == 99|
+                                     ccc19x$der_any_other_3mo == 99)] <- 99
+
+    ccc19x$der_cancertr_none_3mo <- as.factor(ccc19x$der_cancertr_none_3mo)
     
-    #If remains undeclared, use the on treatment variable to declare
-    ccc19x$der_cancertr_none[which(ccc19x$on_treatment == 0 &
-                                     is.na(ccc19x$der_cancertr_none))] <- 1
-    
-    ccc19x$der_cancertr_none <- as.factor(ccc19x$der_cancertr_none)
-    
-    temp <- summary(ccc19x$der_cancertr_none[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_cancertr_none',
+    temp <- summary(ccc19x$der_cancertr_none_3mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancertr_none_3mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -8654,7 +8657,7 @@ var.log <- data.frame(name = character(),
     
     #Ca10k2. Any systemic therapy within 3-12 months
     ccc19x$der_any_systemic_v3 <- ccc19x$der_any_systemic_v2
-    ccc19x$der_any_systemic_v3[which(ccc19x$der_any_systemic == 1)] <- 0
+    ccc19x$der_any_systemic_v3[which(ccc19x$der_any_systemic_3mo == 1)] <- 0
     summary(ccc19x$der_any_systemic_v3[ccc19x$redcap_repeat_instrument == ''])
     
     #Ca10a1. Any cytotoxic chemotherapy within 12 months
@@ -11139,6 +11142,151 @@ var.log <- data.frame(name = character(),
   }
   print('Other derived variables completed')
   
+  #These variables are deprecated and should remain commented out
+   {
+  #   ############################################
+  #   #Dep01. Any cancer treatment in past 3 months
+  #   ############################################
+  #   ccc19x$der_anytx <- NA
+  #   
+  #   ccc19x$der_anytx[which((ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 1:3)|
+  #                            ccc19x$hx_treatment == 1)] <- 1
+  #   
+  #   ccc19x$der_anytx[which((ccc19x$on_treatment == 0 & ccc19x$hx_treatment != 1)|
+  #                            (ccc19x$on_treatment == 1 & ccc19x$recent_treatment %in% 88 & ccc19x$hx_treatment != 1)|
+  #                            ccc19x$recent_treatment == 98)] <- 0
+  #   
+  #   ccc19x$der_anytx[which((ccc19x$on_treatment == 99 | 
+  #                             ccc19x$recent_treatment == 99 |
+  #                             ccc19x$hx_treatment == 99 |
+  #                             (ccc19x$on_treatment == 1 & is.na(ccc19x$recent_treatment))) &
+  #                            is.na(ccc19x$der_anytx))] <- 99
+  #   
+  #   ccc19x$der_anytx <- factor(ccc19x$der_anytx)
+  #   
+  #   temp <- summary(ccc19x$der_anytx[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_anytx',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #####################################
+  #   #Dep02. Any cytotoxic within 3 months
+  #   #####################################
+  #   ccc19x$der_any_cyto <- ccc19x$der_anytx
+  #   ccc19x$der_any_cyto[which(ccc19x$der_any_cyto == 1 & 
+  #                               ((ccc19x$treatment_modality___685 == 0 & ccc19x$treatment_modality___45186 == 0)|
+  #                                  (ccc19x$treatment_modality___694 == 0 &
+  #                                     ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy %in% c(10,2,3,4,5,6))))] <- 0
+  #   
+  #   temp <- summary(ccc19x$der_any_cyto[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_cyto',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep03. Any immunotherapy within 3 months
+  #   ccc19x$der_any_immuno <- ccc19x$der_anytx
+  #   ccc19x$der_any_immuno[which(ccc19x$der_any_immuno == 1 & 
+  #                                 ((ccc19x$treatment_modality___694 == 0 & ccc19x$treatment_modality___45186 == 0)|
+  #                                    (ccc19x$treatment_modality___694 == 0 &
+  #                                       ccc19x$treatment_modality___45186 == 1 & ccc19x$transplant_cellular_therapy == 1)))] <- 0
+  #   
+  #   temp <- summary(ccc19x$der_any_immuno[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_immuno',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep04. Any targeted therapy within 3 months
+  #   ccc19x$der_any_targeted <- ccc19x$der_anytx
+  #   ccc19x$der_any_targeted[which(ccc19x$der_any_targeted == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+  #   
+  #   temp <- summary(ccc19x$der_any_targeted[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_targeted',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep05. Any endocrine therapy within 3 months
+  #   ccc19x$der_any_endo <- ccc19x$der_anytx
+  #   ccc19x$der_any_endo[which(ccc19x$der_any_endo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+  #   
+  #   temp <- summary(ccc19x$der_any_endo[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_endo',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep06. Any radiation therapy within 3 months
+  #   ccc19x$der_any_rt <- ccc19x$der_anytx
+  #   ccc19x$der_any_rt[which(ccc19x$der_any_rt == 1 & ccc19x$treatment_modality___695 == 0)] <- 0
+  #   summary(ccc19x$der_any_rt[ccc19x$redcap_repeat_instrument == ''])
+  #   
+  #   #Dep07. Any cancer surgery within 3 months
+  #   ccc19x$der_any_ca_surgery <- ccc19x$der_anytx
+  #   ccc19x$der_any_ca_surgery[which(ccc19x$der_any_ca_surgery == 1 & ccc19x$treatment_modality___14051 == 0)] <- 0
+  #   summary(ccc19x$der_any_ca_surgery[ccc19x$redcap_repeat_instrument == ''])
+  #   
+  #   #Dep08. Any other therapy within 3 months
+  #   ccc19x$der_any_other <- ccc19x$der_anytx
+  #   ccc19x$der_any_other[which(ccc19x$der_any_other == 1 & 
+  #                                ccc19x$treatment_modality___45215 == 0 &
+  #                                ccc19x$treatment_modality___oth == 0)] <- 0
+  #   
+  #   temp <- summary(ccc19x$der_any_other[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_other',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep09. Any targeted therapy or ICI within 3 months
+  #   ccc19x$der_any_targeted_ici <- ccc19x$der_anytx
+  #   ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & 
+  #                                       (ccc19x$treatment_modality___58229 == 1|
+  #                                          ccc19x$what_immunotherapy %in% c('45838','45446',
+  #                                                                           '45170','45838-45446')))] <- 1
+  #   ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & (ccc19x$treatment_modality___58229 == 0|
+  #                                                                           !ccc19x$what_immunotherapy %in% c('45838','45446',
+  #                                                                                                             '45170','45838-45446')))] <- 0
+  #   
+  #   ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
+  #   summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
+  #   
+  #   #Dep10. Any transplant or cellular therapy within 3 months
+  #   ccc19x$der_any_sct_cellular <- ccc19x$der_anytx
+  #   ccc19x$der_any_sct_cellular[which(ccc19x$der_any_sct_cellular == 1 & ccc19x$treatment_modality___45186 == 0)] <- 0
+  #   ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% c(0,3,4))] <- 0
+  #   ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing %in% 1:2)] <- 1
+  #   ccc19x$der_any_sct_cellular[which(ccc19x$transplant_cellular_timing == 99)] <- 99
+  #   
+  #   ccc19x$der_any_sct_cellular <- factor(ccc19x$der_any_sct_cellular)
+  #   summary(ccc19x$der_any_sct_cellular[ccc19x$redcap_repeat_instrument == ''])
+  #   
+  #   #Dep11. Any local therapy within 3 months (surgery or radiation)
+  #   ccc19x$der_any_local <- ccc19x$der_any_ca_surgery
+  #   ccc19x$der_any_local[which(ccc19x$der_any_rt == 1)] <- 1
+  #   
+  #   temp <- summary(ccc19x$der_any_local[ccc19x$redcap_repeat_instrument == ''])
+  #   temp.var.log <- data.frame(name = 'der_any_local',
+  #                              timestamp = Sys.time(),
+  #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+  #                              stringsAsFactors = F)
+  #   var.log <- rbind(var.log, temp.var.log)
+  #   
+  #   #Dep12. Any systemic therapy within 3 months
+  #   ccc19x$der_any_systemic <- ccc19x$der_any_cyto
+  #   ccc19x$der_any_systemic[which(ccc19x$der_any_endo == 1|
+  #                                   ccc19x$der_any_immuno == 1|
+  #                                   ccc19x$der_any_targeted == 1)] <- 1
+  #   
+   }
 }
 
 #Condensed output for troubleshooting
