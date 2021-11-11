@@ -4882,7 +4882,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_plasma <- factor(ccc19x$der_plasma)
-    summary(ccc19x$der_plasma[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_plasma[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_plasma',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx16. Monoclonal antibody ever used for treatment of COVID-19
     ccc19x$der_monoclonals <- NA
@@ -4950,7 +4956,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_monoclonals <- factor(ccc19x$der_monoclonals)
-    summary(ccc19x$der_monoclonals[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_monoclonals[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_monoclonals',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx6. Tocilizumab ever used for TREATMENT of COVID-19
     ccc19x$der_toci <- NA
@@ -5263,43 +5275,25 @@ var.log <- data.frame(name = character(),
     #Never
     ccc19x$der_statins_baseline[which(ccc19x$concomitant_meds___atc_c10aa == 0)] <- 0
     
-    #Unknown baseline or treatment
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
-                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
-    
-    #Unknown f/u treatment
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] == 0 | is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- 99
     
     #Missing
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
     
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_statins_baseline[i] != 1|is.na(ccc19x$der_statins_baseline[i]))) ccc19x$der_statins_baseline[i] <- NA
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_statins_baseline[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
-      {
-        if(any(temp == 1)) ccc19x$der_statins_baseline[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_statins_baseline[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_statins_baseline[temp.ref] <- 0
-      }
-    }
-    
     ccc19x$der_statins_baseline <- factor(ccc19x$der_statins_baseline)
-    summary(ccc19x$der_statins_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_statins_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_statins_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx22. Beta blockers (BB) at baseline
     ccc19x$der_BB_baseline <- NA
@@ -5308,43 +5302,25 @@ var.log <- data.frame(name = character(),
     #Never
     ccc19x$der_BB_baseline[which(ccc19x$concomitant_meds___c07a == 0)] <- 0
     
-    #Unknown baseline or treatment
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
-                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
+    #Unknown 
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___') &
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
-    
-    #Unknown f/u treatment
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] == 0 | is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- 99
-    
+
     #Missing
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
-    
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_BB_baseline[i] != 1|is.na(ccc19x$der_BB_baseline[i]))) ccc19x$der_BB_baseline[i] <- NA
-    
-    #Merge baseline and followup if discrepancy
-    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
-    {
-      temp.ref <- which(ccc19x$record_id == i)
-      temp <- ccc19x$der_BB_baseline[temp.ref]
-      temp <- as.numeric(unique(temp[!is.na(temp)]))
-      if(length(temp) > 0)
-      {
-        if(any(temp == 1)) ccc19x$der_BB_baseline[temp.ref] <- 1
-        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_BB_baseline[temp.ref] <- 99
-        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_BB_baseline[temp.ref] <- 0
-      }
-    }
-    
+
     ccc19x$der_BB_baseline <- factor(ccc19x$der_BB_baseline)
-    summary(ccc19x$der_BB_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_BB_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_BB_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx9. Antivirals ever (except oseltamivir or remdesivir) for treatment of COVID-19
     ccc19x$der_antivirals <- NA
@@ -5471,8 +5447,6 @@ var.log <- data.frame(name = character(),
                               ccc19x$c19_anticoag_reason___3 == 1|
                               ccc19x$c19_anticoag_reason___oth == 1)] <- 1
     
-    summary(factor(ccc19x$der_ac_apa))
-    
     #Never
     ccc19x$der_ac_apa[which(is.na(ccc19x$der_ac_apa) & ccc19x$concomitant_meds___n02ba == 0 &
                               ccc19x$concomitant_meds___b01ac == 0 &
@@ -5484,15 +5458,11 @@ var.log <- data.frame(name = character(),
                               (is.na(ccc19x$covid_19_treatment_fu___b01ac) | ccc19x$covid_19_treatment_fu___b01ac == 0) &
                               (is.na(ccc19x$covid_19_treatment_fu___b01a) | ccc19x$covid_19_treatment_fu___b01a == 0))] <- 0
     
-    summary(factor(ccc19x$der_ac_apa))
-    
     #Unknown baseline or treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
                         !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac_apa[i] == 0 | is.na(ccc19x$der_ac_apa[i]))) ccc19x$der_ac_apa[i] <- 99
-    
-    summary(factor(ccc19x$der_ac_apa))
     
     #Unknown f/u treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
@@ -5500,20 +5470,14 @@ var.log <- data.frame(name = character(),
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac_apa[i] == 0 | is.na(ccc19x$der_ac_apa[i]))) ccc19x$der_ac_apa[i] <- 99
     
-    summary(factor(ccc19x$der_ac_apa))
-    
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac_apa[i] != 1|is.na(ccc19x$der_ac_apa[i]))) ccc19x$der_ac_apa[i] <- NA
     
-    summary(factor(ccc19x$der_ac_apa))
-    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac_apa[i] != 1|is.na(ccc19x$der_ac_apa[i]))) ccc19x$der_ac_apa[i] <- NA
-    
-    summary(factor(ccc19x$der_ac_apa))
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
@@ -5530,7 +5494,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_ac_apa <- factor(ccc19x$der_ac_apa)
-    summary(ccc19x$der_ac_apa[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ac_apa[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac_apa',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx15. Anticoagulation, aspirin, or APA at baseline
     ccc19x$der_ac_apa_baseline <- NA
@@ -5553,7 +5523,13 @@ var.log <- data.frame(name = character(),
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_apa_baseline[i] <- NA
    
     ccc19x$der_ac_apa_baseline <- factor(ccc19x$der_ac_apa_baseline)
-    summary(ccc19x$der_ac_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ac_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac_apa_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx13a. Anticoagulation at baseline
     ccc19x$der_ac_baseline <- NA
@@ -5695,8 +5671,6 @@ var.log <- data.frame(name = character(),
     ccc19x$der_acei_bl <- NA
     ccc19x$der_acei_bl[which(ccc19x$concomitant_meds___c09a == 1)] <- 1
     
-    summary(factor(ccc19x$der_acei_bl))
-    
     #Unexposed
     ccc19x$der_acei_bl[which(is.na(ccc19x$der_acei_bl) &
                                ccc19x$concomitant_meds___c09a == 0 &
@@ -5711,15 +5685,19 @@ var.log <- data.frame(name = character(),
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_acei_bl[i] <- NA
     
     ccc19x$der_acei_bl <- factor(ccc19x$der_acei_bl)
-    summary(ccc19x$der_acei_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_acei_bl[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_acei_bl',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ######################
     #Rx18. ARB at baseline
     ######################
     ccc19x$der_arb_bl <- NA
     ccc19x$der_arb_bl[which(ccc19x$concomitant_meds___c09c == 1)] <- 1
-    
-    summary(factor(ccc19x$der_arb_bl))
     
     #Unexposed
     ccc19x$der_arb_bl[which(is.na(ccc19x$der_arb_bl) &
@@ -5735,7 +5713,13 @@ var.log <- data.frame(name = character(),
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_arb_bl[i] <- NA
     
     ccc19x$der_arb_bl <- factor(ccc19x$der_arb_bl)
-    summary(ccc19x$der_arb_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_arb_bl[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_arb_bl',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #####################################
     #Rx19. Immunosuppressants at baseline
@@ -11146,7 +11130,13 @@ var.log <- data.frame(name = character(),
       ccc19x$der_cytokine_storm[temp.ref][x1|x2|x3] <- 99
       
       ccc19x$der_cytokine_storm <- factor(ccc19x$der_cytokine_storm)
-      summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_cytokine_storm[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_cytokine_storm',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
     
     #####################################
