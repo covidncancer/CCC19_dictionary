@@ -835,6 +835,36 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    #S03. Categorical symptoms: asymptomatic, symptomatic
+    ccc19x$der_symptoms_cat_v3 <- NA
+    
+    ccc19x$der_symptoms_cat_v3[which(ccc19x$symptoms___84387000 == 1)] <- "Asymptomatic"
+    
+    ccc19x$der_symptoms_cat_v3[which(ccc19x$symptoms___386661006 == 1 | ccc19x$symptoms___49727002 == 1 | 
+                                       ccc19x$symptoms___267036007 == 1 | ccc19x$symptoms___25064002 == 1 | 
+                                       ccc19x$symptoms___68962001 == 1 | ccc19x$symptoms___57676002 == 1 | 
+                                       ccc19x$symptoms___162397003 == 1 | ccc19x$symptoms___44169009 == 1 | 
+                                       ccc19x$symptoms___36955009 == 1 | ccc19x$symptoms___64531003 == 1 | 
+                                       ccc19x$symptoms___422587007 == 1 | ccc19x$symptoms___272044004 == 1 |
+                                       ccc19x$symptoms___62315008 == 1 | ccc19x$symptoms___21522001 == 1 | 
+                                       ccc19x$symptoms___248595008 == 1| ccc19x$symptoms___9826008 == 1 | ccc19x$symptoms___43364001 == 1 | 
+                                       ccc19x$symptoms___oth == 1 | ccc19x$symptoms___367391008 == 1 | 
+                                       ccc19x$symptoms___419284004 == 1)] <- "Symptomatic"
+    
+    ccc19x$der_symptoms_cat_v3[which(ccc19x$symptoms___unk == 1 & 
+                                       is.na(ccc19x$der_symptoms_cat_v3))] <- 'Unknown'
+    
+    ccc19x$der_symptoms_cat_v3 <- factor(ccc19x$der_symptoms_cat_v3)
+    
+    temp <- summary(ccc19x$der_symptoms_cat_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_symptoms_cat_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    
   }
   print('Symptoms completed')
   
@@ -3356,86 +3386,94 @@ var.log <- data.frame(name = character(),
     }
     
     #T6. 30-day follow-up available (0 = no; 1 = yes; 99 = unknown)
-    ccc19x$der_d30 <- NA 
-    
-    #30-day question filled out
-    ccc19x$der_d30[which(ccc19x$mortality == 1)] <- 1
-    ccc19x$der_d30[which(ccc19x$mortality %in% c(0,88))] <- 0
-    ccc19x$der_d30[which(ccc19x$mortality == 99)] <- 99
-    
-    #30-day or 90-day f/u form filled out
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(30,90))]
-    ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #Other f/u form with weeks > 4 filled out
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 4)]
-    ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #T7 & T8 Calculated time from diagnosis has to be at least 30 days
-    ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-    ccc19x$meta_righttime3[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
-    
-    #First initial form
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
-    
-    temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
-    ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
-    
-    # #now deal with followup time based on time stamps
-    temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
-    for(i in 1:length(temp))
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp.time <- unique(ccc19x$ts_5[temp.ref])
-      temp.time <- temp.time[temp.time != '']
-      if(length(temp.time) > 0)
+      ccc19x$der_d30 <- NA 
+      
+      #30-day question filled out
+      ccc19x$der_d30[which(ccc19x$mortality == 1)] <- 1
+      ccc19x$der_d30[which(ccc19x$mortality %in% c(0,88))] <- 0
+      ccc19x$der_d30[which(ccc19x$mortality == 99)] <- 99
+      
+      #30, 90, 180, or 365-day f/u form filled out
+      temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(30,90,180,365))]
+      ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
+      
+      #Other f/u form with weeks > 4 filled out
+      temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 4)]
+      ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
+      
+      #T7 & T8 Calculated time from diagnosis has to be at least 30 days
+      ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+      ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+      ccc19x$meta_righttime3[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
+      
+      #First initial form
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
+      
+      temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
+      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
+      
+      # #now deal with followup time based on time stamps
+      temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
+      for(i in 1:length(temp))
       {
-        temp.list <- list() 
-        for(j in 1:length(temp.time))
-          temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
-                                                                    '%Y-%m-%d %H:%M',
-                                                                    '%Y-%m-%d'))
-        for(j in 1:length(temp.time))
-          temp.time[j] <- as.character(temp.list[[j]])
-        
-        temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
-                                                          '%Y-%m-%d %H:%M',
-                                                          '%Y-%m-%d'))
-        temp.time <- temp.time[which(temp.time == max(temp.time))]
-        ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
+        temp.ref <- which(ccc19x$record_id == temp[i])
+        temp.time <- unique(ccc19x$ts_5[temp.ref])
+        temp.time <- temp.time[temp.time != '']
+        if(length(temp.time) > 0)
+        {
+          temp.list <- list() 
+          for(j in 1:length(temp.time))
+            temp.list[[j]] <- as.POSIXlt(temp.time[j], tryFormats = c('%m/%d/%Y %H:%M',
+                                                                      '%Y-%m-%d %H:%M',
+                                                                      '%Y-%m-%d'))
+          for(j in 1:length(temp.time))
+            temp.time[j] <- as.character(temp.list[[j]])
+          
+          temp.time <- as.POSIXlt(temp.time, tryFormats = c('%m/%d/%Y %H:%M',
+                                                            '%Y-%m-%d %H:%M',
+                                                            '%Y-%m-%d'))
+          temp.time <- temp.time[which(temp.time == max(temp.time))]
+          ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
+        }
       }
+      
+      temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
+      temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
+      
+      ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
+      
+      ccc19x$der_d30 <- factor(ccc19x$der_d30)
+      
+      temp <- summary(ccc19x$der_d30[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_d30',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
-    
-    temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
-    temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
-    
-    ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
-    
-    ccc19x$der_d30 <- factor(ccc19x$der_d30)
-    summary(ccc19x$der_d30[ccc19x$redcap_repeat_instrument == ''])
     
     #########################
     #O18. Dead within 30 days
@@ -4377,7 +4415,13 @@ var.log <- data.frame(name = character(),
       ccc19x$der_ordinal_v2[which(ccc19x$der_dead30 == 99)] <- 99
       
       ccc19x$der_ordinal_v2 <- as.integer(ccc19x$der_ordinal_v2)
-      summary(factor(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == '']))
+      
+      temp <- summary(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_ordinal_v2',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
     
     #O26. ordinal_v3 (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
@@ -6745,7 +6789,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_autoimmune <- factor(ccc19x$der_autoimmune)
-    summary(ccc19x$der_autoimmune[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_autoimmune[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_autoimmune',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #C05. Immunosuppressed
     ccc19x$der_immunosuppressed <- NA
@@ -7390,7 +7440,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_CVD_risk <- factor(ccc19x$der_CVD_risk)
-    summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_CVD_risk[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CVD_risk',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #########################
     #C13a. CVD risk factor v2 
@@ -7529,7 +7585,13 @@ var.log <- data.frame(name = character(),
                                    ccc19x$cancer_type_4 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308")|
                                    ccc19x$cancer_type_5 %in% c("C3167","C8851","C9357","C9244","C4337","C2912","C8504","C3209","C3163","C4341","C9308"))] <- 1
     ccc19x$der_Bcell <- factor(ccc19x$der_Bcell)
-    summary(ccc19x$der_Bcell[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Bcell[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Bcell',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_Lymph_HGNHL <- 0
     ccc19x$der_Lymph_HGNHL[which(ccc19x$cancer_type %in% c("C8851","C9244","C2912")|
@@ -7538,7 +7600,13 @@ var.log <- data.frame(name = character(),
                                    ccc19x$cancer_type_4 %in% c("C8851","C9244","C2912")|
                                    ccc19x$cancer_type_5 %in% c("C8851","C9244","C2912"))] <- 1
     ccc19x$der_Lymph_HGNHL <- factor(ccc19x$der_Lymph_HGNHL)
-    summary(ccc19x$der_Lymph_HGNHL[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Lymph_HGNHL[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Lymph_HGNHL',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_Lymph_LGNHL <- 0
     ccc19x$der_Lymph_LGNHL[which(ccc19x$cancer_type %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
@@ -7547,7 +7615,13 @@ var.log <- data.frame(name = character(),
                                    ccc19x$cancer_type_4 %in% c("C3209", "C3163", "C4341", "C4337", "C8504")|
                                    ccc19x$cancer_type_5 %in% c("C3209", "C3163", "C4341", "C4337", "C8504"))] <- 1
     ccc19x$der_Lymph_LGNHL <- factor(ccc19x$der_Lymph_LGNHL)
-    summary(ccc19x$der_Lymph_LGNHL[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Lymph_LGNHL[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Lymph_LGNHL',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_ALL <- 0
     ccc19x$der_ALL[which(ccc19x$cancer_type %in% c("C3167")|
@@ -7556,7 +7630,13 @@ var.log <- data.frame(name = character(),
                            ccc19x$cancer_type_4 %in% c("C3167")|
                            ccc19x$cancer_type_5 %in% c("C3167"))] <- 1
     ccc19x$der_ALL <- factor(ccc19x$der_ALL)
-    summary(ccc19x$der_ALL[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ALL[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ALL',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_CLL <- 0
     ccc19x$der_CLL[which(ccc19x$cancer_type %in% c("C3163")|
@@ -7565,7 +7645,13 @@ var.log <- data.frame(name = character(),
                            ccc19x$cancer_type_4 %in% c("C3163")|
                            ccc19x$cancer_type_5 %in% c("C3163"))] <- 1
     ccc19x$der_CLL <- factor(ccc19x$der_CLL)
-    summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_CLL[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CLL',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_Hodgkin <- 0
     ccc19x$der_Hodgkin[which(ccc19x$cancer_type %in% c("C9357")|
@@ -7583,7 +7669,13 @@ var.log <- data.frame(name = character(),
                                    ccc19x$cancer_type_4 %in% c("C9308", "C3211")|
                                    ccc19x$cancer_type_5 %in% c("C9308", "C3211"))] <- 1
     ccc19x$der_Lymph_Other <- factor(ccc19x$der_Lymph_Other)
-    summary(ccc19x$der_Lymph_Other[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Lymph_Other[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Lymph_Other',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_AML <- 0
     ccc19x$der_AML[which(ccc19x$cancer_type %in% c("C3171")|
@@ -7633,7 +7725,13 @@ var.log <- data.frame(name = character(),
                              ccc19x$cancer_type_4 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308")|
                              ccc19x$cancer_type_5 %in% c("C3457","C9244","C9357","C3211","C8851","C2912","C27908","C3167","C3163","C3209","C8504","C4341","C4337","C9308"))] <- 1
     ccc19x$der_Lymph <- factor(ccc19x$der_Lymph)
-    summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Lymph[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Lymph',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Myeloid malignancy
     ccc19x$der_Myeloid <- 0
@@ -7750,7 +7848,13 @@ var.log <- data.frame(name = character(),
                                 ccc19x$cancer_type_4 %in% c("C4917", "C2926", "C4878", "C3234","C3411")|
                                 ccc19x$cancer_type_5 %in% c("C4917", "C2926", "C4878", "C3234","C3411"))] <- 1
     ccc19x$der_Thoracic <- factor(ccc19x$der_Thoracic)
-    summary(ccc19x$der_Thoracic[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Thoracic[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Thoracic',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #GI cancers
     
@@ -8544,7 +8648,13 @@ var.log <- data.frame(name = character(),
                                            is.na(ccc19x$der_immunosuppressed_v2))] <- 99
     
     ccc19x$der_immunosuppressed_v2 <- factor(ccc19x$der_immunosuppressed_v2)
-    summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_immunosuppressed_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ################################################################################################
     #C05a1. Immunosuppressed version 2a - with cytotoxic chemotherapy and not based on "comorbidity"
@@ -8827,7 +8937,13 @@ var.log <- data.frame(name = character(),
                                is.na(ccc19x$transplant_cellular_timing))] <- NA
     
     ccc19x$der_allo365 <- factor(ccc19x$der_allo365)
-    summary(ccc19x$der_allo365[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_allo365[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_allo365',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca13. Autologous transplant within 100 days (default is no)
     ccc19x$der_auto100 <- 0
@@ -8839,7 +8955,13 @@ var.log <- data.frame(name = character(),
                                is.na(ccc19x$transplant_cellular_timing))] <- NA
     
     ccc19x$der_auto100 <- factor(ccc19x$der_auto100)
-    summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_auto100[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_auto100',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #########################################
     #Ca23. Hematopoeitic cell transplant ever
@@ -8986,7 +9108,13 @@ var.log <- data.frame(name = character(),
     
     #Factor
     ccc19x$der_cancer_status <- as.factor(ccc19x$der_cancer_status)
-    summary(ccc19x$der_cancer_status[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_cancer_status[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_status',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca07b. Cancer status without combining stable and responding
     ccc19x$der_cancer_status_v2 <- ccc19x$cancer_status
@@ -9480,7 +9608,54 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_btki <- factor(ccc19x$der_btki)
-    summary(ccc19x$der_btki[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_btki[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_btki',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4t: JAKi as cancer treatment (does not include JAKi for immunosuppression)
+    ccc19x$der_jaki <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Fedratinib','Ruxolitinib','Lestaurtinib','Momelotinib','Pacritinib','Tofacitinib'))) ccc19x$der_jaki[temp.ref[i]] <- 1 else
+               ccc19x$der_jaki[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_jaki <- factor(ccc19x$der_jaki)
+    
+    temp <- summary(ccc19x$der_jaki[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_jaki',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4u: BCR-ABL inhibitor as cancer treatment
+    ccc19x$der_bcrabli <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Asciminib','Bosutinib','Dasatinib','Flumatinib',
+               'Imatinib','Nilotinib','Ponatinib','Radotinib'))) ccc19x$der_bcrabli[temp.ref[i]] <- 1 else
+                 ccc19x$der_bcrabli[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_bcrabli <- factor(ccc19x$der_bcrabli)
+    
+    temp <- summary(ccc19x$der_bcrabli[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_bcrabli',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca4c: Venetoclax
     ccc19x$der_venet <- NA
@@ -9909,7 +10084,13 @@ var.log <- data.frame(name = character(),
                                ccc19x$labs == 3)] <- 'Not drawn/Not available'
     
     ccc19x$der_nlr_cat <- factor(ccc19x$der_nlr_cat)
-    summary(ccc19x$der_nlr_cat[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_nlr_cat[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_nlr_cat',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L2. D-Dimer
     ccc19x$der_ddimer <- NA
@@ -9919,7 +10100,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ddimer[which(ccc19x$labs == 3|ccc19x$ddimer == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ddimer <- factor(ccc19x$der_ddimer)
     ccc19x$der_ddimer <- relevel(ccc19x$der_ddimer, ref = 'Normal')
-    summary(ccc19x$der_ddimer[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ddimer[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ddimer',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L3. Fibrinogen
     ccc19x$der_fibrinogen <- NA
@@ -9929,7 +10116,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_fibrinogen[which(ccc19x$labs == 3|ccc19x$fibrinogen == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_fibrinogen <- factor(ccc19x$der_fibrinogen)
     ccc19x$der_fibrinogen <- relevel(ccc19x$der_fibrinogen, ref = 'Normal')
-    summary(ccc19x$der_fibrinogen[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_fibrinogen[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_fibrinogen',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L4. PT
     ccc19x$der_pt <- NA
@@ -9979,7 +10172,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_crp[which(ccc19x$labs == 3|ccc19x$crp == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_crp <- factor(ccc19x$der_crp)
     ccc19x$der_crp <- relevel(ccc19x$der_crp, ref = 'Normal')
-    summary(ccc19x$der_crp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_crp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_crp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L9. ldh
     ccc19x$der_ldh <- NA
@@ -9999,7 +10198,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_il6[which(ccc19x$labs == 3|ccc19x$il6 == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_il6 <- factor(ccc19x$der_il6)
     ccc19x$der_il6 <- relevel(ccc19x$der_il6, ref = 'Normal')
-    summary(ccc19x$der_il6[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_il6[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_il6',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L11. creatinine
     ccc19x$der_creat <- NA
@@ -10009,7 +10214,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_creat[which(ccc19x$labs == 3|ccc19x$creat == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_creat <- factor(ccc19x$der_creat)
     ccc19x$der_creat <- relevel(ccc19x$der_creat, ref = 'Normal')
-    summary(ccc19x$der_creat[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_creat[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_creat',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L12. wbc
     ccc19x$der_wbc <- NA
@@ -10020,7 +10231,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_wbc[which(ccc19x$labs == 3|ccc19x$wbc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_wbc <- factor(ccc19x$der_wbc)
     ccc19x$der_wbc <- relevel(ccc19x$der_wbc, ref = 'Normal')
-    summary(ccc19x$der_wbc[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_wbc[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_wbc',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L13. hgb
     ccc19x$der_hgb <- NA
