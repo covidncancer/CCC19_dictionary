@@ -4878,6 +4878,21 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Rx01a. Combined HCQ/Azithro using the derived variables
+    ccc19x$der_hca_v2 <- ifelse(ccc19x$der_hcq == 1 & ccc19x$der_azithro == 1, "Both", 
+                            ifelse(ccc19x$der_hcq == 1 & ccc19x$der_azithro == 0, "HCQ Only",
+                                   ifelse(ccc19x$der_hcq == 0 & ccc19x$der_azithro == 1, "Azithro Only",
+                                          ifelse(ccc19x$der_hcq == 0 & ccc19x$der_azithro == 0, "Neither",
+                                                 ifelse(ccc19x$der_hcq == 99 | ccc19x$der_azithro == 99, "Unknown",
+                                                        NA)))))
+    
+    temp <- summary(ccc19x$der_hca_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hca_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Rx16. Convalescent plasma ever used for treatment of COVID-19
     ccc19x$der_plasma <- NA
     ccc19x$der_plasma[which(ccc19x$covid_19_treatment___b05ax03 == 1|
@@ -6597,107 +6612,126 @@ var.log <- data.frame(name = character(),
       var.log <- rbind(var.log, temp.var.log)
     }
    
-    "obesity"
-    ##C02a. derived variable coding the obesity status (binary)
+    ##C02. derived variable coding the obesity status (binary)
     {
-      ccc19x$der_obesity <- NA
+      ccc19x$der_obesity_v2 <- NA
       
-      ccc19x$der_obesity[which(ccc19x$significant_comorbidities___414916001 == 1 |
-                                 ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+      ccc19x$der_obesity_v2[which(ccc19x$significant_comorbidities___414916001 == 1 |
+                                    ccc19x$significant_comorbidities___238136002 == 1)] <- 1
       
       #Records with numeric BMI recorded or derived as >= 30
-      ccc19x$der_obesity[which(ccc19x$der_bmi >= 30)] <- 1
+      ccc19x$der_obesity_v2[which(ccc19x$der_bmi >= 30)] <- 1
       
       #Records with numeric BMI recorded or derived as < 30 (do not overwrite, for now)
-      ccc19x$der_obesity[which(ccc19x$der_bmi < 30 & is.na(ccc19x$der_obesity))] <- 0
+      ccc19x$der_obesity_v2[which(ccc19x$der_bmi < 30 & is.na(ccc19x$der_obesity_v2))] <- 0
       
       #Not specified (map to Not obese for now)
-      ccc19x$der_obesity[which(ccc19x$significant_comorbidities___238136002 == 0 &
-                                 ccc19x$significant_comorbidities___414916001 == 0 &
-                                 is.na(ccc19x$der_obesity))] <- 0
+      ccc19x$der_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 0 &
+                                    ccc19x$significant_comorbidities___414916001 == 0 &
+                                    is.na(ccc19x$der_obesity_v2))] <- 0
       
       #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
       temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
       for(i in which(ccc19x$redcap_repeat_instrument == ''))
-        if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_obesity[i] == 0) ccc19x$der_obesity[i] <- NA
+        if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_obesity_v2[i] == 0) ccc19x$der_obesity_v2[i] <- NA
       
       #Unknown
-      ccc19x$der_obesity[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_obesity))] <- 99
+      ccc19x$der_obesity_v2[which(ccc19x$significant_comorbidities___unk == 1 & ccc19x$der_obesity_v2 == 0)] <- 99
       
       #Factor
-      ccc19x$der_obesity <- as.factor(ccc19x$der_obesity)
+      ccc19x$der_obesity_v2 <- as.factor(ccc19x$der_obesity_v2)
       
-      temp <- summary(ccc19x$der_obesity[ccc19x$redcap_repeat_instrument == ''])
-      temp.var.log <- data.frame(name = 'der_obesity',
+      temp <- summary(ccc19x$der_obesity_v2[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_obesity_v2',
                                  timestamp = Sys.time(),
                                  values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
     }
     
-    ##C02b. derived variable coding the morbid obesity status (binary)
+    ##C02b. derived variable coding the morbid obesity status (binary) with BMI cutoff of 40
     {
-    ccc19x$der_morbid_obesity <- NA
-    
-    ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
-    
-    #Records with numeric BMI recorded or derived as >= 40
-    ccc19x$der_morbid_obesity[which(ccc19x$der_bmi >= 40)] <- 1
-    
-    #Records with numeric BMI recorded or derived as < 40 (do not overwrite, for now)
-    ccc19x$der_morbid_obesity[which(ccc19x$der_bmi < 40 & is.na(ccc19x$der_morbid_obesity))] <- 0
-    
-    #Not specified
-    ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___238136002 == 0 &
-                                      is.na(ccc19x$der_morbid_obesity))] <- 0
-    
-    #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
-    temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity[i] == 0) ccc19x$der_morbid_obesity[i] <- NA
-    
-    #Unknown
-    ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_morbid_obesity))] <- 99
-    
-    #Factor
-    ccc19x$der_morbid_obesity <- as.factor(ccc19x$der_morbid_obesity)
-    summary(ccc19x$der_morbid_obesity[ccc19x$redcap_repeat_instrument == ''])
+      ccc19x$der_morbid_obesity_bmi40 <- NA
+      
+      ccc19x$der_morbid_obesity_bmi40[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+      
+      #Records with numeric BMI recorded or derived as >= 40
+      ccc19x$der_morbid_obesity_bmi40[which(ccc19x$der_bmi >= 40)] <- 1
+      
+      #Records with numeric BMI recorded or derived as < 40 (do not overwrite, for now)
+      ccc19x$der_morbid_obesity_bmi40[which(ccc19x$der_bmi < 40 & is.na(ccc19x$der_morbid_obesity_bmi40))] <- 0
+      
+      #Not specified
+      ccc19x$der_morbid_obesity_bmi40[which(ccc19x$significant_comorbidities___238136002 == 0 &
+                                              is.na(ccc19x$der_morbid_obesity_bmi40))] <- 0
+      
+      #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
+      temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
+      for(i in which(ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity_bmi40[i] == 0) ccc19x$der_morbid_obesity_bmi40[i] <- NA
+      
+      #Unknown
+      ccc19x$der_morbid_obesity_bmi40[which(ccc19x$significant_comorbidities___unk == 1 & ccc19x$der_morbid_obesity_bmi40 == 0)] <- 99
+      
+      #Factor
+      ccc19x$der_morbid_obesity_bmi40 <- as.factor(ccc19x$der_morbid_obesity_bmi40)
+      
+      temp <- summary(ccc19x$der_morbid_obesity_bmi40[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_morbid_obesity_bmi40',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
     }
     
     ##C02c. derived variable coding the morbid obesity status (binary, cutoff BMI 35)
     {
-      ccc19x$der_morbid_obesity_v2 <- NA
+      ccc19x$der_morbid_obesity_bmi35 <- NA
       
-      ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+      ccc19x$der_morbid_obesity_bmi35[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
       
       #Records with numeric BMI recorded or derived as >= 35
-      ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi >= 35)] <- 1
+      ccc19x$der_morbid_obesity_bmi35[which(ccc19x$der_bmi >= 35)] <- 1
       
       #Records with numeric BMI recorded or derived as < 35 (do not overwrite, for now)
-      ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi < 35 & is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+      ccc19x$der_morbid_obesity_bmi35[which(ccc19x$der_bmi < 35 & is.na(ccc19x$der_morbid_obesity_bmi35))] <- 0
       
       #Not specified
-      ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 0 &
-                                           is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+      ccc19x$der_morbid_obesity_bmi35[which(ccc19x$significant_comorbidities___238136002 == 0 &
+                                              is.na(ccc19x$der_morbid_obesity_bmi35))] <- 0
       
       #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
       temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
       for(i in which(ccc19x$redcap_repeat_instrument == ''))
-        if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity_v2[i] == 0) ccc19x$der_morbid_obesity_v2[i] <- NA
+        if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity_bmi35[i] == 0) ccc19x$der_morbid_obesity_bmi35[i] <- NA
       
       #Unknown
-      ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_morbid_obesity_v2))] <- 99
+      ccc19x$der_morbid_obesity_bmi35[which(ccc19x$significant_comorbidities___unk == 1 & ccc19x$der_morbid_obesity_bmi35 == 0)] <- 99
       
       #Factor
-      ccc19x$der_morbid_obesity_v2 <- as.factor(ccc19x$der_morbid_obesity_v2)
+      ccc19x$der_morbid_obesity_bmi35 <- as.factor(ccc19x$der_morbid_obesity_bmi35)
       
-      temp <- summary(ccc19x$der_morbid_obesity_v2[ccc19x$redcap_repeat_instrument == ''])
-      temp.var.log <- data.frame(name = 'der_morbid_obesity_v2',
+      temp <- summary(ccc19x$der_morbid_obesity_bmi35[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_morbid_obesity_bmi35',
                                  timestamp = Sys.time(),
                                  values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
     }
+    
+    #C02d. Obesity categorical
+    ccc19x$der_obesity_cat <- as.character(ccc19x$der_obesity_v2)
+    ccc19x$der_obesity_cat[which(ccc19x$der_morbid_obesity_bmi40 == 1)] <- 2
+    ccc19x$der_obesity_cat[which(ccc19x$der_morbid_obesity_bmi40 == 99)] <- 99
+    ccc19x$der_obesity_cat <- factor(ccc19x$der_obesity_cat)
+    
+    temp <- summary(ccc19x$der_obesity_cat[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_obesity_cat',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #C01a. BMI categorical
     {
@@ -7407,7 +7441,7 @@ var.log <- data.frame(name = character(),
     temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
     temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
     #Obesity
-    temp[which(ccc19x$der_obesity == 'Obese')] <- temp[which(ccc19x$der_obesity == 'Obese')] + 1
+    temp[which(ccc19x$der_obesity_v2 == 'Obese')] <- temp[which(ccc19x$der_obesity_v2 == 'Obese')] + 1
     #Hypertension
     temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
     #Hyperlipidemia
@@ -7558,6 +7592,19 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #########################
+    #C13b1. CVD risk factor v3 collapsed
+    #########################
+    ccc19x$der_CVD_risk_v3_collapsed <- ccc19x$der_CVD_risk_v3
+    ccc19x$der_CVD_risk_v3_collapsed[which(ccc19x$der_CVD_risk_v3_collapsed == 'CVD already present')] <- 1
+    ccc19x$der_CVD_risk_v3_collapsed <- droplevels(ccc19x$der_CVD_risk_v3_collapsed)
+    
+    temp <- summary(ccc19x$der_CVD_risk_v3_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CVD_risk_v3_collapsed',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     }
   print('Comorbidities completed')
@@ -11686,6 +11733,113 @@ var.log <- data.frame(name = character(),
      # 
      # ccc19x$der_cancertr_none <- as.factor(ccc19x$der_cancertr_none)
      
+     # ##Dep14. derived variable coding the obesity status (binary) - DEPRECATED
+     # {
+     #   ccc19x$der_obesity <- NA
+     #   
+     #   ccc19x$der_obesity[which(ccc19x$significant_comorbidities___414916001 == 1 |
+     #                              ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as >= 30
+     #   ccc19x$der_obesity[which(ccc19x$der_bmi >= 30)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as < 30 (do not overwrite, for now)
+     #   ccc19x$der_obesity[which(ccc19x$der_bmi < 30 & is.na(ccc19x$der_obesity))] <- 0
+     #   
+     #   #Not specified (map to Not obese for now)
+     #   ccc19x$der_obesity[which(ccc19x$significant_comorbidities___238136002 == 0 &
+     #                              ccc19x$significant_comorbidities___414916001 == 0 &
+     #                              is.na(ccc19x$der_obesity))] <- 0
+     #   
+     #   #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
+     #   temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
+     #   for(i in which(ccc19x$redcap_repeat_instrument == ''))
+     #     if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_obesity[i] == 0) ccc19x$der_obesity[i] <- NA
+     #   
+     #   #Unknown
+     #   ccc19x$der_obesity[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_obesity))] <- 99
+     #   
+     #   #Factor
+     #   ccc19x$der_obesity <- as.factor(ccc19x$der_obesity)
+     #   
+     #   temp <- summary(ccc19x$der_obesity[ccc19x$redcap_repeat_instrument == ''])
+     #   temp.var.log <- data.frame(name = 'der_obesity',
+     #                              timestamp = Sys.time(),
+     #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                              stringsAsFactors = F)
+     #   var.log <- rbind(var.log, temp.var.log)
+     # }
+     # 
+     # ##zDep15. derived variable coding the morbid obesity status (binary) with BMI cutoff of 40
+     # {
+     #   ccc19x$der_morbid_obesity <- NA
+     #   
+     #   ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as >= 40
+     #   ccc19x$der_morbid_obesity[which(ccc19x$der_bmi >= 40)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as < 40 (do not overwrite, for now)
+     #   ccc19x$der_morbid_obesity[which(ccc19x$der_bmi < 40 & is.na(ccc19x$der_morbid_obesity))] <- 0
+     #   
+     #   #Not specified
+     #   ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___238136002 == 0 &
+     #                                     is.na(ccc19x$der_morbid_obesity))] <- 0
+     #   
+     #   #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
+     #   temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
+     #   for(i in which(ccc19x$redcap_repeat_instrument == ''))
+     #     if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity[i] == 0) ccc19x$der_morbid_obesity[i] <- NA
+     #   
+     #   #Unknown
+     #   ccc19x$der_morbid_obesity[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_morbid_obesity))] <- 99
+     # 
+     #   #Factor
+     #   ccc19x$der_morbid_obesity <- as.factor(ccc19x$der_morbid_obesity)
+     #   
+     #   temp <- summary(ccc19x$der_morbid_obesity[ccc19x$redcap_repeat_instrument == ''])
+     #   temp.var.log <- data.frame(name = 'der_morbid_obesity',
+     #                              timestamp = Sys.time(),
+     #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                              stringsAsFactors = F)
+     #   var.log <- rbind(var.log, temp.var.log)
+     #   
+     # }
+     # 
+     # ##zDep16. derived variable coding the morbid obesity status (binary, cutoff BMI 35)
+     # {
+     #   ccc19x$der_morbid_obesity_v2 <- NA
+     #   
+     #   ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 1)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as >= 35
+     #   ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi >= 35)] <- 1
+     #   
+     #   #Records with numeric BMI recorded or derived as < 35 (do not overwrite, for now)
+     #   ccc19x$der_morbid_obesity_v2[which(ccc19x$der_bmi < 35 & is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+     #   
+     #   #Not specified
+     #   ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___238136002 == 0 &
+     #                                        is.na(ccc19x$der_morbid_obesity_v2))] <- 0
+     #   
+     #   #Revert "not obese" to NA if all the significant comorbidities are unchecked and BMI data not available
+     #   temp.ref <- grep(colnames(ccc19x), pattern = 'significant_comorbidities___')
+     #   for(i in which(ccc19x$redcap_repeat_instrument == ''))
+     #     if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_morbid_obesity_v2[i] == 0) ccc19x$der_morbid_obesity_v2[i] <- NA
+     #   
+     #   #Unknown
+     #   ccc19x$der_morbid_obesity_v2[which(ccc19x$significant_comorbidities___unk == 1 & is.na(ccc19x$der_morbid_obesity_v2))] <- 99
+     #   
+     #   #Factor
+     #   ccc19x$der_morbid_obesity_v2 <- as.factor(ccc19x$der_morbid_obesity_v2)
+     #   
+     #   temp <- summary(ccc19x$der_morbid_obesity_v2[ccc19x$redcap_repeat_instrument == ''])
+     #   temp.var.log <- data.frame(name = 'der_morbid_obesity_v2',
+     #                              timestamp = Sys.time(),
+     #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                              stringsAsFactors = F)
+     #   var.log <- rbind(var.log, temp.var.log)
+     # }
      
    }
 }
