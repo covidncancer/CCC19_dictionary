@@ -8,6 +8,7 @@ ccc19x <- foo
 suffix <- 'data with derived variables for analysis'
 suffix <- 'data with derived variables for site QA'
 suffix <- 'data with derived variables for local QA'
+suffix <- 'data with derived variables for appeal'
 
 #Create a table to log the variables as they are created
 var.log <- data.frame(name = character(),
@@ -3933,7 +3934,41 @@ var.log <- data.frame(name = character(),
     
     #Factor
     ccc19x$der_composite_hosp_death <- as.factor(ccc19x$der_composite_hosp_death)
-    summary(ccc19x$der_composite_hosp_death[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_composite_hosp_death[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_composite_hosp_death',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #O10. Composite outcome - hospitalization, ICU, or death (all ever/never)
+    ccc19x$der_composite_ICU_mv_death <- NA
+    
+    #Present
+    ccc19x$der_composite_ICU_mv_death[which(ccc19x$der_deadbinary == 1)] <- 1
+    ccc19x$der_composite_ICU_mv_death[which(ccc19x$der_ICU == 1)] <- 1
+    ccc19x$der_composite_ICU_mv_death[which(ccc19x$der_mv == 1)] <- 1
+    
+    #Absent (requires all 2 derived variables to be absent, and not meeting another criteria)
+    ccc19x$der_composite_ICU_mv_death[which(ccc19x$der_deadbinary == 0 &
+                                              ccc19x$der_ICU == 0 &
+                                              ccc19x$der_mv == 0 &
+                                              is.na(ccc19x$der_composite_ICU_mv_death))] <- 0
+    
+    #Unknown
+    ccc19x$der_composite_ICU_mv_death[which((ccc19x$der_deadbinary == 99 |ccc19x$der_ICU == 99|ccc19x$der_mv == 99) &
+                                              is.na(ccc19x$der_composite_ICU_mv_death))] <- 99
+    
+    #Factor
+    ccc19x$der_composite_ICU_mv_death <- as.factor(ccc19x$der_composite_ICU_mv_death)
+    
+    temp <- summary(ccc19x$der_composite_ICU_mv_death[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_composite_ICU_mv_death',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #T9 Month and year of diagnosis, accounting for interval bounds
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
@@ -4222,7 +4257,13 @@ var.log <- data.frame(name = character(),
                                            is.na(ccc19x$der_cancer_tx_timing_v3))] <- 99
     
     ccc19x$der_cancer_tx_timing_v3 <- as.factor(ccc19x$der_cancer_tx_timing_v3)
-    summary(ccc19x$der_cancer_tx_timing_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_cancer_tx_timing_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_tx_timing_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     }
   print('Time measurements completed')
@@ -6445,7 +6486,12 @@ var.log <- data.frame(name = character(),
     #Factor
     ccc19x$der_division <- as.factor(ccc19x$der_division)
     
-    summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
+    temp <- summary(ccc19x$der_division[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_division',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #D20. Insurance 
     ccc19x$der_insurance <- NA
@@ -7438,8 +7484,8 @@ var.log <- data.frame(name = character(),
     #Two or more risk factors
     temp <- rep(0, nrow(ccc19x))
     #Sex and age
-    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
-    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] + 1
     #Obesity
     temp[which(ccc19x$der_obesity_v2 == 'Obese')] <- temp[which(ccc19x$der_obesity_v2 == 'Obese')] + 1
     #Hypertension
@@ -7490,14 +7536,9 @@ var.log <- data.frame(name = character(),
     #Two or more risk factors
     temp <- rep(0, nrow(ccc19x))
     
-    temp.age <- ccc19x$der_age
-    temp.age[which(temp.age == '18-')] <- 18
-    temp.age[which(temp.age == '90+')] <- 90
-    temp.age <- as.numeric(temp.age)
-    
     #Sex and age
-    temp[which(ccc19x$der_sex == 'Male' & temp.age >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age >= 55)] + 1
-    temp[which(ccc19x$der_sex == 'Female' & temp.age >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age >= 60)] + 1
+    temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] + 1
+    temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] + 1
     
     #Hypertension
     temp[which(ccc19x$significant_comorbidities___38341003 == 1)] <- temp[which(ccc19x$significant_comorbidities___38341003 == 1)] + 1
@@ -7516,8 +7557,8 @@ var.log <- data.frame(name = character(),
     ccc19x$der_CVD_risk_v2[which(temp == 1 & is.na(ccc19x$der_CVD_risk_v2) & ccc19x$redcap_repeat_instrument == '')] <- 0
     
     #Too young
-    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & temp.age < 55)] <- 0
-    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & temp.age < 60)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc < 55)] <- 0
+    ccc19x$der_CVD_risk_v2[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc < 60)] <- 0
     
     #Unknowns
     ccc19x$der_CVD_risk_v2[which((ccc19x$significant_comorbidities___38341003 == 0 & ccc19x$significant_comorbidities___unk == 1)|
@@ -7573,12 +7614,8 @@ var.log <- data.frame(name = character(),
     #Removals
     
     #Too young
-    temp.age <- ccc19x$der_age
-    temp.age[which(temp.age == '18-')] <- 18
-    temp.age[which(temp.age == '90+')] <- 90
-    temp.age <- as.numeric(temp.age)
-    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Male' & temp.age < 55)] <- 0
-    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Female' & temp.age < 60)] <- 0
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc < 55)] <- 0
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc < 60)] <- 0
     
     #Already has CVD
     ccc19x$der_CVD_risk_v3[which(ccc19x$der_card_v2 == 1)] <- 'CVD already present'
@@ -7605,6 +7642,69 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    ######################
+    #C13c. CVD risk factor indicator that patient has 2+ of the CVD risk factors including age
+    {
+      ccc19x$der_CVD_risk_num <- NA
+      
+      #Two or more risk factors
+      temp <- rep(0, nrow(ccc19x))
+      
+      #Sex and age
+      temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] <- temp[which(ccc19x$der_sex == 'Male' & ccc19x$der_age_trunc >= 55)] + 1
+      temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] <- temp[which(ccc19x$der_sex == 'Female' & ccc19x$der_age_trunc >= 60)] + 1
+      
+      #Hypertension
+      temp[which(ccc19x$der_htn == 1)] <- temp[which(ccc19x$der_htn == 1)] + 1
+      #Hyperlipidemia
+      temp[which(ccc19x$der_hld == 1)] <- temp[which(ccc19x$der_hld == 1)] + 1
+      #Diabetes
+      temp[which(ccc19x$der_dm2 == 1)] <- temp[which(ccc19x$der_dm2 == 1)] + 1
+      #Tobacco use
+      temp[which(ccc19x$der_smoking == 'Current')] <- temp[which(ccc19x$der_smoking == 'Current')] + 1
+      
+      ccc19x$der_CVD_risk_num[which(temp >= 2)] <- 1
+      
+      #Only one risk factor
+      ccc19x$der_CVD_risk_num[which(temp == 1)] <- 0
+      
+      #No risk factors
+      ccc19x$der_CVD_risk_num[which(ccc19x$der_sex == 'Male' & 
+                                      ccc19x$der_age_trunc < 55 & 
+                                      ccc19x$der_htn == 0 & 
+                                      ccc19x$der_hld == 0 & 
+                                      ccc19x$der_dm2 == 0 &
+                                      ccc19x$der_smoking %in% c('Never','Former'))] <- 0
+      
+      ccc19x$der_CVD_risk_num[which(ccc19x$der_sex == 'Female' & 
+                                      ccc19x$der_age_trunc < 60 & 
+                                      ccc19x$der_htn == 0 & 
+                                      ccc19x$der_hld == 0 & 
+                                      ccc19x$der_dm2 == 0 &
+                                      ccc19x$der_smoking %in% c('Never','Former'))] <- 0
+      
+      #Unknown with risk score of 1 (needs 1+ unknowns)
+      ccc19x$der_CVD_risk_num[which((ccc19x$der_htn == 99|ccc19x$der_hld == 99|
+                                       ccc19x$der_dm2 == 99|ccc19x$der_smoking == "Unknown") &
+                                      temp == 1)] <- 99
+      
+      #Unknown with risk score of 0 (needs 2+ unknowns)
+      ccc19x$der_CVD_risk_num[which(((ccc19x$der_htn == 99 & (ccc19x$der_hld == 99|ccc19x$der_dm2 == 99|ccc19x$der_smoking == "Unknown"))|
+                                       (ccc19x$der_hld == 99 & (ccc19x$der_htn == 99|ccc19x$der_dm2 == 99|ccc19x$der_smoking == "Unknown"))|
+                                       (ccc19x$der_dm2 == 99 & (ccc19x$der_hld == 99|ccc19x$der_htn == 99|ccc19x$der_smoking == "Unknown"))|
+                                       (ccc19x$der_smoking == 'Unknown' & (ccc19x$der_htn == 99|ccc19x$der_hld == 99|ccc19x$der_dm2 == 99))) &
+                                      temp == 0)] <- 99
+      
+      ccc19x$der_CVD_risk_num <- factor(ccc19x$der_CVD_risk_num)
+      
+      temp <- summary(ccc19x$der_CVD_risk_num[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_CVD_risk_num',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+    }
     
     }
   print('Comorbidities completed')
