@@ -2822,7 +2822,13 @@ var.log <- data.frame(name = character(),
                                          is.na(ccc19x$der_coinfection_viral))] <- 99
     
     ccc19x$der_coinfection_viral <- factor(ccc19x$der_coinfection_viral)
-    summary(ccc19x$der_coinfection_viral[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_coinfection_viral[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_coinfection_viral',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp38 Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
     ccc19x$der_coinfection_bacterial <- NA
@@ -2845,7 +2851,13 @@ var.log <- data.frame(name = character(),
                                              is.na(ccc19x$der_coinfection_bacterial))] <- 99
     
     ccc19x$der_coinfection_bacterial <- factor(ccc19x$der_coinfection_bacterial)
-    summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_coinfection_bacterial[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_coinfection_bacterial',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp38a Gram Positive Bacterial co-infection within +/- 2 weeks of COVID-19 diagnosis
     ccc19x$der_coinfection_bact_gram_pos <- NA
@@ -2928,7 +2940,13 @@ var.log <- data.frame(name = character(),
                                           is.na(ccc19x$der_coinfection_fungal))] <- 99
     
     ccc19x$der_coinfection_fungal <- factor(ccc19x$der_coinfection_fungal)
-    summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_coinfection_fungal[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_coinfection_fungal',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp41 Other co-infection
     ccc19x$der_coinfection_other <- NA
@@ -2947,7 +2965,13 @@ var.log <- data.frame(name = character(),
                                           is.na(ccc19x$der_coinfection_other))] <- 99
     
     ccc19x$der_coinfection_other <- factor(ccc19x$der_coinfection_other)
-    summary(ccc19x$der_coinfection_other[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_coinfection_other[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_coinfection_other',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp40 Any co-infection 
     ccc19x$der_coinfection_any <- NA
@@ -9044,7 +9068,13 @@ var.log <- data.frame(name = character(),
     #Ca10a1. Any cytotoxic chemotherapy within 12 months
     ccc19x$der_any_cyto_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_cyto_12mo[which(ccc19x$der_any_cyto_12mo == 1 & ccc19x$treatment_modality___685 == 0)] <- 0
-    summary(ccc19x$der_any_cyto_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_any_cyto_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_cyto_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca10c1. Any targeted therapy within 12 months
     ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
@@ -9146,7 +9176,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 1)] <- 1
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 0 & is.na(ccc19x$der_hct_recent))] <- 0
     ccc19x$der_hct_recent[which(ccc19x$der_auto100 == 99 & is.na(ccc19x$der_hct_recent))] <- 99
-    summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_hct_recent[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hct_recent',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ################
     #Line of therapy
