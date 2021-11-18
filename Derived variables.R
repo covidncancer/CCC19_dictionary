@@ -5949,7 +5949,13 @@ var.log <- data.frame(name = character(),
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_bl_simple[i] <- NA
     
     ccc19x$der_steroids_bl_simple <- factor(ccc19x$der_steroids_bl_simple)
-    summary(ccc19x$der_steroids_bl_simple[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_steroids_bl_simple[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_steroids_bl_simple',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ###########################
     #Rx24b. Steroids at baseline dichotomized at 10 mg PDE/day
@@ -9929,7 +9935,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_cdk46i <- factor(ccc19x$der_cdk46i)
-    summary(ccc19x$der_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cdk46i',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca4i: GNRH agonists and antagonists
     ccc19x$der_gnrh <- NA
@@ -10011,7 +10023,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_her2 <- factor(ccc19x$der_her2)
-    summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_her2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_her2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca4n: Anthracycline
     ccc19x$der_anthracycline <- NA
@@ -10060,7 +10078,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_targeted_not_her2_cdk46i <- factor(ccc19x$der_targeted_not_her2_cdk46i)
-    summary(ccc19x$der_targeted_not_her2_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_targeted_not_her2_cdk46i[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_targeted_not_her2_cdk46i',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca4q: BiTE antibodies
     ccc19x$der_BiTE <- NA
@@ -10453,7 +10477,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_alc[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_alc <- factor(ccc19x$der_alc)
     ccc19x$der_alc <- relevel(ccc19x$der_alc, ref = 'Normal')
-    summary(ccc19x$der_alc[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_alc[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_alc',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L15a. lymphopenia
     ccc19x$der_lymphopenia <- NA
@@ -10474,7 +10504,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_anc[which(ccc19x$labs == 3|ccc19x$anc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_anc <- factor(ccc19x$der_anc)
     ccc19x$der_anc <- relevel(ccc19x$der_anc, ref = 'Normal')
-    summary(ccc19x$der_anc[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_anc[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_anc',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L17. Troponin
     ccc19x$der_tni <- NA
@@ -10517,8 +10553,6 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_trop_combined <- factor(ccc19x$der_trop_combined)
     summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
-    
-  
     
     #L20. WBC value transformation
     
@@ -10661,6 +10695,54 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$creat[ccc19x$redcap_repeat_instrument == ''])
     summary(ccc19x$transformed_creat[ccc19x$redcap_repeat_instrument == ''])
     boxplot(log10(ccc19x$transformed_creat))
+    
+    #L27. AST
+    ccc19x$der_ast <- NA
+    ccc19x$der_ast[which(ccc19x$ast == 0)] <- 'Normal'
+    ccc19x$der_ast[which(ccc19x$ast == 1)] <- 'Abnormal'
+    ccc19x$der_ast[which(ccc19x$ast == 99)] <- 'Unknown'
+    ccc19x$der_ast[which(ccc19x$labs == 3|ccc19x$ast == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_ast <- factor(ccc19x$der_ast)
+    ccc19x$der_ast <- relevel(ccc19x$der_ast, ref = 'Normal')
+    
+    temp <- summary(ccc19x$der_ast[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ast',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #L28. ALT
+    ccc19x$der_alt <- NA
+    ccc19x$der_alt[which(ccc19x$alt == 0)] <- 'Normal'
+    ccc19x$der_alt[which(ccc19x$alt == 1)] <- 'Abnormal'
+    ccc19x$der_alt[which(ccc19x$alt == 99)] <- 'Unknown'
+    ccc19x$der_alt[which(ccc19x$labs == 3|ccc19x$alt == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_alt <- factor(ccc19x$der_alt)
+    ccc19x$der_alt <- relevel(ccc19x$der_alt, ref = 'Normal')
+    
+    temp <- summary(ccc19x$der_alt[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_alt',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #L29. Total bilirubin
+    ccc19x$der_tbili <- NA
+    ccc19x$der_tbili[which(ccc19x$tbili == 0)] <- 'Normal'
+    ccc19x$der_tbili[which(ccc19x$tbili == 1)] <- 'Abnormal'
+    ccc19x$der_tbili[which(ccc19x$tbili == 99)] <- 'Unknown'
+    ccc19x$der_tbili[which(ccc19x$labs == 3|ccc19x$tbili == 'NT')] <- 'Not drawn/Not available'
+    ccc19x$der_tbili <- factor(ccc19x$der_tbili)
+    ccc19x$der_tbili <- relevel(ccc19x$der_tbili, ref = 'Normal')
+    
+    temp <- summary(ccc19x$der_tbili[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_tbili',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     }
   print('Laboratory values completed')
