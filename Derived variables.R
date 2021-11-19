@@ -1271,7 +1271,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_VTE_comp_v2 <- as.factor(ccc19x$der_VTE_comp_v2)
-      summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_VTE_comp_v2[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_VTE_comp_v2',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp05b. Combined VTE within 3 months (90 days)
       ccc19x$der_VTE_comp_within_3mo <- NA
@@ -1326,7 +1332,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_ATE_comp <- as.factor(ccc19x$der_ATE_comp)
-      summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_ATE_comp[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_ATE_comp',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp06a. ATE complications within 90 days (3 months)
       ccc19x$der_ATE_comp_within_3mo <- NA
@@ -5659,8 +5671,6 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ac_baseline <- NA
     ccc19x$der_ac_baseline[which(ccc19x$concomitant_meds___b01a == 1)] <- 1
     
-    summary(factor(ccc19x$der_ac_baseline))
-    
     #Unexposed
     ccc19x$der_ac_baseline[which(is.na(ccc19x$der_ac_baseline) &
                                    ccc19x$concomitant_meds___b01a == 0 &
@@ -5675,36 +5685,40 @@ var.log <- data.frame(name = character(),
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_baseline[i] <- NA
     
     ccc19x$der_ac_baseline <- factor(ccc19x$der_ac_baseline)
-    summary(ccc19x$der_ac_baseline[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx13b. APA at baseline
+    temp <- summary(ccc19x$der_ac_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Rx13b. APA at baseline (aspirin and other antiplatelet agents)
     ccc19x$der_apa_baseline <- NA
     ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___n02ba == 1|
                                     ccc19x$concomitant_meds___b01ac == 1)] <- 1
-    
-    summary(factor(ccc19x$der_apa_baseline))
     
     #Unexposed
     ccc19x$der_apa_baseline[which(is.na(ccc19x$der_apa_baseline) & ccc19x$concomitant_meds___n02ba == 0 &
                                     ccc19x$concomitant_meds___b01ac == 0 &
                                     ccc19x$concomitant_meds___unk == 0)] <- 0
     
-    summary(factor(ccc19x$der_apa_baseline))
-    
     #Unknown baseline
     ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_apa_baseline))] <- 99
-    
-    summary(factor(ccc19x$der_apa_baseline))
-    
+
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_apa_baseline[i] <- NA
     
-    summary(factor(ccc19x$der_apa_baseline))
-    
     ccc19x$der_apa_baseline <- factor(ccc19x$der_apa_baseline)
-    summary(ccc19x$der_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_apa_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_apa_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx23. Thromboprophylaxis, including consideration of baseline anticoagulation
     #Does not yet account for discrepancies in baseline and follow-up forms
@@ -6446,7 +6460,13 @@ var.log <- data.frame(name = character(),
                                     is.na(ccc19x$der_VTE_baseline))] <- 99
     
     ccc19x$der_VTE_baseline <- as.factor(ccc19x$der_VTE_baseline)
-    summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_VTE_baseline[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_baseline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ############
     #D14. Region
@@ -9085,12 +9105,24 @@ var.log <- data.frame(name = character(),
     #Ca10c1. Any targeted therapy within 12 months
     ccc19x$der_any_targeted_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_targeted_12mo[which(ccc19x$der_any_targeted_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
-    summary(ccc19x$der_any_targeted_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_any_targeted_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_targeted_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca10d1. Any endocrine therapy within 12 months
     ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
-    summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_endo_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca10d1. Any cellular therapy within 12 months
     ccc19x$der_any_sct_cellular_12mo <- ccc19x$der_any_systemic_v2
@@ -9377,7 +9409,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_cancer_prog_bl <- as.factor(ccc19x$der_cancer_prog_bl)
     summary(ccc19x$der_cancer_prog_bl[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca19. Metastatic status (only applicable to solid tumors)
+    #Ca19. Metastatic status (only applicable to solid tumors/lymphoma)
     ccc19x$der_metastatic <- NA
     
     #Yes
@@ -9394,7 +9426,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_metastatic[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_metastatic))] <- 99
     
     ccc19x$der_metastatic <- as.factor(ccc19x$der_metastatic)
-    summary(ccc19x$der_metastatic[which(ccc19x$der_solid == 1)])
+    
+    temp <- summary(ccc19x$der_metastatic[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_metastatic',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca19a. Metastatic disease to lung
     ccc19x$der_met_lung <- NA
@@ -9990,7 +10028,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_pd1_l1[which(ccc19x$what_immunotherapy %in% c('45446','45170','45838-45446'))] <- 1
     
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
-    summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_pd1_l1[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pd1_l1',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca4s: CTLA4 antibodies
     ccc19x$der_ctla4 <- NA
@@ -10115,6 +10159,26 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_cart <- factor(ccc19x$der_cart)
     summary(ccc19x$der_cart[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca4s: IMiDs
+    ccc19x$der_imid <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Thalidomide','Lenalidomide','Pomalidomide'))) ccc19x$der_imid[temp.ref[i]] <- 1 else
+               ccc19x$der_imid[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_imid <- factor(ccc19x$der_imid)
+    
+    temp <- summary(ccc19x$der_imid[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_imid',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca25a: IO within 3 months
     ccc19x$der_IO_3mo <- NA
@@ -10945,11 +11009,11 @@ var.log <- data.frame(name = character(),
                                  ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
                                  ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
                                  ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
+    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                 ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
     ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
                                  ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
                                  ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
@@ -10967,7 +11031,13 @@ var.log <- data.frame(name = character(),
                                  ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
     ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
     ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
-    summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_risk',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #####################
     #X3a. Modified Khorana with order of levels re-arranged
@@ -10997,11 +11067,11 @@ var.log <- data.frame(name = character(),
                                     ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
                                     ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
                                     ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+                                    ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
     ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
                                     ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
                                     ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
@@ -11010,10 +11080,37 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_VTE_risk_v2 <- factor(ccc19x$der_VTE_risk_v2)
     ccc19x$der_VTE_risk_v2 <- relevel(ccc19x$der_VTE_risk_v2, ref = 'Low-risk VTE malignancy')
-    summary(ccc19x$der_VTE_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_VTE_risk_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_risk_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #####################
+    #X3b. Modified Khorana only based on cancer_type (most active tumor)
+    #####################
+    ccc19x$der_VTE_risk_v3 <- NA
+    
+    ccc19x$der_VTE_risk_v3[which(ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S"))] <- 'Other solid malignancy'
+    ccc19x$der_VTE_risk_v3[which(ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H"))] <- 'Other heme malignancy'
+    ccc19x$der_VTE_risk_v3[which(ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871"))] <- 'Low-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v3[which(ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908"))] <- 'Intermediate-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v3[which(ccc19x$cancer_type %in% c("C3850","C4911","C3513"))] <- 'High-risk VTE malignancy'
+    
+    ccc19x$der_VTE_risk_v3 <- factor(ccc19x$der_VTE_risk_v3)
+    ccc19x$der_VTE_risk_v3 <- relevel(ccc19x$der_VTE_risk_v3, ref = 'Low-risk VTE malignancy')
+    
+    temp <- summary(ccc19x$der_VTE_risk_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_risk_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ######################
-    #X3b. Khorana low-risk
+    #X3c. Khorana low-risk
     ######################
     ccc19x$der_VTE_risk_low <- 0
     
@@ -11035,7 +11132,7 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$der_VTE_risk_low[ccc19x$redcap_repeat_instrument == ''])
     
     ###############################
-    #X3c. Khorana intermediate-risk
+    #X3d. Khorana intermediate-risk
     ###############################
     ccc19x$der_VTE_risk_int <- 0
     
@@ -11057,7 +11154,7 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$der_VTE_risk_int[ccc19x$redcap_repeat_instrument == ''])
     
     ###############################
-    #X3d. Khorana high-risk cancers
+    #X3e. Khorana high-risk cancers
     ###############################
     ccc19x$der_VTE_risk_high <- 0
     
