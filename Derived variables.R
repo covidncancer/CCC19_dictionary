@@ -8666,10 +8666,12 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    ##########################################################
-    #Second-order derived variables for timing within 3 months
-    ##########################################################
+    #####################################################################
+    #Second- and third-order derived variables for timing within 3 months
+    #####################################################################
     {
+      #There are four "buckets" of systemic anticancer therapy: cytotoxic chemotherapy,
+      # immunotherapy, targeted therapy, and endocrine therapy.
       #####################################
       #Ca10a. Any cytotoxic within 3 months
       #####################################
@@ -8686,7 +8688,9 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
+      #########################################
       #Ca10b. Any immunotherapy within 3 months
+      #########################################
       ccc19x$der_any_immuno_3mo <- ccc19x$der_anytx_3mo
       ccc19x$der_any_immuno_3mo[which(ccc19x$der_any_immuno_3mo == 1 & 
                                         ((ccc19x$treatment_modality___694 == 0 & ccc19x$treatment_modality___45186 == 0)|
@@ -8700,7 +8704,9 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
+      ############################################
       #Ca10c. Any targeted therapy within 3 months
+      ############################################
       ccc19x$der_any_targeted_3mo <- ccc19x$der_anytx_3mo
       ccc19x$der_any_targeted_3mo[which(ccc19x$der_any_targeted_3mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
       
@@ -8711,12 +8717,29 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
+      #############################################
       #Ca10d. Any endocrine therapy within 3 months
+      #############################################
       ccc19x$der_any_endo_3mo <- ccc19x$der_anytx_3mo
       ccc19x$der_any_endo_3mo[which(ccc19x$der_any_endo_3mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
       
       temp <- summary(ccc19x$der_any_endo_3mo[ccc19x$redcap_repeat_instrument == ''])
       temp.var.log <- data.frame(name = 'der_any_endo_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #####################################
+      #Ca10k. Any systemic therapy within 3 months (third-order variable)
+      #####################################
+      ccc19x$der_any_systemic_3mo <- ccc19x$der_any_cyto_3mo
+      ccc19x$der_any_systemic_3mo[which(ccc19x$der_any_endo_3mo == 1|
+                                          ccc19x$der_any_immuno_3mo == 1|
+                                          ccc19x$der_any_targeted_3mo == 1)] <- 1
+      
+      temp <- summary(ccc19x$der_any_systemic_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_systemic_3mo',
                                  timestamp = Sys.time(),
                                  values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                  stringsAsFactors = F)
@@ -9004,19 +9027,6 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_any_local_3mo[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_any_local_3mo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10k. Any systemic therapy within 3 months
-    ccc19x$der_any_systemic_3mo <- ccc19x$der_any_cyto_3mo
-    ccc19x$der_any_systemic_3mo[which(ccc19x$der_any_endo_3mo == 1|
-                                    ccc19x$der_any_immuno_3mo == 1|
-                                    ccc19x$der_any_targeted_3mo == 1)] <- 1
-    
-    temp <- summary(ccc19x$der_any_systemic_3mo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_systemic_3mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
