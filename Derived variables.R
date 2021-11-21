@@ -5693,6 +5693,42 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Rx13a1. Anticoagulation at baseline with dosing
+    ccc19x$der_ac_baseline_dose <- NA
+    
+    #Prophylaxis
+    ccc19x$der_ac_baseline_dose[which(ccc19x$bl_anticoag_reason == 360271000)] <- 1
+    
+    #Therapeutic dosing
+    ccc19x$der_ac_baseline_dose[which(ccc19x$bl_anticoag_reason == 262202000)] <- 2
+    
+    #Unexposed
+    ccc19x$der_ac_baseline_dose[which(ccc19x$concomitant_meds___b01a == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_ac_baseline_dose[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_ac_baseline_dose))] <- 99
+    
+    #Unknown dosing
+    ccc19x$der_ac_baseline_dose[which(ccc19x$bl_anticoag_reason == 261665006)] <- 99
+    
+    #Missing medication (will overwrite)
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_ac_baseline_dose[i] <- NA
+    
+    #Missing dosing (will overwrite)
+    ccc19x$der_ac_baseline_dose[which(ccc19x$concomitant_meds___b01a == 1 &
+                                        is.na(ccc19x$bl_anticoag_reason))] <- NA
+    
+    ccc19x$der_ac_baseline_dose <- factor(ccc19x$der_ac_baseline_dose)
+    
+    temp <- summary(ccc19x$der_ac_baseline_dose[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac_baseline_dose',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Rx13b. APA at baseline (aspirin and other antiplatelet agents)
     ccc19x$der_apa_baseline <- NA
     ccc19x$der_apa_baseline[which(ccc19x$concomitant_meds___n02ba == 1|
@@ -5720,90 +5756,128 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Rx23. Thromboprophylaxis, including consideration of baseline anticoagulation
-    #Does not yet account for discrepancies in baseline and follow-up forms
-    ccc19x$der_thromboprophy <- NA
+    #Rx13c. Aspirin at baseline with dosing
+    ccc19x$der_asa_baseline_dose <- NA
     
-    #Baseline prophylaxis
-    ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 360271000)] <- 'Baseline prophylactic anticoagulation'
+    #Low dose (less than 200 mg/day)
+    ccc19x$der_asa_baseline_dose[which(ccc19x$aspirin_dose == 262459003)] <- 1
     
-    #Baseline therapeutic
-    ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 262202000)] <- 'Baseline therapeutic anticoagulation'
+    #Full dose
+    ccc19x$der_asa_baseline_dose[which(ccc19x$aspirin_dose == 261829003)] <- 2
     
-    #COVID-19 prophylaxis
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
-                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
-                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 prophylactic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
-                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
-                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 prophylactic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
-                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
-                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 prophylactic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
-                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
-                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 prophylactic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
-                                      ccc19x$c19_anticoag_reason_fu___1 == 1) &
-                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 prophylactic anticoagulation'
+    #Unexposed
+    ccc19x$der_asa_baseline_dose[which(ccc19x$concomitant_meds___n02ba == 0 &
+                                         is.na(ccc19x$der_asa_baseline_dose))] <- 0
     
-    #COVID-19 treatment
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
-                                      ccc19x$c19_anticoag_reason___2c == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
-                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 therapeutic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
-                                      ccc19x$c19_anticoag_reason___2c == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
-                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 therapeutic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
-                                      ccc19x$c19_anticoag_reason___2c == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
-                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 therapeutic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
-                                      ccc19x$c19_anticoag_reason___2c == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
-                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 therapeutic anticoagulation'
-    ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
-                                      ccc19x$c19_anticoag_reason___2c == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2a == 1|
-                                      ccc19x$c19_anticoag_reason_fu___2c == 1) &
-                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 therapeutic anticoagulation'
+    #Unknown baseline
+    ccc19x$der_asa_baseline_dose[which(ccc19x$concomitant_meds___unk == 1 & 
+                                         is.na(ccc19x$der_asa_baseline_dose))] <- 99
     
-    #None for COVID-19
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
-                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--no COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
-                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--no COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
-                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--no COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
-                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--no COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
-                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--no COVID-19 anticoagulation'
+    #Unknown dosing
+    ccc19x$der_asa_baseline_dose[which(ccc19x$aspirin_dose == 261665006)] <- 99
     
-    #Unknown for COVID-19
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
-                                     ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--unknown COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
-                                     ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--unknown COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
-                                     ccc19x$der_ac_baseline == 0)] <- 'No baseline--unknown COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
-                                     ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--unknown COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
-                                     is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--unknown COVID-19 anticoagulation'
+    #Missing medication (will overwrite)
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_asa_baseline_dose[i] <- NA
     
-    #Missing for COVID-19 but not for baseline
-    ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--missing COVID-19 anticoagulation'
-    ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--missing COVID-19 anticoagulation'
+    #Missing dosing (will overwrite)
+    ccc19x$der_asa_baseline_dose[which(ccc19x$concomitant_meds___n02ba == 1 &
+                                         is.na(ccc19x$aspirin_dose))] <- NA
     
-    ccc19x$der_thromboprophy <- factor(ccc19x$der_thromboprophy)
-    summary(ccc19x$der_thromboprophy[ccc19x$redcap_repeat_instrument == ''])
+    ccc19x$der_asa_baseline_dose <- factor(ccc19x$der_asa_baseline_dose)
+    
+    temp <- summary(ccc19x$der_asa_baseline_dose[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_asa_baseline_dose',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Rx13d. APA at baseline (other antiplatelet agents, NOT including aspirin)
+    ccc19x$der_apa_baseline_v2 <- NA
+    
+    #Exposed
+    ccc19x$der_apa_baseline_v2[which(ccc19x$concomitant_meds___b01ac == 1)] <- 1
+    
+    #Unexposed (can be overwritten later)
+    ccc19x$der_apa_baseline_v2[which(ccc19x$concomitant_meds___b01ac == 0)] <- 0
+    
+    #Unknown baseline
+    ccc19x$der_apa_baseline_v2[which(ccc19x$concomitant_meds___unk == 1 & is.na(ccc19x$der_apa_baseline_v2))] <- 99
+    
+    #Missing (will overwrite)
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_apa_baseline_v2[i] <- NA
+    
+    ccc19x$der_apa_baseline_v2 <- factor(ccc19x$der_apa_baseline_v2)
+    
+    temp <- summary(ccc19x$der_apa_baseline_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_apa_baseline_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ###################################
+    #Rx23. Anticoagulation for COVID-19
+    ###################################
+    ccc19x$der_ac_c19_dose <- NA
+    
+    #Prophylactic dosing
+    ccc19x$der_ac_c19_dose[which(ccc19x$c19_anticoag_reason___1 == 1|
+                                   ccc19x$c19_anticoag_reason_fu___1 == 1)] <- 1
+    
+    #Therapeutic dosing (will overwrite)
+    ccc19x$der_ac_c19_dose[which(ccc19x$c19_anticoag_reason___2a == 1|
+                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+                                   ccc19x$c19_anticoag_reason___2b == 1|
+                                   ccc19x$c19_anticoag_reason_fu___2b == 1|
+                                   ccc19x$c19_anticoag_reason___2c == 1|
+                                   ccc19x$c19_anticoag_reason_fu___2c == 1|
+                                   ccc19x$c19_anticoag_reason___3 == 1|
+                                   ccc19x$c19_anticoag_reason_fu___3 == 1)] <- 2
+    
+    #Other dosing
+    ccc19x$der_ac_c19_dose[which((ccc19x$c19_anticoag_reason___oth == 1|
+                                    ccc19x$c19_anticoag_reason_fu___oth == 1) &
+                                   is.na(ccc19x$der_ac_c19_dose))] <- 88
+    
+    #Unexposed (declared, only)
+    ccc19x$der_ac_c19_dose[which((ccc19x$c19_anticoag_reason___none == 1|
+                                    ccc19x$covid_19_treatment___none == 1) &
+                                   is.na(ccc19x$der_ac_c19_dose))] <- 0
+    
+    #Unknown
+    ccc19x$der_ac_c19_dose[which((ccc19x$c19_anticoag_reason___unk == 1|
+                                    ccc19x$c19_anticoag_reason_fu___unk == 1|
+                                    ccc19x$covid_19_treatment___unk == 1|
+                                    ccc19x$covid_19_treatment_fu___unk)
+                                 & is.na(ccc19x$der_ac_c19_dose))] <- 99
+    
+    #Merge baseline and followup if discrepancy (ignore other/missing/unknown)
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_ac_c19_dose[temp.ref]
+      temp <- unique(temp[which(temp %in% 0:2)])
+      if(length(temp) > 1)
+      {
+        if(any(temp == 2)) ccc19x$der_ac_c19_dose[temp.ref] <- 2
+        if(!any(temp == 2) & any(temp == 1)) ccc19x$der_ac_c19_dose[temp.ref] <- 1
+        if(!any(temp == 2) & !any(temp == 1) & any(temp == 0)) ccc19x$der_ac_c19_dose[temp.ref] <- 0
+      }
+    }
+    
+    ccc19x$der_ac_c19_dose <- factor(ccc19x$der_ac_c19_dose)
+    
+    temp <- summary(ccc19x$der_ac_c19_dose[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac_c19_dose',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx17. ACEi at baseline
     ccc19x$der_acei_bl <- NA
@@ -9123,12 +9197,34 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Ca10c2. Any targeted therapy within 3-12 months
+    ccc19x$der_any_targeted_3_12mo <- ccc19x$der_any_systemic_v3
+    ccc19x$der_any_targeted_3_12mo[which(ccc19x$der_any_targeted_3_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
+    
+    temp <- summary(ccc19x$der_any_targeted_3_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_targeted_3_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Ca10d1. Any endocrine therapy within 12 months
     ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
     
     temp <- summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_any_endo_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca10d2. Any endocrine therapy within 3-12 months
+    ccc19x$der_any_endo_3_12mo <- ccc19x$der_any_systemic_v3
+    ccc19x$der_any_endo_3_12mo[which(ccc19x$der_any_endo_3_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
+    
+    temp <- summary(ccc19x$der_any_endo_3_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_any_endo_3_12mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -10046,6 +10142,54 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Ca4k1: PD-1 or PD-L1 inhibitor within 3 months
+    ccc19x$der_pd1_l1_3mo <- NA
+    
+    ccc19x$der_pd1_l1_3mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_3mo == 1)] <- 1
+    ccc19x$der_pd1_l1_3mo[which(ccc19x$der_pd1_l1 == 0|ccc19x$der_any_systemic_3mo == 0)] <- 0
+    ccc19x$der_pd1_l1_3mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_3mo == 99)] <- 99
+    
+    ccc19x$der_pd1_l1_3mo <- factor(ccc19x$der_pd1_l1_3mo)
+    
+    temp <- summary(ccc19x$der_pd1_l1_3mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pd1_l1_3mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4k2: PD-1 or PD-L1 inhibitor within 12 months
+    ccc19x$der_pd1_l1_12mo <- NA
+    
+    ccc19x$der_pd1_l1_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v2 == 1)] <- 1
+    ccc19x$der_pd1_l1_12mo[which(ccc19x$der_pd1_l1 == 0|ccc19x$der_any_systemic_v2 == 0)] <- 0
+    ccc19x$der_pd1_l1_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v2 == 99)] <- 99
+    
+    ccc19x$der_pd1_l1_12mo <- factor(ccc19x$der_pd1_l1_12mo)
+    
+    temp <- summary(ccc19x$der_pd1_l1_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pd1_l1_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4k3: PD-1 or PD-L1 inhibitor within 3-12 months
+    ccc19x$der_pd1_l1_3_12mo <- NA
+    
+    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v3 == 1)] <- 1
+    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 0|ccc19x$der_any_systemic_v3 == 0)] <- 0
+    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v3 == 99)] <- 99
+    
+    ccc19x$der_pd1_l1_3_12mo <- factor(ccc19x$der_pd1_l1_3_12mo)
+    
+    temp <- summary(ccc19x$der_pd1_l1_3_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pd1_l1_3_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Ca4s: CTLA4 antibodies
     ccc19x$der_ctla4 <- NA
     
@@ -10185,6 +10329,54 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_imid[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_imid',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4s1: IMiDS within 3 months
+    ccc19x$der_imid_3mo <- NA
+    
+    ccc19x$der_imid_3mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_3mo == 1)] <- 1
+    ccc19x$der_imid_3mo[which(ccc19x$der_imid == 0|ccc19x$der_any_systemic_3mo == 0)] <- 0
+    ccc19x$der_imid_3mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_3mo == 99)] <- 99
+    
+    ccc19x$der_imid_3mo <- factor(ccc19x$der_imid_3mo)
+    
+    temp <- summary(ccc19x$der_imid_3mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_imid_3mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4s2: IMiDS within 12 months
+    ccc19x$der_imid_12mo <- NA
+    
+    ccc19x$der_imid_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v2 == 1)] <- 1
+    ccc19x$der_imid_12mo[which(ccc19x$der_imid == 0|ccc19x$der_any_systemic_v2 == 0)] <- 0
+    ccc19x$der_imid_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v2 == 99)] <- 99
+    
+    ccc19x$der_imid_12mo <- factor(ccc19x$der_imid_12mo)
+    
+    temp <- summary(ccc19x$der_imid_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_imid_12mo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca4s3: IMiDS within 3-12 months
+    ccc19x$der_imid_3_12mo <- NA
+    
+    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v3 == 1)] <- 1
+    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 0|ccc19x$der_any_systemic_v3 == 0)] <- 0
+    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v3 == 99)] <- 99
+    
+    ccc19x$der_imid_3_12mo <- factor(ccc19x$der_imid_3_12mo)
+    
+    temp <- summary(ccc19x$der_imid_3_12mo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_imid_3_12mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -12165,6 +12357,91 @@ var.log <- data.frame(name = character(),
      #                              stringsAsFactors = F)
      #   var.log <- rbind(var.log, temp.var.log)
      # }
+     
+     # #zDep17. Thromboprophylaxis, including consideration of baseline anticoagulation
+     # #Does not yet account for discrepancies in baseline and follow-up forms
+     # ccc19x$der_thromboprophy <- NA
+     # 
+     # #Baseline prophylaxis
+     # ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 360271000)] <- 'Baseline prophylactic anticoagulation'
+     # 
+     # #Baseline therapeutic
+     # ccc19x$der_thromboprophy[which(ccc19x$bl_anticoag_reason == 262202000)] <- 'Baseline therapeutic anticoagulation'
+     # 
+     # #COVID-19 prophylaxis
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___1 == 1) &
+     #                                  ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 prophylactic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___1 == 1) &
+     #                                  ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 prophylactic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___1 == 1) &
+     #                                  ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 prophylactic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___1 == 1) &
+     #                                  ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 prophylactic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___1 == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___1 == 1) &
+     #                                  is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 prophylactic anticoagulation'
+     # 
+     # #COVID-19 treatment
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason___2c == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2c == 1) &
+     #                                  ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--COVID-19 therapeutic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason___2c == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2c == 1) &
+     #                                  ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--COVID-19 therapeutic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason___2c == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2c == 1) &
+     #                                  ccc19x$der_ac_baseline == 0)] <- 'No baseline--COVID-19 therapeutic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason___2c == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2c == 1) &
+     #                                  ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--COVID-19 therapeutic anticoagulation'
+     # ccc19x$der_thromboprophy[which((ccc19x$c19_anticoag_reason___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason___2c == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2a == 1|
+     #                                   ccc19x$c19_anticoag_reason_fu___2c == 1) &
+     #                                  is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--COVID-19 therapeutic anticoagulation'
+     # 
+     # #None for COVID-19
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+     #                                  ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--no COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+     #                                  ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--no COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+     #                                  ccc19x$der_ac_baseline == 0)] <- 'No baseline--no COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+     #                                  ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--no COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___none == 1 &
+     #                                  is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--no COVID-19 anticoagulation'
+     # 
+     # #Unknown for COVID-19
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+     #                                  ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--unknown COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+     #                                  ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--unknown COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+     #                                  ccc19x$der_ac_baseline == 0)] <- 'No baseline--unknown COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+     #                                  ccc19x$der_ac_baseline == 99)] <- 'Unknown baseline--unknown COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$c19_anticoag_reason___unk == 1 &
+     #                                  is.na(ccc19x$der_ac_baseline))] <- 'Missing baseline--unknown COVID-19 anticoagulation'
+     # 
+     # #Missing for COVID-19 but not for baseline
+     # ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline prophylactic anticoagulation')] <- 'Baseline prophy--missing COVID-19 anticoagulation'
+     # ccc19x$der_thromboprophy[which(ccc19x$der_thromboprophy == 'Baseline therapeutic anticoagulation')] <- 'Baseline therapeutic--missing COVID-19 anticoagulation'
+     # 
+     # ccc19x$der_thromboprophy <- factor(ccc19x$der_thromboprophy)
+     # summary(ccc19x$der_thromboprophy[ccc19x$redcap_repeat_instrument == ''])
      
    }
 }
