@@ -9406,7 +9406,13 @@ var.log <- data.frame(name = character(),
     
     #Factor
     ccc19x$der_ecogcat <- as.factor(ccc19x$der_ecogcat)
-    summary(ccc19x$der_ecogcat)
+    
+    temp <- summary(ccc19x$der_ecogcat[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ecogcat',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca3b. ECOG 0, 1, 2+
     ccc19x$der_ecogcat2 <- ccc19x$ecog_status
@@ -11431,9 +11437,27 @@ var.log <- data.frame(name = character(),
     ccc19x$der_30d_complete <- factor(ccc19x$der_30d_complete)
     ccc19x$der_90d_complete <- factor(ccc19x$der_90d_complete)
     ccc19x$der_180d_complete <- factor(ccc19x$der_180d_complete)
-    summary(ccc19x$der_30d_complete[ccc19x$redcap_repeat_instrument == ''])
-    summary(ccc19x$der_90d_complete[ccc19x$redcap_repeat_instrument == ''])
-    summary(ccc19x$der_180d_complete[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_30d_complete[which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_Breast == 1)])
+    temp.var.log <- data.frame(name = 'der_30d_complete',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    temp <- summary(ccc19x$der_90d_complete[which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_Breast == 1)])
+    temp.var.log <- data.frame(name = 'der_90d_complete',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    temp <- summary(ccc19x$der_180d_complete[which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_Breast == 1)])
+    temp.var.log <- data.frame(name = 'der_180d_complete',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ##############################################
     #X4. Quality score and X5. Enumerated problems
