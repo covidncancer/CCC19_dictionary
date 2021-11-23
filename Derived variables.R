@@ -10684,7 +10684,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_plt[which(ccc19x$labs == 3|ccc19x$plt_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_plt <- factor(ccc19x$der_plt)
     ccc19x$der_plt <- relevel(ccc19x$der_plt, ref = 'Normal')
-    summary(ccc19x$der_plt[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_plt[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_plt',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L15. alc
     ccc19x$der_alc <- NA
