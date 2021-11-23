@@ -9197,34 +9197,12 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca10c2. Any targeted therapy within 3-12 months
-    ccc19x$der_any_targeted_3_12mo <- ccc19x$der_any_systemic_v3
-    ccc19x$der_any_targeted_3_12mo[which(ccc19x$der_any_targeted_3_12mo == 1 & ccc19x$treatment_modality___58229 == 0)] <- 0
-    
-    temp <- summary(ccc19x$der_any_targeted_3_12mo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_targeted_3_12mo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
     #Ca10d1. Any endocrine therapy within 12 months
     ccc19x$der_any_endo_12mo <- ccc19x$der_any_systemic_v2
     ccc19x$der_any_endo_12mo[which(ccc19x$der_any_endo_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
     
     temp <- summary(ccc19x$der_any_endo_12mo[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_any_endo_12mo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca10d2. Any endocrine therapy within 3-12 months
-    ccc19x$der_any_endo_3_12mo <- ccc19x$der_any_systemic_v3
-    ccc19x$der_any_endo_3_12mo[which(ccc19x$der_any_endo_3_12mo == 1 & ccc19x$treatment_modality___691 == 0)] <- 0
-    
-    temp <- summary(ccc19x$der_any_endo_3_12mo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_any_endo_3_12mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -10180,22 +10158,6 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4k3: PD-1 or PD-L1 inhibitor within 3-12 months
-    ccc19x$der_pd1_l1_3_12mo <- NA
-    
-    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v3 == 1)] <- 1
-    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 0|ccc19x$der_any_systemic_v3 == 0)] <- 0
-    ccc19x$der_pd1_l1_3_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v3 == 99)] <- 99
-    
-    ccc19x$der_pd1_l1_3_12mo <- factor(ccc19x$der_pd1_l1_3_12mo)
-    
-    temp <- summary(ccc19x$der_pd1_l1_3_12mo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_pd1_l1_3_12mo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
     #Ca4s: CTLA4 antibodies
     ccc19x$der_ctla4 <- NA
     
@@ -10367,22 +10329,6 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_imid_12mo[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_imid_12mo',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Ca4s3: IMiDS within 3-12 months
-    ccc19x$der_imid_3_12mo <- NA
-    
-    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v3 == 1)] <- 1
-    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 0|ccc19x$der_any_systemic_v3 == 0)] <- 0
-    ccc19x$der_imid_3_12mo[which(ccc19x$der_imid == 1 & ccc19x$der_any_systemic_v3 == 99)] <- 99
-    
-    ccc19x$der_imid_3_12mo <- factor(ccc19x$der_imid_3_12mo)
-    
-    temp <- summary(ccc19x$der_imid_3_12mo[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_imid_3_12mo',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
