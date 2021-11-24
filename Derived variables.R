@@ -11472,12 +11472,16 @@ var.log <- data.frame(name = character(),
       u1 <- dict.unk$name[dict.unk$Field.Type == 'radio']
       temp <- dict.unk$name[dict.unk$Field.Type == 'checkbox']
       u2 <- colnames(ccc19x)[colnames(ccc19x) %in% c(paste(temp,'___unk',sep = ''),
-                                                     paste(temp,'___99', sep = ''))]
+                                                     paste(temp,'___99', sep = ''),
+                                                     paste(temp,'___la4489_6', sep = ''),
+                                                     paste(temp,'___1506_98', sep = ''),
+                                                     paste(temp,'___1502_99', sep = ''),
+                                                     paste(temp,'___1504_99', sep = ''))]
       
       ccc19x$unknown <- 0
       for(i in which(ccc19x$redcap_repeat_instrument == ''))
       {
-        ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK','99')))
+        ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK','99','261665006')))
         ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
       }
       
