@@ -8059,7 +8059,13 @@ var.log <- data.frame(name = character(),
                               ccc19x$cancer_type_4 %in% c("C4872")|
                               ccc19x$cancer_type_5 %in% c("C4872"))] <- 1
     ccc19x$der_Breast <- factor(ccc19x$der_Breast)
-    summary(ccc19x$der_Breast[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Breast[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Breast',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #GU
     ccc19x$der_GU <- 0
@@ -8085,6 +8091,13 @@ var.log <- data.frame(name = character(),
                                 ccc19x$cancer_type_5 %in% c("C4863"))] <- 1
     ccc19x$der_Prostate <- factor(ccc19x$der_Prostate)
     summary(ccc19x$der_Prostate[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Prostate[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Prostate',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Bladder
     ccc19x$der_Bladder <- 0
@@ -11152,104 +11165,7 @@ var.log <- data.frame(name = character(),
     var.log <- rbind(var.log, temp.var.log)
     
     #####################
-    #X3. Modified Khorana
-    #####################
-    ccc19x$der_VTE_risk <- NA
-    
-    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
-    if(is.null(ccc19x$cancer_type_3))
-    {
-      ccc19x$cancer_type_3 <- ''
-      ccc19x$cancer_type_4 <- ''
-      ccc19x$cancer_type_5 <- ''
-    }
-    
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
-                                 ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
-                                 ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
-                                 ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
-                                 ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                 ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                 ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                 ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                 ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                 ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                 ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                 ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                 ccc19x$cancer_type_4 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                 ccc19x$cancer_type_5 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
-    ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                 ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                 ccc19x$cancer_type_3 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                 ccc19x$cancer_type_4 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                 ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
-    ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
-    ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
-    
-    temp <- summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_VTE_risk',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #####################
-    #X3a. Modified Khorana with order of levels re-arranged
-    #####################
-    ccc19x$der_VTE_risk_v2 <- NA
-    
-    #Create dummy variables if the data set does not have cancer_type_3, 4, 5
-    if(is.null(ccc19x$cancer_type_3))
-    {
-      ccc19x$cancer_type_3 <- ''
-      ccc19x$cancer_type_4 <- ''
-      ccc19x$cancer_type_5 <- ''
-    }
-    
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                    ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                    ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                    ccc19x$cancer_type_4 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
-                                    ccc19x$cancer_type_5 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                    ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                    ccc19x$cancer_type_3 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                    ccc19x$cancer_type_4 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
-                                    ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                    ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                    ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                    ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
-                                    ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
-                                    ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
-    ccc19x$der_VTE_risk_v2[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
-                                    ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
-                                    ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
-                                    ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
-                                    ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
-    
-    ccc19x$der_VTE_risk_v2 <- factor(ccc19x$der_VTE_risk_v2)
-    ccc19x$der_VTE_risk_v2 <- relevel(ccc19x$der_VTE_risk_v2, ref = 'Low-risk VTE malignancy')
-    
-    temp <- summary(ccc19x$der_VTE_risk_v2[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_VTE_risk_v2',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #####################
-    #X3b. Modified Khorana only based on cancer_type (most active tumor)
+    #X3. Modified Khorana only based on cancer_type (most active tumor)
     #####################
     ccc19x$der_VTE_risk_v3 <- NA
     
@@ -11264,6 +11180,20 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_VTE_risk_v3[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_VTE_risk_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ############################################
+    #X3a. Khorana risk with collapsed categories
+    ############################################
+    ccc19x$der_VTE_risk_v3a <- ccc19x$der_VTE_risk_v3
+    ccc19x$der_VTE_risk_v3a[which(ccc19x$der_VTE_risk_v3a %in% c('Other heme malignancy','Other solid malignancy'))] <- 'Low-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v3a <- droplevels(ccc19x$der_VTE_risk_v3a)
+    
+    temp <- summary(ccc19x$der_VTE_risk_v3a[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_risk_v3a',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -11457,7 +11387,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[which(ccc19x$missing > threshold)] <- paste(ccc19x$meta_problems[which(ccc19x$missing > threshold)],
                                                                        '; High levels of baseline missingness', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Major criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Major criteria (5 points)',
                                                    'Acceptable level of baseline missingness',
                                                    paste(format(length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11489,7 +11419,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[which(ccc19x$unknown >= 20)] <- paste(ccc19x$meta_problems[which(ccc19x$unknown >= 20)],
                                                                  '; Large number of unknowns', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Major criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Major criteria (5 points)',
                                                    'Acceptable level of unknowns',
                                                    paste(format(length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11509,7 +11439,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Cancer status missing', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Cancer status not missing',
                                                    paste(format(length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11525,7 +11455,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ECOG PS missing', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'ECOG performance status not missing',
                                                    paste(format(length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11541,7 +11471,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Death status missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Death status not missing or unknown',
                                                    paste(format(length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11557,7 +11487,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Baseline COVID-19 severity missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Baseline COVID-19 severity not missing or unknown',
                                                    paste(format(length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11575,6 +11505,15 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; 30-day f/u is at least 60 days overdue', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
+                                                   '30-day f/u is at least 60 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       #90-day f/u is 60+ days overdue (if applicable)
       temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
       temp <- as.numeric(temp.diff)
@@ -11584,6 +11523,33 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; 90-day f/u is at least 60 days overdue', sep = '')
       
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (unscored)',
+                                                   '90-day f/u is at least 60 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
+      
+      #180-day f/u is 60+ days overdue (if applicable)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 240 & ccc19x$der_days_fu < 180 & ccc19x$der_180d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 180-day f/u is at least 60 days overdue', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (unscored)',
+                                                   '180-day f/u is at least 60 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
+      
       ###############
       #Minor problems
       ###############
@@ -11591,26 +11557,40 @@ var.log <- data.frame(name = character(),
       #ADT (prostate)
       temp.ref <- which((ccc19x$adt == 99|is.na(ccc19x$adt)) &
                           !ccc19x$hx_treatment %in% c(3,88) &
-                          (ccc19x$cancer_type == 'C4863'|
-                             ccc19x$cancer_type_2 == 'C4863'|
-                             ccc19x$cancer_type_3 == 'C4863'|
-                             ccc19x$cancer_type_4 == 'C4863'|
-                             ccc19x$cancer_type_5 == 'C4863'))
+                          ccc19x$der_Prostate == 1)
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ADT missing or unknown', sep = '')
       
+      np <- length(which(ccc19x$der_Prostate == 1))
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (prostate cancer only)',
+                                                   'Recent ADT exposure missing or unknown',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(np, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/np, digits = 2),
+                                                         '%)', sep = ''))
+      
       #Biomarkers (breast)
       temp.ref <- which(((ccc19x$breast_biomarkers___er == 0 & ccc19x$breast_biomarkers___her2 == 0 &
                             ccc19x$breast_biomarkers___tnbc == 0) | (ccc19x$breast_biomarkers___99 == 1)) &
-                          (ccc19x$cancer_type == 'C4872'|
-                             ccc19x$cancer_type_2 == 'C4872'|
-                             ccc19x$cancer_type_3 == 'C4872'|
-                             ccc19x$cancer_type_4 == 'C4872'|
-                             ccc19x$cancer_type_5 == 'C4872'))
+                          ccc19x$der_Breast == 1)
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Breast cancer biomarkers missing or unknown', sep = '')
+      
+      nb <- length(which(ccc19x$der_Breast == 1))
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (breast cancer only)',
+                                                   'Breast cancer biomarkers missing or unknown',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(nb, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/nb, digits = 2),
+                                                         '%)', sep = ''))
       
       #BCG (bladder) - DEPRECATED
       # temp.ref <- which((ccc19x$bcg_intraves_ever == 99|is.na(ccc19x$bcg_intraves_ever)) &
@@ -11632,7 +11612,7 @@ var.log <- data.frame(name = character(),
       
       n1 <- length(which(ccc19x$cancer_status %in% 1:99 & ccc19x$redcap_repeat_instrument == ''))
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Baseline cancer status non-missing with a known value',
                                                    paste(format(length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11650,7 +11630,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Metastatic status missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Metastatic status with a known value',
                                                    paste(format(n - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11668,7 +11648,7 @@ var.log <- data.frame(name = character(),
       
       n1 <- length(which(ccc19x$ecog_status %in% 0:99 & ccc19x$redcap_repeat_instrument == ''))
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Baseline ECOG performance status non-missing with a known value, including not documented in the 3 months preceding COVID-19 diagnosis',
                                                    paste(format(length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
                                                          ' of ',
@@ -11684,7 +11664,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ICU status missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'ICU status with a known value',
                                                    paste(format(n - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11700,7 +11680,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Hospital status missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Hospital status with a known value',
                                                    paste(format(n - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11716,7 +11696,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; Intubation status missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Intubation status with a known value',
                                                    paste(format(n - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11732,7 +11712,7 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; O2 requirement missing or unknown', sep = '')
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Supplemental oxygen status with a known value',
                                                    paste(format(n - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11751,7 +11731,7 @@ var.log <- data.frame(name = character(),
       
       n1 <- length(which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == ''))
       
-      quality_report[nrow(quality_report)+1,] <- c('Minor criteria',
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Days to death non-missing with a known value',
                                                    paste(format(n1 - length(temp.ref), big.mark = ','),
                                                          ' of ',
@@ -11767,7 +11747,16 @@ var.log <- data.frame(name = character(),
       temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                              '; 30-day f/u is at least 30 days overdue', sep = '')
+                                              '; 30-day f/u is 30-59 days overdue', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
+                                                   '30-day f/u is 30-59 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #90-day f/u is 30+ days overdue (if applicable)
       temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
@@ -11776,7 +11765,34 @@ var.log <- data.frame(name = character(),
       temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
-                                              '; 90-day f/u is at least 30 days overdue', sep = '')
+                                              '; 90-day f/u is 30-59 days overdue', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (unscored)',
+                                                   '90-day f/u is 30-59 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
+      
+      #180-day f/u is 30+ days overdue (if applicable)
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp <- as.numeric(temp.diff)
+      
+      temp.ref <- which(temp >= 210 & temp < 240 & ccc19x$der_days_fu < 180 & ccc19x$der_180d_complete == 'No')
+      ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 0 #No penalty, yet
+      ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
+                                              '; 180-day f/u is 30-59 days overdue', sep = '')
+      
+      quality_report[nrow(quality_report)+1,] <- c('Minor criteria (unscored)',
+                                                   '180-day f/u is 30-59 days overdue',
+                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                         ' of ',
+                                                         format(n, big.mark = ','),
+                                                         ' (', 
+                                                         round(100*length(temp.ref)/n, digits = 2),
+                                                         '%)', sep = ''))
       
       #Remove leading semicolon
       ccc19x$meta_problems <- gsub(ccc19x$meta_problems, pattern = '^; ', replacement = '')
@@ -12422,6 +12438,56 @@ var.log <- data.frame(name = character(),
      # 
      # ccc19x$der_thromboprophy <- factor(ccc19x$der_thromboprophy)
      # summary(ccc19x$der_thromboprophy[ccc19x$redcap_repeat_instrument == ''])
+     
+     # ######################
+     # #zDep18. Modified Khorana
+     # ######################
+     # {
+     #   ccc19x$der_VTE_risk <- NA
+     #   
+     #   #Create dummy variables if the data set does not have cancer_type_3, 4, 5
+     #   if(is.null(ccc19x$cancer_type_3))
+     #   {
+     #     ccc19x$cancer_type_3 <- ''
+     #     ccc19x$cancer_type_4 <- ''
+     #     ccc19x$cancer_type_5 <- ''
+     #   }
+     #   
+     #   ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3850","C4911","C3513")| 
+     #                                ccc19x$cancer_type_2 %in% c("C3850","C4911", "C3513")| 
+     #                                ccc19x$cancer_type_3 %in% c("C3850","C4911", "C3513")| 
+     #                                ccc19x$cancer_type_4 %in% c("C3850","C4911", "C3513")| 
+     #                                ccc19x$cancer_type_5 %in% c("C3850","C4911", "C3513")))] <- 'High-risk VTE malignancy'
+     #   ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+     #                                ccc19x$cancer_type_2 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+     #                                ccc19x$cancer_type_3 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+     #                                ccc19x$cancer_type_4 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")| 
+     #                                ccc19x$cancer_type_5 %in% c("C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C27908")))] <- 'Intermediate-risk VTE malignancy'
+     #   ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+     #                                ccc19x$cancer_type_2 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+     #                                ccc19x$cancer_type_3 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+     #                                ccc19x$cancer_type_4 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")| 
+     #                                ccc19x$cancer_type_5 %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871")))] <- 'Low-risk VTE malignancy'
+     #   ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+     #                                ccc19x$cancer_type_2 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+     #                                ccc19x$cancer_type_3 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+     #                                ccc19x$cancer_type_4 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")|
+     #                                ccc19x$cancer_type_5 %in% c("C3234","C3411","C3099","C3844","C4436","C3267", "C7558", "C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S")))] <- 'Other solid malignancy'
+     #   ccc19x$der_VTE_risk[which((ccc19x$cancer_type %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+     #                                ccc19x$cancer_type_2 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+     #                                ccc19x$cancer_type_3 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+     #                                ccc19x$cancer_type_4 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")| 
+     #                                ccc19x$cancer_type_5 %in% c("C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H")))] <- 'Other heme malignancy'
+     #   ccc19x$der_VTE_risk <- factor(ccc19x$der_VTE_risk)
+     #   ccc19x$der_VTE_risk <- relevel(ccc19x$der_VTE_risk, ref = 'Low-risk VTE malignancy')
+     #   
+     #   temp <- summary(ccc19x$der_VTE_risk[ccc19x$redcap_repeat_instrument == ''])
+     #   temp.var.log <- data.frame(name = 'der_VTE_risk',
+     #                              timestamp = Sys.time(),
+     #                              values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                              stringsAsFactors = F)
+     #   var.log <- rbind(var.log, temp.var.log)
+     # }
      
    }
 }
