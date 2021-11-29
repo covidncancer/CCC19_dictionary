@@ -968,7 +968,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_PE_comp_within_3mo <- as.factor(ccc19x$der_PE_comp_within_3mo)
-      summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_PE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_PE_comp_within_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp02. SVT complications
       ccc19x$der_SVT_comp <- NA
@@ -1093,7 +1099,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_DVT_comp_within_3mo <- as.factor(ccc19x$der_DVT_comp_within_3mo)
-      summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_DVT_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_DVT_comp_within_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp03b. DVT complications within 30 days
       ccc19x$der_DVT_comp_within_30d <- NA
@@ -1292,7 +1304,13 @@ var.log <- data.frame(name = character(),
                                               ccc19x$der_thrombosis_NOS_comp_within_3mo == 99) &
                                              is.na(ccc19x$der_VTE_comp_within_3mo))] <- 99
       ccc19x$der_VTE_comp_within_3mo <- as.factor(ccc19x$der_VTE_comp_within_3mo)
-      summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_VTE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_VTE_comp_within_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp06. ATE complications (MI, CVA)
       ccc19x$der_ATE_comp <- NA
@@ -1383,7 +1401,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_ATE_comp_within_3mo <- as.factor(ccc19x$der_ATE_comp_within_3mo)
-      summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_ATE_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_ATE_comp_within_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp07. Stroke complication
       ccc19x$der_stroke_comp <- NA
@@ -1474,7 +1498,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_stroke_comp_within_3mo <- as.factor(ccc19x$der_stroke_comp_within_3mo)
-      summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_stroke_comp_within_3mo[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_stroke_comp_within_3mo',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
     
     #Comp08. Arrhythmia complications (partial derived)
@@ -9468,7 +9498,13 @@ var.log <- data.frame(name = character(),
     
     #Factor
     ccc19x$der_cancer_status_v3 <- as.factor(ccc19x$der_cancer_status_v3)
-    summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_cancer_status_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_status_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca07d. Cancer status with remission conditioned on cancer timing
     ccc19x$der_cancer_status_v4 <- NA
