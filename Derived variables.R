@@ -926,7 +926,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_PE_comp <- as.factor(ccc19x$der_PE_comp)
-      summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_PE_comp[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_PE_comp',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp01a. PE complications within 90 days (3 months)
       ccc19x$der_PE_comp_within_3mo <- NA
@@ -1017,7 +1023,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_SVT_comp <- as.factor(ccc19x$der_SVT_comp)
-      summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_SVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_SVT_comp',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp03. DVT complications
       ccc19x$der_DVT_comp <- NA
@@ -1057,7 +1069,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_DVT_comp <- as.factor(ccc19x$der_DVT_comp)
-      summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_DVT_comp[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_DVT_comp',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp03a. DVT complications within 90 days (3 months)
       ccc19x$der_DVT_comp_within_3mo <- NA
@@ -1193,7 +1211,13 @@ var.log <- data.frame(name = character(),
       }
       
       ccc19x$der_thrombosis_NOS_comp <- as.factor(ccc19x$der_thrombosis_NOS_comp)
-      summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp <- summary(ccc19x$der_thrombosis_NOS_comp[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_thrombosis_NOS_comp',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
       
       #Comp04a. thrombosis_NOS complications within 90 days (3 months)
       ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
@@ -1959,8 +1983,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_resp_failure_comp <- as.factor(ccc19x$der_resp_failure_comp)
-    summary(ccc19x$der_resp_failure_comp[ccc19x$redcap_repeat_instrument == ''])
     
+    temp <- summary(ccc19x$der_resp_failure_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_resp_failure_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp16 Pneumonitis: 205237003 (der_pneumonitis_comp)
     
@@ -2001,8 +2030,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_pneumonitis_comp <- as.factor(ccc19x$der_pneumonitis_comp)
-    summary(ccc19x$der_pneumonitis_comp[ccc19x$redcap_repeat_instrument == ''])
     
+    temp <- summary(ccc19x$der_pneumonitis_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pneumonitis_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp17 Pneumonia: 233604007 (der_pneumonia_comp)
     
@@ -2043,7 +2077,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_pneumonia_comp <- as.factor(ccc19x$der_pneumonia_comp)
-    summary(ccc19x$der_pneumonia_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_pneumonia_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pneumonia_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp18 Pneumonia/Pneumonitis combined
     ccc19x$der_pneumo_comp <- NA
@@ -2093,9 +2133,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_ARDS_comp <- as.factor(ccc19x$der_ARDS_comp)
-    summary(ccc19x$der_ARDS_comp[ccc19x$redcap_repeat_instrument == ''])
     
-    
+    temp <- summary(ccc19x$der_ARDS_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ARDS_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp20 Pleural Effusion: 60046008 (der_pleural_eff_comp)
     
@@ -2136,8 +2180,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_pleural_eff_comp <- as.factor(ccc19x$der_pleural_eff_comp)
-    summary(ccc19x$der_pleural_eff_comp[ccc19x$redcap_repeat_instrument == ''])
     
+    temp <- summary(ccc19x$der_pleural_eff_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pleural_eff_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp21 Empyema: 312682007 (der_empyema_comp)
     
@@ -2178,7 +2227,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_empyema_comp <- as.factor(ccc19x$der_empyema_comp)
-    summary(ccc19x$der_empyema_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_empyema_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_empyema_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #### Cardio ####
     
@@ -2316,7 +2371,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_card_isch_comp <- as.factor(ccc19x$der_card_isch_comp)
-    summary(ccc19x$der_card_isch_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_card_isch_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_card_isch_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp25 Atrial Fibrillation: 49436004 (der_AFib_comp)
     
@@ -2452,7 +2513,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_arry_oth_comp <- as.factor(ccc19x$der_arry_oth_comp)
-    summary(ccc19x$der_arry_oth_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_arry_oth_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_arry_oth_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp28 Cardiomyopathy: 85898001 (der_CMY_comp)
     
@@ -8039,7 +8106,13 @@ var.log <- data.frame(name = character(),
                                ccc19x$cancer_type_4 %in% c("C27134","C9300","C3106","OTH_H")|
                                ccc19x$cancer_type_5 %in% c("C27134","C9300","C3106","OTH_H"))] <- 1
     ccc19x$der_HemeNOS <- factor(ccc19x$der_HemeNOS)
-    summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_HemeNOS[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_HemeNOS',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #B-cell malignancies + acute lymphoblastic leukemia + aggressive NHL + indolent NHL and excluding plasma cell neoplasms
     ccc19x$der_Bcell <- 0
@@ -8157,7 +8230,13 @@ var.log <- data.frame(name = character(),
                             ccc19x$cancer_type_4 %in% c("C3242","C4665","C3819")|
                             ccc19x$cancer_type_5 %in% c("C3242","C4665","C3819"))] <- 1
     ccc19x$der_PCDs <- factor(ccc19x$der_PCDs)
-    summary(ccc19x$der_PCDs[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_PCDs[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_PCDs',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca11 Primary heme type
     ccc19x$der_heme_type <- NA
@@ -8205,7 +8284,13 @@ var.log <- data.frame(name = character(),
                              ccc19x$cancer_type_4 %in% c("C3171","C4345","C3174","C3247")|
                              ccc19x$cancer_type_5 %in% c("C3171","C4345","C3174","C3247"))] <- 1
     ccc19x$der_Myeloid <- factor(ccc19x$der_Myeloid)
-    summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Myeloid[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Myeloid',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Myeloproliferative neoplasms
     ccc19x$der_MPN <- 0
@@ -8315,7 +8400,13 @@ var.log <- data.frame(name = character(),
                                 ccc19x$cancer_type_5 %in% c("C9061","C9063","C4912","C6389",
                                                             "C7355","C9385","C3267"))] <- 1
     ccc19x$der_Other_GU <- factor(ccc19x$der_Other_GU)
-    summary(ccc19x$der_Other_GU[ccc19x$redcap_repeat_instrument == ''])
+   
+    temp <- summary(ccc19x$der_Other_GU[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Other_GU',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Thoracic
     ccc19x$der_Thoracic <- 0
@@ -8441,7 +8532,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_GI <- 0
     ccc19x$der_GI[which(ccc19x$der_LowerGI == 1|ccc19x$der_UpperGI == 1)] <- 1
     ccc19x$der_GI <- factor(ccc19x$der_GI)
-    summary(ccc19x$der_GI[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_GI[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_GI',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Gyn
     ccc19x$der_Gyn <- 0
@@ -8451,7 +8548,13 @@ var.log <- data.frame(name = character(),
                            ccc19x$cancer_type_4 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866")|
                            ccc19x$cancer_type_5 %in% c("C7558", "C9039", "C7431","C3867","C3555","C3917","C4866"))] <- 1
     ccc19x$der_Gyn <- factor(ccc19x$der_Gyn)
-    summary(ccc19x$der_Gyn[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Gyn[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Gyn',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Cervix
     ccc19x$der_Cervix <- 0
@@ -8511,7 +8614,13 @@ var.log <- data.frame(name = character(),
                             ccc19x$cancer_type_4 %in% c("C4815", "C9325", "C3809", "C4906")|
                             ccc19x$cancer_type_5 %in% c("C4815", "C9325", "C3809", "C4906"))] <- 1
     ccc19x$der_Endo <- factor(ccc19x$der_Endo)
-    summary(ccc19x$der_Endo[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Endo[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Endo',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Neuroendocrine tumors
     ccc19x$der_NET <- 0
@@ -8531,7 +8640,13 @@ var.log <- data.frame(name = character(),
                             ccc19x$cancer_type_4 %in% c("C3224", "C9231","C4819","C2921")|
                             ccc19x$cancer_type_5 %in% c("C3224", "C9231","C4819","C2921"))] <- 1
     ccc19x$der_Derm <- factor(ccc19x$der_Derm)
-    summary(ccc19x$der_Derm[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Derm[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Derm',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ccc19x$der_Melanoma <- 0
     ccc19x$der_Melanoma[which(ccc19x$cancer_type %in% c("C3224")|
@@ -8550,7 +8665,13 @@ var.log <- data.frame(name = character(),
                           ccc19x$cancer_type_4 %in% c("C4013", "C3871")|
                           ccc19x$cancer_type_5 %in% c("C4013", "C3871"))] <- 1
     ccc19x$der_HN <- factor(ccc19x$der_HN)
-    summary(ccc19x$der_HN[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_HN[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_HN',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Sarcoma
     ccc19x$der_Sarcoma <- 0
@@ -8659,7 +8780,13 @@ var.log <- data.frame(name = character(),
                              ccc19x$cancer_type_4 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541")|
                              ccc19x$cancer_type_5 %in% c("C3059","C4627","C5111","C132067", "C3270", "C7541"))] <- 1
     ccc19x$der_Neuro <- factor(ccc19x$der_Neuro)
-    summary(ccc19x$der_Neuro[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_Neuro[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Neuro',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Solid tumors NOS (including unassigned "Other" cancers)
     ccc19x$der_SolidNOS <- 0
@@ -8669,7 +8796,13 @@ var.log <- data.frame(name = character(),
                                 ccc19x$cancer_type_4 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH")|
                                 ccc19x$cancer_type_5 %in% c("C132146","C3538","C3708","C4039","OTH_S","OTH"))] <- 1
     ccc19x$der_SolidNOS <- factor(ccc19x$der_SolidNOS)
-    summary(ccc19x$der_SolidNOS[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_SolidNOS[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_SolidNOS',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Solid indicator
     ccc19x$der_solid <- NA
