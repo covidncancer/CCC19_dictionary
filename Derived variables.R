@@ -5086,11 +5086,10 @@ var.log <- data.frame(name = character(),
                                 ccc19x$steroid_specific_fu %in% 2:3)] <- 1
     
     #Never or less than 20 mg/d
-    ccc19x$der_steroids_hd_c19[which((ccc19x$covid_19_treatment___ho_45523 == 1 & ccc19x$steroid_specific %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
-                                (ccc19x$covid_19_treatment_fu___ho_45523 == 1 & ccc19x$steroid_specific_fu %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
-                                (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19))|
-                                (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19)))] <- 0
-    
+    ccc19x$der_steroids_hd_c19[which((ccc19x$steroid_specific %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
+                                       (ccc19x$steroid_specific_fu %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
+                                       (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19))|
+                                       (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19)))] <- 0
     
     #Unknown
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
@@ -5132,7 +5131,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_steroids_hd_c19 <- factor(ccc19x$der_steroids_hd_c19)
-    summary(ccc19x$der_steroids_hd_c19[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_steroids_hd_c19[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_steroids_hd_c19',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx4a. Steroids ever used for TREATMENT of COVID-19
     ccc19x$der_steroids_c19 <- NA
