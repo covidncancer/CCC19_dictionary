@@ -2657,7 +2657,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_AHI_comp <- as.factor(ccc19x$der_AHI_comp)
-    summary(ccc19x$der_AHI_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_AHI_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_AHI_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp31 Ascites: 389026000 (der_ascites_comp)
     
@@ -2698,7 +2704,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_ascites_comp <- as.factor(ccc19x$der_ascites_comp)
-    summary(ccc19x$der_ascites_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ascites_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ascites_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp32 Bowel Obstruction: 81060008 (der_BO_comp)
     
@@ -2739,7 +2751,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_BO_comp <- as.factor(ccc19x$der_BO_comp)
-    summary(ccc19x$der_BO_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_BO_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_BO_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp33 Bowel Perforation: 56905009 (der_bowelPerf_comp)
     
@@ -2780,7 +2798,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_bowelPerf_comp <- as.factor(ccc19x$der_bowelPerf_comp)
-    summary(ccc19x$der_bowelPerf_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_bowelPerf_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_bowelPerf_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp34 Ileus: 710572000 (der_ileus_comp)
     
@@ -2821,7 +2845,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_ileus_comp <- as.factor(ccc19x$der_ileus_comp)
-    summary(ccc19x$der_ileus_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ileus_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ileus_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     
     #Comp35 Peritonitis: 48661000 (der_peritonitis_comp)
@@ -2863,7 +2893,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_peritonitis_comp <- as.factor(ccc19x$der_peritonitis_comp)
-    summary(ccc19x$der_peritonitis_comp[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_peritonitis_comp[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_peritonitis_comp',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Comp36 AKI: 14669001 (der_AKI_comp)
     
@@ -11225,7 +11261,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_trop_combined[temp.ref] <- as.character(ccc19x$der_tni[temp.ref])
     
     ccc19x$der_trop_combined <- factor(ccc19x$der_trop_combined)
-    summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_trop_combined[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_trop_combined',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L20. WBC value transformation
     
