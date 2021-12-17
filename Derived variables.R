@@ -5816,8 +5816,11 @@ var.log <- data.frame(name = character(),
     
     #Never
     ccc19x$der_steroids_ld[which((ccc19x$concomitant_meds___h02 == 0 & is.na(ccc19x$der_steroids_ld))|
+                                   (ccc19x$steroid_specific_2 %in% 2:3 & is.na(ccc19x$der_steroids_ld))|
                                    (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_ld))|
-                                   (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_ld)))] <- 0
+                                   (ccc19x$steroid_specific %in% 2:3 & is.na(ccc19x$der_steroids_ld))|
+                                   (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_ld))|
+                                   (ccc19x$steroid_specific_fu %in% 2:3 & is.na(ccc19x$der_steroids_ld)))] <- 0
     
     #Unknown
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
@@ -5859,7 +5862,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_steroids_ld <- factor(ccc19x$der_steroids_ld)
-    summary(ccc19x$der_steroids_ld[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_steroids_ld[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_steroids_ld',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx11. Anticoagulation, aspirin, or APA ever (baseline or treatment for COVID-19)
     ccc19x$der_ac_apa <- NA
