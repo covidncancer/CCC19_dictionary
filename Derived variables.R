@@ -5808,7 +5808,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_antivirals <- factor(ccc19x$der_antivirals)
     summary(ccc19x$der_antivirals[ccc19x$redcap_repeat_instrument == ''])
     
-    #Rx10. Low-dose steroids ever (dose up to 20 mg/d)
+    #Rx10. Low-dose steroids ever (dose up to 20 mg/d, baseline or treatment of COVID-19)
     ccc19x$der_steroids_ld <- NA
     ccc19x$der_steroids_ld[which(ccc19x$steroid_specific_2 %in% c('1','1a','1b')|
                                    ccc19x$steroid_specific %in% c('1','1a','1b')|
@@ -5823,6 +5823,12 @@ var.log <- data.frame(name = character(),
                                    (ccc19x$steroid_specific_fu %in% 2:3 & is.na(ccc19x$der_steroids_ld)))] <- 0
     
     #Unknown
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___') & 
+                        !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment___unk[i] == 1 &
+         (ccc19x$der_steroids_ld[i] == 0 | is.na(ccc19x$der_steroids_ld[i]))) ccc19x$der_steroids_ld[i] <- 99
+    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
                         !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
@@ -5836,9 +5842,14 @@ var.log <- data.frame(name = character(),
          (ccc19x$der_steroids_ld[i] == 0 | is.na(ccc19x$der_steroids_ld[i]))) ccc19x$der_steroids_ld[i] <- 99
     
     ccc19x$der_steroids_ld[which(ccc19x$steroid_specific == 99 & is.na(ccc19x$der_steroids_ld)|
+                                   ccc19x$steroid_specific_2 == 99 & is.na(ccc19x$der_steroids_ld)|
                                    ccc19x$steroid_specific_fu == 99 & is.na(ccc19x$der_steroids_ld))] <- 99
     
     #Missing
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_ld[i] == 0) ccc19x$der_steroids_ld[i] <- NA
+    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_ld[i] == 0) ccc19x$der_steroids_ld[i] <- NA
