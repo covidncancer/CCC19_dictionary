@@ -10658,7 +10658,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4n: Anthracycline
+    #CaTxChemo01: Anthracycline
     ccc19x$der_anthracycline <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -10675,6 +10675,146 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_anthracycline[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_anthracycline',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxChemo02: Taxane
+    ccc19x$der_taxane <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Docetaxel','Paclitaxel','Cabazitaxel','nab-Paclitaxel'))) ccc19x$der_taxane[temp.ref[i]] <- 1 else
+               ccc19x$der_taxane[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_taxane <- factor(ccc19x$der_taxane)
+    
+    temp <- summary(ccc19x$der_taxane[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_taxane',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxChemo03: Gemcitabine
+    ccc19x$der_gemcitabine <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Gemcitabine'))) ccc19x$der_gemcitabine[temp.ref[i]] <- 1 else
+               ccc19x$der_gemcitabine[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_gemcitabine <- factor(ccc19x$der_gemcitabine)
+    
+    temp <- summary(ccc19x$der_gemcitabine[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_gemcitabine',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxChemo04: Irinotecan
+    ccc19x$der_irinotecan <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Irinotecan'))) ccc19x$der_irinotecan[temp.ref[i]] <- 1 else
+               ccc19x$der_irinotecan[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_irinotecan <- factor(ccc19x$der_irinotecan)
+    
+    temp <- summary(ccc19x$der_irinotecan[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_irinotecan',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxChemo05: Platinum agent
+    ccc19x$der_platinum <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Cisplatin','Carboplatin','Oxaliplatin','Heptaplatin','Nedaplatin'))) ccc19x$der_platinum[temp.ref[i]] <- 1 else
+               ccc19x$der_platinum[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_platinum <- factor(ccc19x$der_platinum)
+    
+    temp <- summary(ccc19x$der_platinum[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_platinum',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxChemo06: Fluoropyrimidine
+    ccc19x$der_fluoropyrimidine <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Capecitabine','Doxifluridine','Fluorouracil','Floxuridine','Tegafur and uracil','Trifluridine and tipiracil'))) ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 1 else
+               ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_fluoropyrimidine <- factor(ccc19x$der_fluoropyrimidine)
+    
+    temp <- summary(ccc19x$der_fluoropyrimidine[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_fluoropyrimidine',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxTargeted01: EGFR inhibitor (small molecule inhibitors)
+    ccc19x$der_egfri <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Afatinib','Dacomitinib','Erlotinib','Gefitinib','Icotinib','Mobocertinib','Osimertinib'))) ccc19x$der_egfri[temp.ref[i]] <- 1 else
+               ccc19x$der_egfri[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_egfri <- factor(ccc19x$der_egfri)
+    
+    temp <- summary(ccc19x$der_egfri[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_egfri',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #CaTxTargeted02: anti-EGFR antibodies
+    ccc19x$der_egfr_mab <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+             c('Amivantamab','Cetuximab','Necitumumab','Panitumumab'))) ccc19x$der_egfr_mab[temp.ref[i]] <- 1 else
+               ccc19x$der_egfr_mab[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_egfr_mab <- factor(ccc19x$der_egfr_mab)
+    
+    temp <- summary(ccc19x$der_egfr_mab[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_egfr_mab',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
