@@ -8485,6 +8485,22 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Lung cancers
+    ccc19x$der_Lung <- 0
+    ccc19x$der_Lung[which(ccc19x$cancer_type %in% c("C4917", "C2926", "C4878")|
+                            ccc19x$cancer_type_2 %in% c("C4917", "C2926", "C4878")|
+                            ccc19x$cancer_type_3 %in% c("C4917", "C2926", "C4878")|
+                            ccc19x$cancer_type_4 %in% c("C4917", "C2926", "C4878")|
+                            ccc19x$cancer_type_5 %in% c("C4917", "C2926", "C4878"))] <- 1
+    ccc19x$der_Lung <- factor(ccc19x$der_Lung)
+    
+    temp <- summary(ccc19x$der_Lung[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_Lung',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #GI cancers
     
     #Lower GI (including appendix and small bowel)
