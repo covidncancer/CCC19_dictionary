@@ -9936,8 +9936,24 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Ca07e. Cancer status combining all active categories
+    ccc19x$der_cancer_status_v5 <- ccc19x$cancer_status
+    ccc19x$der_cancer_status_v5[which(ccc19x$der_cancer_status_v5 == 1)] <- '0 - Remission/NED'
+    ccc19x$der_cancer_status_v5[which(ccc19x$der_cancer_status_v5 %in% c(2,3,4))] <- '1 - Active, stable/responding/progressing'
+    ccc19x$der_cancer_status_v5[which(ccc19x$der_cancer_status_v5 %in% c(5,99))] <- '99 - Unknown'
+    
+    #Factor
+    ccc19x$der_cancer_status_v5 <- as.factor(ccc19x$der_cancer_status_v5)
+    
+    temp <- summary(ccc19x$der_cancer_status_v5[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_status_v5',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     ############################################################
-    #Ca07e. Cancer progressing at the time of COVID-19 diagnosis
+    #Ca07f. Cancer progressing at the time of COVID-19 diagnosis
     ccc19x$der_cancer_prog_bl <- NA
     
     #No
@@ -11925,6 +11941,23 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_VTE_risk_high <- factor(ccc19x$der_VTE_risk_high)
     summary(ccc19x$der_VTE_risk_high[ccc19x$redcap_repeat_instrument == ''])
+    
+    #####################
+    #X3f. Modified Khorana with uterine re-assigned, and only two categories
+    #####################
+    ccc19x$der_VTE_risk_v4 <- NA
+    
+    ccc19x$der_VTE_risk_v4[which(ccc19x$cancer_type %in% c("C4872","C4863","C9291","C4910","C9330","C7724","C2955","C9382","C4013", "C3871","C3167","C3163","C9308","C3247","C3171","C4345","C3106","C3174","C3242","C4665","C3819","C27134","C9300","OTH_H","C3234","C3411","C3099","C3844","C4436","C3267","C9039","C3867","C3555","C3917","C4866","C4815", "C9325", "C3809", "C4906","C9306", "C3868", "C9145","C9312","C4817","C3359","C8538","C3059","C4627","C5111","C132067", "C3270", "C7541","C3224", "C9231","C4819","C2921","C132146","C4039","C3538","C9061","C6389","C4189","OTH","OTH_S"))] <- 'Low/Other'
+    ccc19x$der_VTE_risk_v4[which(ccc19x$cancer_type %in% c("C3850","C4911","C3513","C4917","C2926","C4878","C7431","C9063","C4912","C3708","C7355","C9385","C8851","C3209","C9244","C4341","C3211","C3457","C9357","C4337","C2912","C8504","C7558","C27908"))] <- 'High/Very high'
+    
+    ccc19x$der_VTE_risk_v4 <- factor(ccc19x$der_VTE_risk_v4)
+    
+    temp <- summary(ccc19x$der_VTE_risk_v4[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_VTE_risk_v4',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #X6a-c. Due dates for follow-up forms, assuming right-sided diagnosis (i.e., at least)
     ccc19x$meta_30d_due <- NA
