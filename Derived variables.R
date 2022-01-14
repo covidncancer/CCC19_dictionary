@@ -6471,15 +6471,11 @@ var.log <- data.frame(name = character(),
                           ccc19x$c19_anticoag_reason___3 == 1|
                           ccc19x$c19_anticoag_reason___oth == 1)] <- 1
     
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
-    
     #Never
     ccc19x$der_ac[which(is.na(ccc19x$der_ac) & 
                           ccc19x$concomitant_meds___b01a == 0 &
                           ccc19x$covid_19_treatment___b01a == 0 &
                           (is.na(ccc19x$covid_19_treatment_fu___b01a) | ccc19x$covid_19_treatment_fu___b01a == 0))] <- 0
-    
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
     
     #Unknown baseline or treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
@@ -6487,29 +6483,21 @@ var.log <- data.frame(name = character(),
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac[i] == 0 | is.na(ccc19x$der_ac[i]))) ccc19x$der_ac[i] <- 99
     
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
-    
     #Unknown f/u treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
                         !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac[i] == 0 | is.na(ccc19x$der_ac[i]))) ccc19x$der_ac[i] <- 99
     
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
-    
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac[i] != 1|is.na(ccc19x$der_ac[i]))) ccc19x$der_ac[i] <- NA
     
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
-    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_ac[i] != 1|is.na(ccc19x$der_ac[i]))) ccc19x$der_ac[i] <- NA
-    
-    summary(factor(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == '']))
-    
+   
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
     {
@@ -6525,8 +6513,14 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_ac <- factor(ccc19x$der_ac)
-    summary(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == ''])
     
+    temp <- summary(ccc19x$der_ac[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ac',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+
     #Rx14. Remdesivir ever used for TREATMENT of COVID-19
     ccc19x$der_rem <- NA
     ccc19x$der_rem[which(ccc19x$covid_19_treatment___omop4873974 == 1|
