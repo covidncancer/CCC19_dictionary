@@ -36,7 +36,7 @@ var.log <- data.frame(name = character(),
                                   ccc19x$current_status_retro %in% c("1", "1b") | 
                                   ccc19x$current_status_v2 %in% c("1", "1b", "2")) ] <- 0
     
-    #Dead on primary form
+    #Dead on primary form (overwriting allowed)
     ccc19x$der_deadbinary[which(ccc19x$current_status_retro == 3 | 
                                   ccc19x$current_status_v2 == 3 | 
                                   ccc19x$mortality == 0 |
@@ -44,29 +44,26 @@ var.log <- data.frame(name = character(),
                                   ccc19x$mortality_180 == 0 |
                                   ccc19x$current_status == 9)] <- 1
     
-    #Unknown on primary form
-    ccc19x$der_deadbinary[which(ccc19x$current_status_retro == 99)] <- 99
+    #Unknown on primary form (don't overwrite)
+    ccc19x$der_deadbinary[which(ccc19x$current_status_retro == 99 &
+                                  is.na(ccc19x$der_deadbinary))] <- 99
     
     #Alive on followup form
-    temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
-                        ccc19x$fu_reason %in% 1:2)
+    ccc19x$der_deadbinary[which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+                        ccc19x$fu_reason %in% 1:2)] <- 0
     
-    ccc19x$der_deadbinary[temp.ref] <- 0
-    
-    #Dead on followup form
-    temp.ref <- which(ccc19x$covid_19_status_fu ==3 | 
+    #Dead on followup form (overwriting allowed)
+    ccc19x$der_deadbinary[which(ccc19x$covid_19_status_fu ==3 | 
                         ccc19x$d30_vital_status == 1 |
                         ccc19x$d90_vital_status == 1 |
                         ccc19x$d180_vital_status == 1 |
                         ccc19x$d365_vital_status == 1 |
                         ccc19x$current_status_fu == 9 |
-                        ccc19x$fu_reason == 3)
+                        ccc19x$fu_reason == 3)] <- 1
     
-    ccc19x$der_deadbinary[temp.ref] <- 1
-    
-    #Unknown on followup form
-    temp.ref <- which(ccc19x$covid_19_status_fu == 99)
-    ccc19x$der_deadbinary[temp.ref] <- 99
+    #Unknown on followup form (don't overwrite)
+    ccc19x$der_deadbinary[which(ccc19x$covid_19_status_fu == 99 &
+                                  is.na(ccc19x$der_deadbinary))] <- 99
     
     #Reconcile death status for each patient
     temp <- unique(ccc19x$record_id)
@@ -91,7 +88,7 @@ var.log <- data.frame(name = character(),
         #Screen for false positives ("resuscitations")
         if(length(temp1) > 0)
         {
-          if(temp1 == 1 & any(temp2 == 0)) 
+          if(temp1 == 1 & any(temp2 == 0) & !any(temp2 == 1)) 
           {
             temp1 <- 3
             ccc19x$der_deadbinary[temp.ref] <- 3 
@@ -13242,25 +13239,25 @@ var.log <- data.frame(name = character(),
      # 
      # #Alive on primary form
      # ccc19x$der_deadbinary_old[which(ccc19x$current_status %in% 1:8 |
-     #                                   ccc19x$current_status_retro %in% c("1", "1b") | 
+     #                                   ccc19x$current_status_retro %in% c("1", "1b") |
      #                                   ccc19x$current_status_v2 %in% c("1", "1b", "2")) ] <- 0
      # 
      # #Dead on primary form
-     # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 3 | 
-     #                                   ccc19x$current_status_v2 == 3 | 
+     # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 3 |
+     #                                   ccc19x$current_status_v2 == 3 |
      #                                   ccc19x$current_status == 9)] <- 1
      # 
      # #Unknown on primary form
      # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 99)] <- 99
      # 
      # #Alive on followup form
-     # temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+     # temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') |
      #                     ccc19x$fu_reason %in% 1:2)
      # 
      # ccc19x$der_deadbinary_old[temp.ref] <- 0
      # 
      # #Dead on followup form
-     # temp.ref <- which(ccc19x$covid_19_status_fu ==3 | 
+     # temp.ref <- which(ccc19x$covid_19_status_fu ==3 |
      #                     ccc19x$current_status_fu == 9 |
      #                     ccc19x$fu_reason == 3)
      # 
@@ -13287,7 +13284,7 @@ var.log <- data.frame(name = character(),
      # 
      # #Factor
      # ccc19x$der_deadbinary_old <- as.factor(ccc19x$der_deadbinary_old)
-     # 
+
      # temp <- summary(ccc19x$der_deadbinary_old[ccc19x$redcap_repeat_instrument == ''])
      # temp.var.log <- data.frame(name = 'der_deadbinary_old',
      #                            timestamp = Sys.time(),
