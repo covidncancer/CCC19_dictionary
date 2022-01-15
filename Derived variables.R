@@ -26,8 +26,9 @@ var.log <- data.frame(name = character(),
   #########
   {
     
-    "deadbinary"
-    ##O1. Derived dead/alive variable (0=alive, 1=dead, 99=unknown)
+    ###########################
+    #O1. Binary death indicator
+    ###########################
     ccc19x$der_deadbinary <- NA
     
     #Alive on primary form
@@ -38,6 +39,9 @@ var.log <- data.frame(name = character(),
     #Dead on primary form
     ccc19x$der_deadbinary[which(ccc19x$current_status_retro == 3 | 
                                   ccc19x$current_status_v2 == 3 | 
+                                  ccc19x$mortality == 0 |
+                                  ccc19x$mortality_90 == 0 |
+                                  ccc19x$mortality_180 == 0 |
                                   ccc19x$current_status == 9)] <- 1
     
     #Unknown on primary form
@@ -51,6 +55,10 @@ var.log <- data.frame(name = character(),
     
     #Dead on followup form
     temp.ref <- which(ccc19x$covid_19_status_fu ==3 | 
+                        ccc19x$d30_vital_status == 1 |
+                        ccc19x$d90_vital_status == 1 |
+                        ccc19x$d180_vital_status == 1 |
+                        ccc19x$d365_vital_status == 1 |
                         ccc19x$current_status_fu == 9 |
                         ccc19x$fu_reason == 3)
     
@@ -64,14 +72,41 @@ var.log <- data.frame(name = character(),
     temp <- unique(ccc19x$record_id)
     for(i in 1:length(temp))
     {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- ccc19x$der_deadbinary[temp.ref]
-      temp2 <- temp2[!is.na(temp2)]
-      if(length(temp2) > 0)
+      temp.ref1 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == '')
+      temp1 <- ccc19x$der_deadbinary[temp.ref1]
+      
+      temp.ref2 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      if(length(temp.ref2) > 0)
       {
-        if(any(temp2 == 1)) ccc19x$der_deadbinary[temp.ref] <- 1
-        if(!any(temp2 == 1) & any(temp2 == 0)) ccc19x$der_deadbinary[temp.ref] <- 0
-        if(!any(temp2 == 1) & !any(temp2 == 0) & any(temp2 == 99)) ccc19x$der_deadbinary[temp.ref] <- 99
+        temp2 <- ccc19x$der_deadbinary[temp.ref2]
+        
+        #If there is a follow-up but the baseline is missing, change baseline to unknown
+        if(is.na(temp1)) temp1 <- 99
+        
+        temp1 <- temp1[!is.na(temp1)]
+        temp2 <- temp2[!is.na(temp2)]
+        
+        temp.ref <- c(temp.ref1, temp.ref2)
+        
+        #Screen for false positives ("resuscitations")
+        if(length(temp1) > 0)
+        {
+          if(temp1 == 1 & any(temp2 == 0)) 
+          {
+            temp1 <- 3
+            ccc19x$der_deadbinary[temp.ref] <- 3 
+          }
+        } 
+        
+        if(temp1 != 3)
+        {
+          temp2 <- c(temp1, temp2)
+          {
+            if(any(temp2 == 1)) ccc19x$der_deadbinary[temp.ref] <- 1
+            if(!any(temp2 == 1) & any(temp2 == 0)) ccc19x$der_deadbinary[temp.ref] <- 0
+            if(!any(temp2 == 1) & !any(temp2 == 0) & any(temp2 == 99)) ccc19x$der_deadbinary[temp.ref] <- 99
+          }
+        }
       }
     }
     
@@ -80,9 +115,9 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_deadbinary[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_deadbinary',
-                          timestamp = Sys.time(),
-                          values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                          stringsAsFactors = F)
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
     ####################
@@ -13196,6 +13231,65 @@ var.log <- data.frame(name = character(),
      # 
      # temp <- summary(ccc19x$der_met_lung[ccc19x$redcap_repeat_instrument == ''])
      # temp.var.log <- data.frame(name = 'der_met_lung',
+     #                            timestamp = Sys.time(),
+     #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                            stringsAsFactors = F)
+     # var.log <- rbind(var.log, temp.var.log)
+     
+     # ##zDep20. Derived dead/alive variable (0=alive, 1=dead, 99=unknown)
+     # #Deprecated because it does not use the vital status indicators
+     # ccc19x$der_deadbinary_old <- NA
+     # 
+     # #Alive on primary form
+     # ccc19x$der_deadbinary_old[which(ccc19x$current_status %in% 1:8 |
+     #                                   ccc19x$current_status_retro %in% c("1", "1b") | 
+     #                                   ccc19x$current_status_v2 %in% c("1", "1b", "2")) ] <- 0
+     # 
+     # #Dead on primary form
+     # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 3 | 
+     #                                   ccc19x$current_status_v2 == 3 | 
+     #                                   ccc19x$current_status == 9)] <- 1
+     # 
+     # #Unknown on primary form
+     # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 99)] <- 99
+     # 
+     # #Alive on followup form
+     # temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+     #                     ccc19x$fu_reason %in% 1:2)
+     # 
+     # ccc19x$der_deadbinary_old[temp.ref] <- 0
+     # 
+     # #Dead on followup form
+     # temp.ref <- which(ccc19x$covid_19_status_fu ==3 | 
+     #                     ccc19x$current_status_fu == 9 |
+     #                     ccc19x$fu_reason == 3)
+     # 
+     # ccc19x$der_deadbinary_old[temp.ref] <- 1
+     # 
+     # #Unknown on followup form
+     # temp.ref <- which(ccc19x$covid_19_status_fu == 99)
+     # ccc19x$der_deadbinary_old[temp.ref] <- 99
+     # 
+     # #Reconcile death status for each patient
+     # temp <- unique(ccc19x$record_id)
+     # for(i in 1:length(temp))
+     # {
+     #   temp.ref <- which(ccc19x$record_id == temp[i])
+     #   temp2 <- ccc19x$der_deadbinary_old[temp.ref]
+     #   temp2 <- temp2[!is.na(temp2)]
+     #   if(length(temp2) > 0)
+     #   {
+     #     if(any(temp2 == 1)) ccc19x$der_deadbinary_old[temp.ref] <- 1
+     #     if(!any(temp2 == 1) & any(temp2 == 0)) ccc19x$der_deadbinary_old[temp.ref] <- 0
+     #     if(!any(temp2 == 1) & !any(temp2 == 0) & any(temp2 == 99)) ccc19x$der_deadbinary_old[temp.ref] <- 99
+     #   }
+     # }
+     # 
+     # #Factor
+     # ccc19x$der_deadbinary_old <- as.factor(ccc19x$der_deadbinary_old)
+     # 
+     # temp <- summary(ccc19x$der_deadbinary_old[ccc19x$redcap_repeat_instrument == ''])
+     # temp.var.log <- data.frame(name = 'der_deadbinary_old',
      #                            timestamp = Sys.time(),
      #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
      #                            stringsAsFactors = F)
