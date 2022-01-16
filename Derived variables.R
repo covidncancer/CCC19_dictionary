@@ -7493,6 +7493,39 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #C07a1. Cardiovascular comorbidity v3 (CAD, PVD, CVA)
+    ccc19x$der_card_v3 <- NA
+    ccc19x$der_card_v3[which( ccc19x$significant_comorbidities___53741008 == 1|#CAD
+                                ccc19x$significant_comorbidities___400047006 == 1|#PVD
+                                ccc19x$significant_comorbidities___275526006 == 1#CVA
+    )] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___53741008|comorbidities___400047006|comorbidities___275526006|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___53741008[i] == 0,
+                                         ccc19x$significant_comorbidities___400047006[i] == 0,
+                                         ccc19x$significant_comorbidities___275526006[i] == 0)
+      )) ccc19x$der_card_v3[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_card_v3[i] <- 99
+    }
+    
+    ccc19x$der_card_v3 <- factor(ccc19x$der_card_v3)
+    
+    temp <- summary(ccc19x$der_card_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_card_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #C07b. CAD comorbidity
     ccc19x$der_CAD_bl <- NA
     ccc19x$der_CAD_bl[which( ccc19x$significant_comorbidities___53741008 == 1)] <- 1
@@ -7600,6 +7633,34 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_CVA_bl[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_CVA_bl',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #C07f. Atrial fibrillation comorbidity
+    ccc19x$der_afib_bl <- NA
+    ccc19x$der_afib_bl[which( ccc19x$significant_comorbidities___49436004 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'comorbidities___49436004|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & all(c(ccc19x$significant_comorbidities___49436004[i] == 0)
+      )) ccc19x$der_afib_bl[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_afib_bl[i] <- 99
+    }
+    
+    ccc19x$der_afib_bl <- factor(ccc19x$der_afib_bl)
+    
+    temp <- summary(ccc19x$der_afib_bl[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_afib_bl',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
