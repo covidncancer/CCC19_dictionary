@@ -5881,16 +5881,16 @@ var.log <- data.frame(name = character(),
     
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_ld[i] == 0) ccc19x$der_steroids_ld[i] <- NA
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_steroids_ld[i] == 0))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_ld[i] <- NA
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_ld[i] == 0) ccc19x$der_steroids_ld[i] <- NA
+    for(i in which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_steroids_ld[i] == 0))
+      if(all(ccc19x[i,temp.ref] == 0) ) ccc19x$der_steroids_ld[i] <- NA
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$der_steroids_ld[i] == 0) ccc19x$der_steroids_ld[i] <- NA
+    for(i in which(ccc19x$redcap_repeat_instrument == 'followup' & ccc19x$der_steroids_ld[i] == 0))
+      if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_steroids_ld[i] <- NA
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
@@ -10183,7 +10183,7 @@ var.log <- data.frame(name = character(),
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2021-11-07 with modalities.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2022-01-08 with modalities.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
@@ -12161,7 +12161,7 @@ var.log <- data.frame(name = character(),
       #Create density plot of missingness
       x <- density(ccc19x$missing[ccc19x$redcap_repeat_instrument == ''])
       plot(x)
-      threshold <- 123
+      threshold <- 124
       abline(v = threshold, col = 'red', lty = 2)
       
       ccc19x$meta_quality[which(ccc19x$missing > threshold)] <- ccc19x$meta_quality[which(ccc19x$missing > threshold)] + 5
