@@ -12771,7 +12771,7 @@ var.log <- data.frame(name = character(),
     }
     
     ###############
-    #X11. PASC (v1)
+    #X11. PASC (v2)
     ###############
     ccc19x$der_pasc <- NA
     
@@ -12782,20 +12782,32 @@ var.log <- data.frame(name = character(),
                             ccc19x$covid_19_dx_interval %in% 1:5)] <- 0
     
     #Follow-up
-    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu == 1 &
-                            (ccc19x$fu_weeks %in% c(30,90)|
-                              ccc19x$timing_of_report_weeks <= 13))] <- 0
+    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu == 1|ccc19x$c19_status_fu_final == 1) &
+                            (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13))] <- 0
     
-    #Yes - patient marked as having recovered with complications within 90 days
+    #Yes - patient marked as having ongoing infection or recovered with complications at 90 days or beyond
     
     #Baseline
-    ccc19x$der_pasc[which((ccc19x$current_status_v2 == '1b'|ccc19x$current_status_retro == '1b') &
-                            ccc19x$covid_19_dx_interval %in% 1:5)] <- 1
+    ccc19x$der_pasc[which(ccc19x$current_status_v2 %in% c('1b','2') &
+                            ccc19x$covid_19_dx_interval %in% 6:10)] <- 1
     
     #Follow-up
-    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu == '1b' &
-                            (ccc19x$fu_weeks %in% c(30,90)|
-                               ccc19x$timing_of_report_weeks <= 13))] <- 1
+    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu %in% c('1b','2')|
+                             ccc19x$c19_status_fu_final %in% c('1b','3')) &
+                            (ccc19x$fu_weeks %in% c(180,365)|
+                               ccc19x$timing_of_report_weeks >= 13))] <- 1
+    
+    #Unknown
+    
+    #Baseline
+    ccc19x$der_pasc[which((ccc19x$current_status_v2 == 99|
+                            ccc19x$current_status_retro == 99) &
+                            is.na(ccc19x$der_pasc))] <- 99
+    
+    #Follow-up
+    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu == 99|
+                             ccc19x$c19_status_fu_final == 99) &
+                            is.na(ccc19x$der_pasc))] <- 99
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
