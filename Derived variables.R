@@ -10124,6 +10124,144 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Ca19c. Metastatic disease to bone
+    ccc19x$der_met_bone <- NA
+    
+    #Yes
+    ccc19x$der_met_bone[which(ccc19x$mets_sites___1112_1 == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_bone[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_met_bone))] <- 0
+    ccc19x$der_met_bone[which(ccc19x$mets_yn == 0 & is.na(ccc19x$der_met_bone))] <- 0
+    
+    #Metastatic, something checked besides mets_sites___1112_1
+    ccc19x$der_met_bone[which(ccc19x$mets_yn == 1 & ccc19x$mets_sites___1112_1 == 0 &
+                                (ccc19x$mets_sites___1116_1 == 1|ccc19x$mets_sites___1113_1 == 1|
+                                   ccc19x$mets_sites___1114_1 == 1|ccc19x$mets_sites___1115_1 == 1|
+                                   ccc19x$mets_sites___1117_1 == 1|ccc19x$mets_sites___1117_2 == 1))] <- 0
+    
+    #Unknown
+    ccc19x$der_met_bone[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_bone))] <- 99
+    ccc19x$der_met_bone[which(ccc19x$mets_sites___99 == 1 & is.na(ccc19x$der_met_bone))] <- 99
+    
+    ccc19x$der_met_bone <- as.factor(ccc19x$der_met_bone)
+    
+    temp <- summary(ccc19x$der_met_bone[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_bone',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19d. Metastatic disease to distant lymph nodes
+    ccc19x$der_met_ln <- NA
+    
+    #Yes
+    ccc19x$der_met_ln[which(ccc19x$mets_sites___1114_1 == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_ln[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_met_ln))] <- 0
+    ccc19x$der_met_ln[which(ccc19x$mets_yn == 0 & is.na(ccc19x$der_met_ln))] <- 0
+    
+    #Metastatic, something checked besides mets_sites___1114_1
+    ccc19x$der_met_ln[which(ccc19x$mets_yn == 1 & ccc19x$mets_sites___1114_1 == 0 &
+                              (ccc19x$mets_sites___1116_1 == 1|ccc19x$mets_sites___1113_1 == 1|
+                                 ccc19x$mets_sites___1112_1 == 1|ccc19x$mets_sites___1115_1 == 1|
+                                 ccc19x$mets_sites___1117_1 == 1|ccc19x$mets_sites___1117_2 == 1))] <- 0
+    
+    #Unknown
+    ccc19x$der_met_ln[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_ln))] <- 99
+    ccc19x$der_met_ln[which(ccc19x$mets_sites___99 == 1 & is.na(ccc19x$der_met_ln))] <- 99
+    
+    ccc19x$der_met_ln <- as.factor(ccc19x$der_met_ln)
+    
+    temp <- summary(ccc19x$der_met_ln[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_ln',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19e. Metastatic disease to liver
+    ccc19x$der_met_liver <- NA
+    
+    #Yes
+    ccc19x$der_met_liver[which(ccc19x$mets_sites___1115_1 == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_liver[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_met_liver))] <- 0
+    ccc19x$der_met_liver[which(ccc19x$mets_yn == 0 & is.na(ccc19x$der_met_liver))] <- 0
+    
+    #Metastatic, something checked besides mets_sites___1115_1
+    ccc19x$der_met_liver[which(ccc19x$mets_yn == 1 & ccc19x$mets_sites___1115_1 == 0 &
+                                 (ccc19x$mets_sites___1116_1 == 1|ccc19x$mets_sites___1113_1 == 1|
+                                    ccc19x$mets_sites___1112_1 == 1|ccc19x$mets_sites___1114_1 == 1|
+                                    ccc19x$mets_sites___1117_1 == 1|ccc19x$mets_sites___1117_2 == 1))] <- 0
+    
+    #Unknown
+    ccc19x$der_met_liver[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_liver))] <- 99
+    ccc19x$der_met_liver[which(ccc19x$mets_sites___99 == 1 & is.na(ccc19x$der_met_liver))] <- 99
+    
+    ccc19x$der_met_liver <- as.factor(ccc19x$der_met_liver)
+    
+    temp <- summary(ccc19x$der_met_liver[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_liver',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19f. Metastatic disease to brain
+    ccc19x$der_met_brain <- NA
+    
+    #Yes
+    ccc19x$der_met_brain[which(ccc19x$mets_sites___1113_1 == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_brain[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_met_brain))] <- 0
+    ccc19x$der_met_brain[which(ccc19x$mets_yn == 0 & is.na(ccc19x$der_met_brain))] <- 0
+    
+    #Metastatic, something checked besides mets_sites___1113_1
+    ccc19x$der_met_brain[which(ccc19x$mets_yn == 1 & ccc19x$mets_sites___1113_1 == 0 &
+                                 (ccc19x$mets_sites___1116_1 == 1|ccc19x$mets_sites___1115_1 == 1|
+                                    ccc19x$mets_sites___1112_1 == 1|ccc19x$mets_sites___1114_1 == 1|
+                                    ccc19x$mets_sites___1117_1 == 1|ccc19x$mets_sites___1117_2 == 1))] <- 0
+    
+    #Unknown
+    ccc19x$der_met_brain[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_met_brain))] <- 99
+    ccc19x$der_met_brain[which(ccc19x$mets_sites___99 == 1 & is.na(ccc19x$der_met_brain))] <- 99
+    
+    ccc19x$der_met_brain <- as.factor(ccc19x$der_met_brain)
+    
+    temp <- summary(ccc19x$der_met_brain[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_brain',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19g. Metastatic disease to visceral organs (lung or liver)
+    ccc19x$der_met_visceral <- NA
+    
+    #Yes
+    ccc19x$der_met_visceral[which(ccc19x$der_met_lung_v2 == 1|ccc19x$der_met_liver == 1)] <- 1
+    
+    #No
+    ccc19x$der_met_visceral[which(ccc19x$der_met_lung_v2 == 0 & ccc19x$der_met_liver == 0)] <- 0
+    
+    #Unknown
+    ccc19x$der_met_visceral[which((ccc19x$der_met_lung_v2 == 99|ccc19x$der_met_liver == 99) &
+                                    is.na(ccc19x$der_met_visceral))] <- 99
+    
+    ccc19x$der_met_visceral <- as.factor(ccc19x$der_met_visceral)
+    
+    temp <- summary(ccc19x$der_met_visceral[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_visceral',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Ca20. Stage at cancer diagnosis, simplified
     ccc19x$der_stage <- NA
     
