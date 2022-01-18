@@ -3419,8 +3419,10 @@ var.log <- data.frame(name = character(),
             if(ccc19x$der_days_to_death_combined[temp.ref] != 9999) 
             {
               ccc19x$der_days_fu[temp.ref] <- ccc19x$der_days_to_death_combined[temp.ref]
-            } else #Default is the median of the time interval of diagnosis
+            } else #Default is the median of the time interval of diagnosis or the f/u period for the form reporting death, whichever is smaller
+            {
               ccc19x$der_days_fu[temp.ref] <- fu[ccc19x$covid_19_dx_interval[temp.ref]]
+            }
           } else
           {
             #Default is the median of the time interval of diagnosis
@@ -3521,9 +3523,12 @@ var.log <- data.frame(name = character(),
           temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 180) & 
             any(ccc19x$d180_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
           if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
+          
+          temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 365) & 
+            any(ccc19x$d365_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
+          if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 365
         }
       }
-      
       
       #Make sure that all forms (baseline and follow-up) for a given patient have the same f/u value
       for(i in 1:length(pts))
@@ -12923,30 +12928,50 @@ var.log <- data.frame(name = character(),
     ###############
     ccc19x$der_pasc <- NA
     
+    #Create a dummy variable that assumes once fully recovered in follow-up, always fully recovered
+    t.status <- ccc19x$current_status_v2
+    t.status[which(ccc19x$current_status_retro != '')] <- ccc19x$current_status_retro[which(ccc19x$current_status_retro != '')]
+    t.status[which(ccc19x$covid_19_status_fu != '')] <- ccc19x$covid_19_status_fu[which(ccc19x$covid_19_status_fu != '')]
+    t.status[which(ccc19x$c19_status_fu_final != '')] <- ccc19x$c19_status_fu_final[which(ccc19x$c19_status_fu_final != '')]
+    
+    #Assume follow-ups are entered in temporal order (check this assumption!)
+    pts <- unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instance == 2)])
+    for(i in 1:length(pts))
+    {
+      temp.ref <- which(ccc19x$record_id == pts[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      temp <- t.status[temp.ref]
+      if(any(temp == '1'))
+      {
+        temp.ref2 <- min(which(temp == '1'))
+        temp[temp.ref2:length(temp)] <- '1'
+        t.status[temp.ref] <- temp
+      }
+    }
+    
     #No - patient marked as fully recovered within 90 days
     
     #Baseline
-    ccc19x$der_pasc[which((ccc19x$current_status_v2 == 1|ccc19x$current_status_retro == 1) &
+    ccc19x$der_pasc[which(t.status == 1 &
                             ccc19x$covid_19_dx_interval %in% 1:5)] <- 0
     
     #Follow-up
-    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu == 1|ccc19x$c19_status_fu_final == 1) &
+    ccc19x$der_pasc[which(t.status == 1 &
                             (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13))] <- 0
     
     #Yes - patient marked as having ongoing infection or recovered with complications at 90 days or beyond
     
     #Baseline
-    ccc19x$der_pasc[which(ccc19x$current_status_v2 %in% c('1b','2') &
+    ccc19x$der_pasc[which(t.status %in% c('1b','2') &
                             ccc19x$covid_19_dx_interval %in% 6:10)] <- 1
     
     #Follow-up, alive
-    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu %in% c('1b','2') &
+    ccc19x$der_pasc[which(t.status %in% c('1b','2') &
                             (ccc19x$fu_weeks %in% c(90,180,365)|
                                ccc19x$timing_of_report_weeks >= 13))] <- 1
     
     #For those reported as having died at 90+ days having recovered or having ongoing infection, 
     #additionally require that cause of death is at least partially attributed to COVID-19 or "other"
-    ccc19x$der_pasc[which(ccc19x$c19_status_fu_final %in% c('1b','3') &
+    ccc19x$der_pasc[which(t.status %in% c('1b','3') &
                             (ccc19x$cause_of_death_fu %in% c(1,3,88)|ccc19x$cause_of_death_fu_2 %in% c(1,3,88)) &
                             ccc19x$der_days_to_death_combined >= 90)] <- 1
     
@@ -12956,21 +12981,18 @@ var.log <- data.frame(name = character(),
                             ccc19x$der_pasc == 1)] <- NA
     
     #Unknown
-    
-    #Baseline
-    ccc19x$der_pasc[which((ccc19x$current_status_v2 == 99|
-                            ccc19x$current_status_retro == 99) &
-                            is.na(ccc19x$der_pasc))] <- 99
-    
-    #Follow-up
-    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu == 99|
-                             ccc19x$c19_status_fu_final == 99) &
-                            is.na(ccc19x$der_pasc))] <- 99
+    ccc19x$der_pasc[which(t.status == 99 & is.na(ccc19x$der_pasc))] <- 99
     
     #For those reported as having died at 90+ days having recovered or having ongoing infection, 
-    #and cause of death is cancer or unknown, assign to unknown
-    ccc19x$der_pasc[which(ccc19x$c19_status_fu_final %in% c('1b','3') &
+    #and cause of death is cancer or unknown, assign to unknown (require queries)
+    ccc19x$der_pasc[which(t.status %in% c('1b','3') &
                             (ccc19x$cause_of_death_fu %in% c(2,99)|ccc19x$cause_of_death_fu_2 %in% c(2,99)) &
+                            ccc19x$der_days_to_death_combined >= 90)] <- 99
+    
+    #For those reported as having died at 90+ days having fully recovered, 
+    #and cause of death is COVID-19 or both, assign to unknown (require queries)
+    ccc19x$der_pasc[which(t.status %in% c('1') &
+                            (ccc19x$cause_of_death_fu %in% c(1,3)|ccc19x$cause_of_death_fu_2 %in% c(1,3)) &
                             ccc19x$der_days_to_death_combined >= 90)] <- 99
     
     #Merge baseline and followup if discrepancy
