@@ -3408,9 +3408,9 @@ var.log <- data.frame(name = character(),
       for(i in 1:length(pts))
       {
         temp.ref <- which(ccc19x$record_id == pts[i])
-        #Check that f/u form has been completed, remove otherwise
+        #Check that f/u form has been completed or is unverified, remove otherwise
         temp <- ccc19x$followup_complete[temp.ref]
-        temp.ref <- temp.ref[which(is.na(temp) | temp == 2)]
+        temp.ref <- temp.ref[which(is.na(temp) | temp %in% 1:2)]
         if(length(temp.ref) == 1) #No follow-up forms
         {
           #Check if days to death has data, if so use it
@@ -3523,17 +3523,27 @@ var.log <- data.frame(name = character(),
           if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 180
         }
       }
+      
+      
+      #Make sure that all forms (baseline and follow-up) for a given patient have the same f/u value
+      for(i in 1:length(pts))
+      {
+        temp.ref <- which(ccc19x$record_id == pts[i])
+        temp <- ccc19x$der_days_fu[temp.ref]
+        temp <- unique(temp[!is.na(temp)])
+        if(length(temp) == 1) ccc19x$der_days_fu[temp.ref] <- temp
+      }
+      
+      temp <- summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
+      
+      temp.var.log <- data.frame(name = 'der_days_fu',
+                                 timestamp = Sys.time(),
+                                 values = paste(c(paste('Median:', temp[3], 'days'),
+                                                  paste('IQR:', temp[2], '-', temp[5]),
+                                                  paste('NA:', temp[7])), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
     }
-    
-    temp <- summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
-    
-    temp.var.log <- data.frame(name = 'der_days_fu',
-                               timestamp = Sys.time(),
-                               values = paste(c(paste('Median:', temp[3], 'days'),
-                                                paste('IQR:', temp[2], '-', temp[5]),
-                                                paste('NA:', temp[7])), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
     
     #T4 & T5 Median f/u in days anchored to actual dates
     ccc19x$meta_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
@@ -12929,11 +12939,21 @@ var.log <- data.frame(name = character(),
     ccc19x$der_pasc[which(ccc19x$current_status_v2 %in% c('1b','2') &
                             ccc19x$covid_19_dx_interval %in% 6:10)] <- 1
     
-    #Follow-up
-    ccc19x$der_pasc[which((ccc19x$covid_19_status_fu %in% c('1b','2')|
-                             ccc19x$c19_status_fu_final %in% c('1b','3')) &
-                            (ccc19x$fu_weeks %in% c(180,365)|
+    #Follow-up, alive
+    ccc19x$der_pasc[which(ccc19x$covid_19_status_fu %in% c('1b','2') &
+                            (ccc19x$fu_weeks %in% c(90,180,365)|
                                ccc19x$timing_of_report_weeks >= 13))] <- 1
+    
+    #For those reported as having died at 90+ days having recovered or having ongoing infection, 
+    #additionally require that cause of death is at least partially attributed to COVID-19 or "other"
+    ccc19x$der_pasc[which(ccc19x$c19_status_fu_final %in% c('1b','3') &
+                            (ccc19x$cause_of_death_fu %in% c(1,3,88)|ccc19x$cause_of_death_fu_2 %in% c(1,3,88)) &
+                            ccc19x$der_days_to_death_combined >= 90)] <- 1
+    
+    #Reset patients with less than 90 days of follow-up as missing
+    ccc19x$der_pasc[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$der_days_fu < 90|
+                                                                         is.na(ccc19x$der_days_fu))] &
+                            ccc19x$der_pasc == 1)] <- NA
     
     #Unknown
     
@@ -12946,6 +12966,12 @@ var.log <- data.frame(name = character(),
     ccc19x$der_pasc[which((ccc19x$covid_19_status_fu == 99|
                              ccc19x$c19_status_fu_final == 99) &
                             is.na(ccc19x$der_pasc))] <- 99
+    
+    #For those reported as having died at 90+ days having recovered or having ongoing infection, 
+    #and cause of death is cancer or unknown, assign to unknown
+    ccc19x$der_pasc[which(ccc19x$c19_status_fu_final %in% c('1b','3') &
+                            (ccc19x$cause_of_death_fu %in% c(2,99)|ccc19x$cause_of_death_fu_2 %in% c(2,99)) &
+                            ccc19x$der_days_to_death_combined >= 90)] <- 99
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
@@ -12966,7 +12992,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_pasc <- factor(ccc19x$der_pasc)
-    summary(ccc19x$der_pasc[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_pasc[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pasc',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     ############################
     #X12. SARS-CoV-2 vaccination
