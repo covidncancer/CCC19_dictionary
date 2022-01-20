@@ -3511,7 +3511,7 @@ var.log <- data.frame(name = character(),
             if(length(temp[temp != '']) > 0 & all(!is.na(temp[temp != '']))) ccc19x$der_days_fu[temp.ref] <- max(as.numeric(temp[temp != '']))
           }
           
-          #If patient is deceased and days are missing, check the mortality variables for floor adjustment
+          #If patient is deceased and days are missing, check the vital status indicators for floor adjustment
           temp <- any(ccc19x$der_deadbinary[temp.ref] == 1) & any(ccc19x$der_days_fu[temp.ref] > 30) & 
             any(ccc19x$d30_vital_status[temp.ref] == 1) & any(is.na(ccc19x$der_days_to_death_combined[temp.ref])|ccc19x$der_days_to_death_combined[temp.ref] == 9999)
           if(!is.na(temp) & temp) ccc19x$der_days_fu[temp.ref] <- 30
@@ -3538,6 +3538,32 @@ var.log <- data.frame(name = character(),
         temp <- unique(temp[!is.na(temp)])
         if(length(temp) == 1) ccc19x$der_days_fu[temp.ref] <- temp
       }
+      
+      #Ceiling adjustments for patients marked as alive at the landmarks
+      
+      #30-day
+      temp.ref <- which(ccc19x$der_days_fu < 30 &
+                          ccc19x$der_dead30 == 0 &
+                          (ccc19x$mortality == 1|ccc19x$d30_vital_status == 0))
+      ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 30
+      
+      #90-day
+      temp.ref <- which(ccc19x$der_days_fu < 90 &
+                          ccc19x$der_dead90 == 0 &
+                          (ccc19x$mortality_90 == 1|ccc19x$d90_vital_status == 0))
+      ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 90
+      
+      #180-day
+      temp.ref <- which(ccc19x$der_days_fu < 180 &
+                          ccc19x$der_dead180 == 0 &
+                          (ccc19x$mortality_180 == 1|ccc19x$d180_vital_status == 0))
+      ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 180
+      
+      #365-day
+      temp.ref <- which(ccc19x$der_days_fu < 365 &
+                          ccc19x$der_deadbinary == 0 &
+                          ccc19x$d365_vital_status == 0)
+      ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 365
       
       temp <- summary(ccc19x$der_days_fu[ccc19x$redcap_repeat_instrument == ''])
       
