@@ -6249,7 +6249,7 @@ var.log <- data.frame(name = character(),
                                    ccc19x$c19_anticoag_reason___3 == 1|
                                    ccc19x$c19_anticoag_reason_fu___3 == 1)] <- 2
     
-    #Other dosing
+    #Other dosing (does not overwrite)
     ccc19x$der_ac_c19_dose[which((ccc19x$c19_anticoag_reason___oth == 1|
                                     ccc19x$c19_anticoag_reason_fu___oth == 1) &
                                    is.na(ccc19x$der_ac_c19_dose))] <- 88
@@ -6259,7 +6259,7 @@ var.log <- data.frame(name = character(),
                                     ccc19x$covid_19_treatment___none == 1) &
                                    is.na(ccc19x$der_ac_c19_dose))] <- 0
     
-    #Unknown
+    #Unknown (does not overwrite)
     ccc19x$der_ac_c19_dose[which((ccc19x$c19_anticoag_reason___unk == 1|
                                     ccc19x$c19_anticoag_reason_fu___unk == 1|
                                     ccc19x$covid_19_treatment___unk == 1|
@@ -6668,6 +6668,41 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    #Rx25. Received "promising" COVID-19 treatment
+    ccc19x$der_c19_treatment <- NA
+    
+    #Yes
+    ccc19x$der_c19_treatment[which(ccc19x$der_rem == 1|
+                                     ccc19x$der_toci == 1|
+                                     ccc19x$der_steroids_c19 == 1|
+                                     ccc19x$der_plasma == 1|
+                                     ccc19x$der_monoclonals == 1)] <- 1
+    
+    #No
+    ccc19x$der_c19_treatment[which(ccc19x$der_rem == 0 &
+                                     ccc19x$der_toci == 0 &
+                                     ccc19x$der_steroids_c19 == 0 &
+                                     ccc19x$der_plasma == 0 &
+                                     ccc19x$der_monoclonals == 0)] <- 0
+    
+    #Unknown (do not overwrite)
+    ccc19x$der_c19_treatment[which((ccc19x$der_rem == 99|
+                                     ccc19x$der_toci == 99|
+                                     ccc19x$der_steroids_c19 == 99|
+                                     ccc19x$der_plasma == 99|
+                                     ccc19x$der_monoclonals == 99) &
+                                     is.na(ccc19x$der_c19_treatment))] <- 99
+    
+    ccc19x$der_c19_treatment <- factor(ccc19x$der_c19_treatment)
+    
+    temp <- summary(ccc19x$der_c19_treatment[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_c19_treatment',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
   }
   print('Treatments completed')
   
