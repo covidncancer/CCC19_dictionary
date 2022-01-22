@@ -5581,16 +5581,7 @@ var.log <- data.frame(name = character(),
         }
       }
     }
-    
-    ccc19x$der_other_tx_c19 <- factor(ccc19x$der_other_tx_c19)
-    
-    temp <- summary(ccc19x$der_other_tx_c19[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_other_tx_c19',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
+   
     #Unknown
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
                         !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
@@ -5602,8 +5593,6 @@ var.log <- data.frame(name = character(),
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & ccc19x$covid_19_treatment_fu___unk[i] == 1) ccc19x$der_other_tx_c19[i] <- 99
     
-    summary(factor(ccc19x$der_other_tx_c19))
-    
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
@@ -5612,8 +5601,6 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0)) ccc19x$der_other_tx_c19[i] <- NA
-    
-    summary(factor(ccc19x$der_other_tx_c19))
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
@@ -5630,7 +5617,13 @@ var.log <- data.frame(name = character(),
     }
     
     ccc19x$der_other_tx_c19 <- factor(ccc19x$der_other_tx_c19)
-    summary(ccc19x$der_other_tx_c19[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_other_tx_c19[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_other_tx_c19',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Rx7a. COVID-19 treatments other than HCQ, steroids, or remdesivir
     ccc19x$der_other_tx_c19_v2 <- NA
