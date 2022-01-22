@@ -462,20 +462,46 @@ var.log <- data.frame(name = character(),
     var.log <- rbind(var.log, temp.var.log)
     
     "recovered"                           
-    #O5. Derived recovery variable [needs unknown added]
+    #O5. Derived recovery variable
     ccc19x$der_recovered <- NA
     
-    #initial form
+    #Yes, initial form
     ccc19x$der_recovered[which(ccc19x$current_status_v2 %in% c("1", "1b") |
                                  ccc19x$current_status_retro %in% c("1", "1b"))] <- 1
-    ccc19x$der_recovered[which(is.na(ccc19x$der_recovered))] <- 0
     
-    #followup form
-    ccc19x$furecovered <- NA
-    ccc19x$furecovered[which(ccc19x$covid_19_status_fu %in% c("1", "1b"))] <- 1
-    furecovereds <- ccc19x$record_id[which(ccc19x$furecovered == 1)]
-    ccc19x$der_recovered[which(ccc19x$record_id %in% furecovereds)] <- 1
-    rm(furecovereds)
+    #Yes, followup form
+    ccc19x$der_recovered[which(ccc19x$covid_19_status_fu %in% c("1", "1b") |
+                                 ccc19x$c19_status_fu_final %in% c("1", "1b"))] <- 1
+    
+    #No, initial form
+    ccc19x$der_recovered[which(ccc19x$current_status_v2 == '2' |
+                                 (ccc19x$current_status_v2 == '3' & ccc19x$cause_of_death_2 %in% c(1,3))|
+                                 (ccc19x$current_status_retro == '3' & ccc19x$cause_of_death_2 %in% c(1,3)))] <- 0
+    
+    #No, followup form (including died with COVID-19 as a factor)
+    ccc19x$der_recovered[which(ccc19x$covid_19_status_fu == '2' |
+                                 (ccc19x$covid_19_status_fu == '3' & ccc19x$cause_of_death_fu %in% c(1,3))|
+                                 (ccc19x$c19_status_fu_final == '3' & ccc19x$cause_of_death_fu %in% c(1,3)))] <- 0
+    
+    #Unknown
+    ccc19x$der_recovered[which(ccc19x$current_status_v2 == 99|
+                                 ccc19x$current_status_retro == 99|
+                                 ccc19x$covid_19_status_fu == 99|
+                                 ccc19x$c19_status_fu_final == 99)] <- 99
+    
+    #Merge baseline and followup if discrepancy
+    for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+    {
+      temp.ref <- which(ccc19x$record_id == i)
+      temp <- ccc19x$der_recovered[temp.ref]
+      temp <- as.numeric(unique(temp[!is.na(temp)]))
+      if(length(temp) > 0)
+      {
+        if(any(temp == 1)) ccc19x$der_recovered[temp.ref] <- 1
+        if(!any(temp == 1) & any(temp == 99)) ccc19x$der_recovered[temp.ref] <- 99
+        if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_recovered[temp.ref] <- 0
+      }
+    }
     
     #Factor
     ccc19x$der_recovered <- as.factor(ccc19x$der_recovered)
