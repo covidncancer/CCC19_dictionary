@@ -3345,6 +3345,98 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    ####################################################
+    #Comp45. Complications with severity by adjudication
+    ####################################################
+    ccc19x$der_complications_severity <- NA
+    
+    #Named complications
+    comp <- read.csv(file = 'Mapping - complications/2022-01-22 complications graded.csv', header = T, stringsAsFactors = F)
+    
+    #Graded
+    temp.ref1 <- which(colnames(ccc19x) %in% comp$variable[comp$value == 'Mild'])
+    temp.ref2 <- which(colnames(ccc19x) %in% comp$variable[comp$value == 'Moderate'])
+    temp.ref3 <- which(colnames(ccc19x) %in% comp$variable[comp$value == 'Serious'])
+    
+    #Go through the rows and overwrite from least to most complicated
+    for(i in 1:nrow(ccc19x))
+    {
+      if(length(which(ccc19x[i,temp.ref1] == 1)) > 0) ccc19x$der_complications_severity[i] <- 'Mild'
+      if(length(which(ccc19x[i,temp.ref2] == 1)) > 0) ccc19x$der_complications_severity[i] <- 'Moderate'
+      if(length(which(ccc19x[i,temp.ref3] == 1)) > 0) ccc19x$der_complications_severity[i] <- 'Serious'
+    }
+    
+    #None of the named complications
+    temp.ref <- which(colnames(ccc19x) %in% comp$variable)
+    temp.ref2 <- which(is.na(ccc19x$der_complications_severity))
+    for(i in temp.ref2)
+    {
+      temp <- ccc19x[i,temp.ref]
+      #Remove the missing
+      temp <- temp[!is.na(temp)]
+      if(all(temp == 0)) ccc19x$der_complications_severity[i] <- 'None'
+    }
+    
+    #Other
+    
+    #Baseline
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic___238147009',
+                                              'c19_complications_pulm___50043002',
+                                              'c19_complications_card___49601007',
+                                              'c19_complications_gi___53619000',
+                                              'c19_complications_other___362965005'))
+    temp.ref2 <- which(is.na(ccc19x$der_complications_severity) & ccc19x$redcap_repeat_instrument == '')
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1)) ccc19x$der_complications_severity[i] <- 'Other'
+    
+    #Follow-up (affects full case if present)
+    temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_systemic_fu___238147009',
+                                              'c19_complications_pulm_fu___50043002',
+                                              'c19_complications_card_fu___49601007',
+                                              'c19_complications_gi_fu___53619000',
+                                              'c19_complications_other_fu___362965005'))
+    temp.ref2 <- which(is.na(ccc19x$der_complications_severity) & ccc19x$redcap_repeat_instrument == 'followup')
+    for(i in temp.ref2)
+      if(any(ccc19x[i,temp.ref] == 1)) 
+      {
+        temp.ref3 <- which(ccc19x$record_id == ccc19x$record_id[i])
+        if(all(is.na(ccc19x$der_complications_severity[temp.ref3]))) ccc19x$der_complications_severity[temp.ref3] <- 'Other'
+      }
+    
+    #Unknown
+    temp.ref <- which(colnames(ccc19x) %in% comp$variable)
+    temp.ref2 <- which(is.na(ccc19x$der_complications_severity))
+    for(i in temp.ref2)
+    {
+      temp <- ccc19x[i,temp.ref]
+      #Remove the missing
+      temp <- temp[!is.na(temp)]
+      if(any(temp == 99)) ccc19x$der_complications_severity[i] <- 'Unknown'
+    }
+    
+    #Categorical complications based on der_worst (overwrite to higher grade if needed)
+    ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Other','Unknown') &
+                                              ccc19x$der_worst == 'Mild')] <- 'Mild'
+    
+    ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Mild','Other','Unknown') &
+                                              ccc19x$der_worst == 'Moderate')] <- 'Moderate'
+    
+    ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Mild','Moderate','Other','Unknown') &
+                                              ccc19x$der_worst == 'Serious')] <- 'Serious'
+    
+    ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Unknown') &
+                                              ccc19x$der_worst == 'Other')] <- 'Other'
+    
+    ccc19x$der_complications_severity <- factor(ccc19x$der_complications_severity)
+    
+    temp <- summary(ccc19x$der_complications_severity[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_complications_severity',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ######
     rm(master_comp)
     }
   print('Complications completed')
