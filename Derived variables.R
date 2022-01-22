@@ -11450,17 +11450,15 @@ var.log <- data.frame(name = character(),
     var.log <- rbind(var.log, temp.var.log)
     
     #Ca6: Center type
-    sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
+    ccc19x$der_site_type <- NA
     
     #ccc19x institutions, first
-    temp <- unique(ccc19x$ccc19_institution)
-    temp <- temp[temp != '']
+    sites <- read.csv(file = '~/Box Sync/CCC19 data/Institution list.csv', header = T, stringsAsFactors = F)
     
-    ccc19x$der_site_type <- NA
-    for(i in 1:length(temp))
+    for(i in 1:nrow(sites))
     {
-      temp.ref <- which(ccc19x$ccc19_institution == temp[i])
-      ccc19x$der_site_type[temp.ref] <- sites$Center.Type[sites$Center.ID == temp[i]]
+      temp.ref <- which(ccc19x$ccc19_institution == sites$Site_ID[i])
+      if(length(temp.ref) > 0) ccc19x$der_site_type[temp.ref] <- sites$Center.Type[i]
     }
     
     #Next, the unaffiliated
