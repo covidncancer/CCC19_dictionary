@@ -8002,6 +8002,66 @@ var.log <- data.frame(name = character(),
     ccc19x$der_HIV <- factor(ccc19x$der_HIV)
     summary(ccc19x$der_HIV[ccc19x$redcap_repeat_instrument == ''])
     
+    #################
+    #C17. Sleep Apnea
+    #################
+    ccc19x$der_OSA <- NA
+    ccc19x$der_OSA[which(ccc19x$significant_comorbidities___78275009 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___78275009|significant_comorbidities___unk'))
+    
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___78275009[i] == 0) ccc19x$der_OSA[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_OSA[i] <- 99
+    }
+    
+    ccc19x$der_OSA <- factor(ccc19x$der_OSA)
+    
+    temp <- summary(ccc19x$der_OSA[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_OSA',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ########################
+    #C18. Metabolic syndrome
+    ########################
+    ccc19x$der_metabolic_syndrome <- NA
+    ccc19x$der_metabolic_syndrome[which(ccc19x$significant_comorbidities___237602007 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___237602007|significant_comorbidities___unk'))
+    
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___237602007[i] == 0) ccc19x$der_metabolic_syndrome[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_metabolic_syndrome[i] <- 99
+    }
+    
+    ccc19x$der_metabolic_syndrome <- factor(ccc19x$der_metabolic_syndrome)
+    
+    temp <- summary(ccc19x$der_metabolic_syndrome[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_metabolic_syndrome',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #######################
     #C10. Baseline dementia
     #######################
