@@ -4641,8 +4641,8 @@ var.log <- data.frame(name = character(),
     
     #T3
     temp.ref2 <- which(x2 %in% c('09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & y2 != 2099)
-    
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T3', y2[temp.ref2])
+    
     ccc19x$der_tri_rt_dx <- factor(ccc19x$der_tri_rt_dx)
     
     temp <- summary(ccc19x$der_tri_rt_dx[ccc19x$redcap_repeat_instrument == ''])
