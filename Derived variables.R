@@ -3505,6 +3505,19 @@ var.log <- data.frame(name = character(),
       }
     }
     
+    #Fix left time if there is a discrepancy with the year of diagnosis
+    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2019 &
+                        ccc19x$dx_year == 2020)
+    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2020 &
+                        ccc19x$dx_year == 2021)
+    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2021 &
+                        ccc19x$dx_year == 2022)
+    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+    
     ###############
     #T3. Median f/u
     ###############
@@ -3751,6 +3764,19 @@ var.log <- data.frame(name = character(),
       }
     }
     
+    #Fix left time if there is a discrepancy with the year of diagnosis
+    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2019 &
+                        ccc19x$dx_year == 2020)
+    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2020 &
+                        ccc19x$dx_year == 2021)
+    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2021 &
+                        ccc19x$dx_year == 2022)
+    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+    
     #T6. 30-day follow-up available (0 = no; 1 = yes; 99 = unknown)
     {
       ccc19x$der_d30 <- NA 
@@ -3825,6 +3851,19 @@ var.log <- data.frame(name = character(),
           ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
         }
       }
+      
+      #Fix left time if there is a discrepancy with the year of diagnosis
+      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2019 &
+                          ccc19x$dx_year == 2020)
+      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+      
+      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2020 &
+                          ccc19x$dx_year == 2021)
+      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+      
+      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2021 &
+                          ccc19x$dx_year == 2022)
+      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
       
       temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
       temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
