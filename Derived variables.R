@@ -10350,8 +10350,8 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    ################################################
-    #Ca07g. Cancer progressing on any follow-up form
+    #######################################################################################
+    #Ca07g. Cancer progressing on any follow-up form, including attributable cause of death
     ccc19x$der_cancer_prog_fu <- NA
     
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -10372,6 +10372,15 @@ var.log <- data.frame(name = character(),
           ccc19x$der_cancer_prog_fu[temp.ref2] <- 0 
         } else ccc19x$der_cancer_prog_fu[temp.ref2] <- 99
       }
+    }
+    
+    #Check for cancer as attributable cause of death
+    temp <- unique(ccc19x$record_id[which(ccc19x$der_deadbinary == 1 &
+                                            ccc19x$redcap_repeat_instrument == 'followup')])
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == '')
+      if(ccc19x$der_cause_of_death[temp.ref] %in% c(1,3)) ccc19x$der_cancer_prog_fu[temp.ref] <- 1
     }
     
     #Factor
