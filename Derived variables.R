@@ -10342,7 +10342,81 @@ var.log <- data.frame(name = character(),
     
     #Factor
     ccc19x$der_cancer_prog_bl <- as.factor(ccc19x$der_cancer_prog_bl)
-    summary(ccc19x$der_cancer_prog_bl[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_cancer_prog_bl[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_prog_bl',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ################################################
+    #Ca07g. Cancer progressing on any follow-up form
+    ccc19x$der_cancer_prog_fu <- NA
+    
+    temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
+    
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      temp.ref2 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == '')
+      temp2 <- ccc19x$cancer_status_fu[temp.ref]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp2) > 0)
+      {
+        if(any(temp2 == 4)) 
+        {
+          ccc19x$der_cancer_prog_fu[temp.ref2] <- 1 
+        } else if(all(temp2 %in% c(1,2,3))) 
+        { 
+          ccc19x$der_cancer_prog_fu[temp.ref2] <- 0 
+        } else ccc19x$der_cancer_prog_fu[temp.ref2] <- 99
+      }
+    }
+    
+    #Factor
+    ccc19x$der_cancer_prog_fu <- as.factor(ccc19x$der_cancer_prog_fu)
+    
+    temp <- summary(ccc19x$der_cancer_prog_fu[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_prog_fu',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ######################################################
+    #Ca26. Cancer treatment modified on any follow-up form
+    ccc19x$der_cancer_tx_mod <- NA
+    
+    temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
+    
+    for(i in 1:length(temp))
+    {
+      temp.ref <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      temp.ref2 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == '')
+      temp2 <- ccc19x$cancer_tx_fu[temp.ref]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp2) > 0)
+      {
+        if(any(temp2 == 1)) 
+        {
+          ccc19x$der_cancer_tx_mod[temp.ref2] <- 1 
+        } else if(all(temp2 == 0)) 
+        { 
+          ccc19x$der_cancer_tx_mod[temp.ref2] <- 0 
+        } else ccc19x$der_cancer_tx_mod[temp.ref2] <- 99
+      }
+    }
+    
+    #Factor
+    ccc19x$der_cancer_tx_mod <- as.factor(ccc19x$der_cancer_tx_mod)
+    
+    temp <- summary(ccc19x$der_cancer_tx_mod[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cancer_tx_mod',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #Ca19. Metastatic status (only applicable to solid tumors/lymphoma)
     ccc19x$der_metastatic <- NA
