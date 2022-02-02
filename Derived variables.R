@@ -13376,9 +13376,9 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    ############################
-    #X12. SARS-CoV-2 vaccination
-    ############################
+    ##########################
+    #X12. COVID-19 vaccination
+    ##########################
     ccc19x$der_vax <- NA
     
     #No
@@ -13407,7 +13407,35 @@ var.log <- data.frame(name = character(),
                            ccc19x$sars_vax_when == 99)] <- 'Unknown'
     
     ccc19x$der_vax <- factor(ccc19x$der_vax)
-    summary(ccc19x$der_vax[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_vax[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vax',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #X12a. COVID-19 vaccination with temporal collapse
+    ccc19x$der_vax_collapsed <- NA
+    
+    #At least one dose prior to COVID-19
+    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Partially vaccinated','Fully vaccinated'))] <- 1
+    
+    #Unvaccinated or vaccinated after COVID-19
+    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Unvaccinated','After COVID-19'))] <- 0
+    
+    #Unknown
+    ccc19x$der_vax_collapsed[which(ccc19x$der_vax == 'Unknown')] <- 99
+    
+    ccc19x$der_vax_collapsed <- factor(ccc19x$der_vax_collapsed)
+    
+    temp <- summary(ccc19x$der_vax_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vax_collapsed',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     
   }
   print('Other derived variables completed')
