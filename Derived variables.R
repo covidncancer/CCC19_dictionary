@@ -10698,7 +10698,7 @@ var.log <- data.frame(name = character(),
     #Just keep the rows with drug information
     drugs <- drugs[drugs$drug1 != '',]
     
-    for(i in 5:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
+    for(i in 4:ncol(drugs)) drugs[,i] <- trimws(drugs[,i])
     
     ccc19x$der_no_drugs <- NA
     
