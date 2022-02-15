@@ -49,7 +49,7 @@ var.log <- data.frame(name = character(),
                                   is.na(ccc19x$der_deadbinary))] <- 99
     
     #Alive on followup form
-    ccc19x$der_deadbinary[which(ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+    ccc19x$der_deadbinary[which(ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                         ccc19x$fu_reason %in% 1:2)] <- 0
     
     #Dead on followup form (overwriting allowed)
@@ -588,14 +588,14 @@ var.log <- data.frame(name = character(),
     time.df$record_id <- unique(ccc19x$record_id)
     
     #Baseline
-    temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instrument == '', c('record_id','der_o2_ever')], all.x = T)
+    temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instrument == '', c('record_id', 'der_o2_ever')], all.x = T)
     temp <- temp[order(time.df$record_id),]
     time.df[,2] <- temp$der_o2_ever
     
     #Followup
     for(i in 3:ncol(time.df))
     {
-      temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instance == i - 2, c('record_id','der_o2_ever')], all.x = T)
+      temp <- merge(time.df, ccc19x[ccc19x$redcap_repeat_instance == i - 2, c('record_id', 'der_o2_ever')], all.x = T)
       temp <- temp[order(time.df$record_id),]
       time.df[,i] <- temp$der_o2_ever
     }
@@ -960,12 +960,12 @@ var.log <- data.frame(name = character(),
       #Unknown
       
       #Baseline
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_pulm___unk'))
       for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == ''))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
       
       #Followup
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_pulm_fu___unk'))
       for(i in which(is.na(ccc19x$der_PE_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp[i] <- 99
       
@@ -1010,12 +1010,12 @@ var.log <- data.frame(name = character(),
       #Unknown
       
       #Baseline
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_pulm___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_pulm___unk'))
       for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
       
       #Followup
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_pulm_fu___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_pulm_fu___unk'))
       for(i in which(is.na(ccc19x$der_PE_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
                      (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_3mo[i] <- 99
@@ -1245,12 +1245,12 @@ var.log <- data.frame(name = character(),
       #Unknown
       
       #Baseline
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_other___unk'))
       for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == ''))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
       
       #Followup
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_other_fu___unk'))
       for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp) & ccc19x$redcap_repeat_instrument == 'followup'))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp[i] <- 99
       
@@ -1295,12 +1295,12 @@ var.log <- data.frame(name = character(),
       #Unknown
       
       #Baseline
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk','c19_complications_other___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_other___unk'))
       for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == ''))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
       
       #Followup
-      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk','c19_complications_other_fu___unk'))
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_other_fu___unk'))
       for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_3mo) & ccc19x$redcap_repeat_instrument == 'followup' &
                      (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
         if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_3mo[i] <- 99
@@ -1326,7 +1326,7 @@ var.log <- data.frame(name = character(),
       ccc19x$der_VTE_comp <- NA
       
       #Any complication
-      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp','der_thrombosis_NOS_comp'))
+      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp', 'der_DVT_comp', 'der_thrombosis_NOS_comp'))
       for(i in temp.ref)
         ccc19x$der_VTE_comp[which(ccc19x[,i] == 1)] <- 1
       
@@ -1353,7 +1353,7 @@ var.log <- data.frame(name = character(),
       ccc19x$der_VTE_comp_v2 <- NA
       
       #Any complication
-      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp','der_DVT_comp'))
+      temp.ref <- which(colnames(ccc19x) %in% c('der_PE_comp', 'der_DVT_comp'))
       for(i in temp.ref)
         ccc19x$der_VTE_comp_v2[which(ccc19x[,i] == 1)] <- 1
       
@@ -3416,16 +3416,16 @@ var.log <- data.frame(name = character(),
       }
       
       #Categorical complications based on der_worst (overwrite to higher grade if needed)
-      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Other','Unknown') &
+      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None', 'Other', 'Unknown') &
                                                 ccc19x$der_worst == 'Mild')] <- 'Mild'
       
-      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Mild','Other','Unknown') &
+      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None', 'Mild', 'Other', 'Unknown') &
                                                 ccc19x$der_worst == 'Moderate')] <- 'Moderate'
       
-      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Mild','Moderate','Other','Unknown') &
+      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None', 'Mild', 'Moderate', 'Other', 'Unknown') &
                                                 ccc19x$der_worst == 'Serious')] <- 'Serious'
       
-      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None','Unknown') &
+      ccc19x$der_complications_severity[which(ccc19x$der_complications_severity %in% c('None', 'Unknown') &
                                                 ccc19x$der_worst == 'Other')] <- 'Other'
       
       ccc19x$der_complications_severity <- factor(ccc19x$der_complications_severity)
@@ -3564,7 +3564,7 @@ var.log <- data.frame(name = character(),
             # #Check that LOS aren't longer than this
             # if(!is.na(ccc19x$der_days_fu[temp.ref]))
             # {
-            #   temp <- ccc19x[temp.ref,c('hosp_los','hosp_los_2','icu_los')]
+            #   temp <- ccc19x[temp.ref,c('hosp_los', 'hosp_los_2', 'icu_los')]
             #   temp <- sum(temp[!is.na(temp)])
             #   if(temp > ccc19x$der_days_fu[temp.ref]) ccc19x$der_days_fu[temp.ref] <- temp
             # }
@@ -4008,7 +4008,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
     #Alive on followup form
-    temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+    temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
                          (ccc19x$fu_weeks %in% c(30,90,180) | ccc19x$timing_of_report_weeks > 4))
     temp <- ccc19x$record_id[temp.ref2]
@@ -4248,7 +4248,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 0
     
     #Alive on followup form
-    temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1','1b','2') | 
+    temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
                          (ccc19x$fu_weeks %in% c(90,180) | ccc19x$timing_of_report_weeks > 12))
     temp <- ccc19x$record_id[temp.ref2]
@@ -4584,23 +4584,23 @@ var.log <- data.frame(name = character(),
     ccc19x$der_quarter_dx <- NA
     
     #Q1
-    temp.ref2 <- which(x1 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & 
-                         x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)') & 
+                         x2 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q1', y1[temp.ref2])
     
     #Q2
-    temp.ref2 <- which(x1 %in% c('04 (Apr)','05 (May)','06 (Jun)') & 
-                         x2 %in% c('04 (Apr)','05 (May)','06 (Jun)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('04 (Apr)', '05 (May)', '06 (Jun)') & 
+                         x2 %in% c('04 (Apr)', '05 (May)', '06 (Jun)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q2', y1[temp.ref2])
     
     #Q3
-    temp.ref2 <- which(x1 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & 
-                         x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)') & 
+                         x2 %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q3', y1[temp.ref2])
     
     #Q4
-    temp.ref2 <- which(x1 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & 
-                         x2 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('10 (Oct)', '11 (Nov)', '12 (Dec)') & 
+                         x2 %in% c('10 (Oct)', '11 (Nov)', '12 (Dec)') & y1 == y2 & y1 != 2099)
     ccc19x$der_quarter_dx[temp.ref[temp.ref2]] <- paste('Q4', y1[temp.ref2])
     
     ccc19x$der_quarter_dx <- factor(ccc19x$der_quarter_dx)
@@ -4610,19 +4610,19 @@ var.log <- data.frame(name = character(),
     ccc19x$der_quarter_rt_dx <- NA
     
     #Q1
-    temp.ref2 <- which(x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q1', y2[temp.ref2])
     
     #Q2
-    temp.ref2 <- which(x2 %in% c('04 (Apr)','05 (May)','06 (Jun)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('04 (Apr)', '05 (May)', '06 (Jun)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q2', y2[temp.ref2])
     
     #Q3
-    temp.ref2 <- which(x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)') & y2 != 2099)
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q3', y2[temp.ref2])
     
     #Q4
-    temp.ref2 <- which(x2 %in% c('10 (Oct)','11 (Nov)','12 (Dec)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('10 (Oct)', '11 (Nov)', '12 (Dec)') & y2 != 2099)
     
     ccc19x$der_quarter_rt_dx[temp.ref[temp.ref2]] <- paste('Q4', y2[temp.ref2])
     ccc19x$der_quarter_rt_dx <- factor(ccc19x$der_quarter_rt_dx)
@@ -4632,15 +4632,15 @@ var.log <- data.frame(name = character(),
     ccc19x$der_tri_rt_dx <- NA
     
     #T1
-    temp.ref2 <- which(x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)', '04 (Apr)') & y2 != 2099)
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T1', y2[temp.ref2])
     
     #T2
-    temp.ref2 <- which(x2 %in% c('05 (May)','06 (Jun)','07 (Jul)','08 (Aug)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('05 (May)', '06 (Jun)', '07 (Jul)', '08 (Aug)') & y2 != 2099)
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T2', y2[temp.ref2])
     
     #T3
-    temp.ref2 <- which(x2 %in% c('09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & y2 != 2099)
+    temp.ref2 <- which(x2 %in% c('09 (Sep)', '10 (Oct)', '11 (Nov)', '12 (Dec)') & y2 != 2099)
     ccc19x$der_tri_rt_dx[temp.ref[temp.ref2]] <- paste('T3', y2[temp.ref2])
     
     ccc19x$der_tri_rt_dx <- factor(ccc19x$der_tri_rt_dx)
@@ -4656,13 +4656,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_hemi_dx <- NA
     
     #H1
-    temp.ref2 <- which(x1 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)','05 (May)','06 (Jun)') & 
-                         x2 %in% c('01 (Jan)','02 (Feb)','03 (Mar)','04 (Apr)','05 (May)','06 (Jun)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)', '04 (Apr)', '05 (May)', '06 (Jun)') & 
+                         x2 %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)', '04 (Apr)', '05 (May)', '06 (Jun)') & y1 == y2 & y1 != 2099)
     ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H1', y1[temp.ref2])
     
     #H2
-    temp.ref2 <- which(x1 %in% c('07 (Jul)','08 (Aug)','09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & 
-                         x2 %in% c('07 (Jul)','08 (Aug)','09 (Sep)','10 (Oct)','11 (Nov)','12 (Dec)') & y1 == y2 & y1 != 2099)
+    temp.ref2 <- which(x1 %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)', '10 (Oct)', '11 (Nov)', '12 (Dec)') & 
+                         x2 %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)', '10 (Oct)', '11 (Nov)', '12 (Dec)') & y1 == y2 & y1 != 2099)
     ccc19x$der_hemi_dx[temp.ref[temp.ref2]] <- paste('H2', y1[temp.ref2])
     
     ccc19x$der_hemi_dx <- factor(ccc19x$der_hemi_dx)
@@ -5191,7 +5191,7 @@ var.log <- data.frame(name = character(),
     trial.ref <- which(ccc19x$covid_19_treatment_trial == 1)
     for(i in 1:length(trial.ref))
     {
-      temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx___rxcui_5521','covid_19_trial_tx___rxcui_18631')]
+      temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx___rxcui_5521', 'covid_19_trial_tx___rxcui_18631')]
       if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
         if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
           if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
@@ -5208,7 +5208,7 @@ var.log <- data.frame(name = character(),
     {
       for(i in 1:length(trial.ref))
       {
-        temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx_fu___rxcui_5521','covid_19_trial_tx_fu___rxcui_18631')]
+        temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx_fu___rxcui_5521', 'covid_19_trial_tx_fu___rxcui_18631')]
         if(temp[1] != 0 & temp[2] != 0)
         {
         if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
@@ -5231,7 +5231,7 @@ var.log <- data.frame(name = character(),
       if(length(temp) > 0)
       {
         if((any(temp == 'AZ alone') & any(temp=='HCQ alone'))|any(temp == 'AZ+HCQ')) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- 'AZ+HCQ'
-        else if(any(temp %in% c('Neither HCQ nor AZ','Unknown')) & any(!temp %in% c('Neither HCQ nor AZ','Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ','Unknown')])
+        else if(any(temp %in% c('Neither HCQ nor AZ', 'Unknown')) & any(!temp %in% c('Neither HCQ nor AZ', 'Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ', 'Unknown')])
       }
     }
     
@@ -5318,8 +5318,8 @@ var.log <- data.frame(name = character(),
                                 ccc19x$steroid_specific_fu %in% 2:3)] <- 1
     
     #Never or less than 20 mg/d
-    ccc19x$der_steroids_hd_c19[which((ccc19x$steroid_specific %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
-                                       (ccc19x$steroid_specific_fu %in% c('1','1a','1b') & is.na(ccc19x$der_steroids_hd_c19))|
+    ccc19x$der_steroids_hd_c19[which((ccc19x$steroid_specific %in% c('1', '1a', '1b') & is.na(ccc19x$der_steroids_hd_c19))|
+                                       (ccc19x$steroid_specific_fu %in% c('1', '1a', '1b') & is.na(ccc19x$der_steroids_hd_c19))|
                                        (ccc19x$covid_19_treatment___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19))|
                                        (ccc19x$covid_19_treatment_fu___ho_45523 == 0 & is.na(ccc19x$der_steroids_hd_c19)))] <- 0
     
@@ -5695,16 +5695,16 @@ var.log <- data.frame(name = character(),
     ccc19x$der_other_tx_c19 <- NA
     
     #Build the exclusion list
-    x <- c('b01a','n02ba', #Anticoag, Aspirin, APA
-           '233573008','714749008', #ECMO, CRRT
-           'rxcui_5521','omop4873974','rxcui_18631', #HCQ, Rem, AZ
-           'ho_44995','rxcui_260101', #Antivirals NOS, oseltamivir
+    x <- c('b01a', 'n02ba', #Anticoag, Aspirin, APA
+           '233573008', '714749008', #ECMO, CRRT
+           'rxcui_5521', 'omop4873974', 'rxcui_18631', #HCQ, Rem, AZ
+           'ho_44995', 'rxcui_260101', #Antivirals NOS, oseltamivir
            'ho_45523', #Steroids
-           '612865','l04ac07', #Toci
+           '612865', 'l04ac07', #Toci
            'atc_c10aa', #Statins
-           '19_treatment___oth','19_treatment_fu___oth','trial_tx___oth','tx_fu___oth', #"Other" treatments (usually antibiotics)
-           '19_treatment___unk','19_treatment_fu___unk','trial_tx___unk','tx_fu___unk',
-           'treatment___none','treatment_fu___none')
+           '19_treatment___oth', '19_treatment_fu___oth', 'trial_tx___oth', 'tx_fu___oth', #"Other" treatments (usually antibiotics)
+           '19_treatment___unk', '19_treatment_fu___unk', 'trial_tx___unk', 'tx_fu___unk',
+           'treatment___none', 'treatment_fu___none')
     x <- paste(x, collapse = '|')
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment__|19_treatment_fu_|covid_19_trial_tx|covid_19_tx') & 
@@ -5788,15 +5788,15 @@ var.log <- data.frame(name = character(),
     ccc19x$der_other_tx_c19_v2 <- NA
     
     #Build the exclusion list
-    x <- c('b01a','n02ba', #Anticoag, Aspirin, APA
-           '233573008','714749008', #ECMO, CRRT
-           'rxcui_5521','omop4873974', #HCQ, Rem
-           'ho_44995','rxcui_260101', #Antivirals NOS, oseltamivir
+    x <- c('b01a', 'n02ba', #Anticoag, Aspirin, APA
+           '233573008', '714749008', #ECMO, CRRT
+           'rxcui_5521', 'omop4873974', #HCQ, Rem
+           'ho_44995', 'rxcui_260101', #Antivirals NOS, oseltamivir
            'ho_45523', #Steroids
            'atc_c10aa', #Statins
-           '19_treatment___oth','19_treatment_fu___oth','trial_tx___oth','tx_fu___oth', #"Other" treatments (usually antibiotics)
-           '19_treatment___unk','19_treatment_fu___unk','trial_tx___unk','tx_fu___unk',
-           'treatment___none','treatment_fu___none')
+           '19_treatment___oth', '19_treatment_fu___oth', 'trial_tx___oth', 'tx_fu___oth', #"Other" treatments (usually antibiotics)
+           '19_treatment___unk', '19_treatment_fu___unk', 'trial_tx___unk', 'tx_fu___unk',
+           'treatment___none', 'treatment_fu___none')
     x <- paste(x, collapse = '|')
     
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment__|19_treatment_fu_|covid_19_trial_tx|covid_19_tx') & 
@@ -6037,9 +6037,9 @@ var.log <- data.frame(name = character(),
     
     #Rx10. Low-dose steroids ever (dose up to 20 mg/d, baseline or treatment of COVID-19)
     ccc19x$der_steroids_ld <- NA
-    ccc19x$der_steroids_ld[which(ccc19x$steroid_specific_2 %in% c('1','1a','1b')|
-                                   ccc19x$steroid_specific %in% c('1','1a','1b')|
-                                   ccc19x$steroid_specific_fu %in% c('1','1a','1b'))] <- 1
+    ccc19x$der_steroids_ld[which(ccc19x$steroid_specific_2 %in% c('1', '1a', '1b')|
+                                   ccc19x$steroid_specific %in% c('1', '1a', '1b')|
+                                   ccc19x$steroid_specific_fu %in% c('1', '1a', '1b'))] <- 1
     
     #Never
     ccc19x$der_steroids_ld[which((ccc19x$concomitant_meds___h02 == 0 & is.na(ccc19x$der_steroids_ld))|
@@ -6507,7 +6507,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_steroids_hd_bl[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
     
     #Unexposed or under-exposed
-    ccc19x$der_steroids_hd_bl[which((ccc19x$steroid_specific_2 %in% c(1,'1a','1b') |
+    ccc19x$der_steroids_hd_bl[which((ccc19x$steroid_specific_2 %in% c(1, '1a', '1b') |
                                        ccc19x$concomitant_meds___h02 == 0) &
                                       ccc19x$concomitant_meds___unk == 0)] <- 0
     
@@ -6536,7 +6536,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 == 1)] <- 'Low-dose (<=20 mg PDE/day)'
     
     #High-dose
-    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% c('1b','2','3'))] <- 'High-dose (>10 mg PDE/day)'
+    ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% c('1b', '2', '3'))] <- 'High-dose (>10 mg PDE/day)'
     
     #Dose unknown
     ccc19x$der_steroids_bl[which(ccc19x$steroid_specific_2 %in% 99)] <- 'Steroids, unknown dose'
@@ -6600,7 +6600,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_steroids_bl_10[which(ccc19x$steroid_specific_2 %in% c('1a'))] <- "10 mg PDE or less per day"
     
     #More than 10
-    ccc19x$der_steroids_bl_10[which(ccc19x$steroid_specific_2 %in% c('1b','2','3'))] <- "More than 10 mg PDE per day"
+    ccc19x$der_steroids_bl_10[which(ccc19x$steroid_specific_2 %in% c('1b', '2', '3'))] <- "More than 10 mg PDE per day"
     
     #Unknown
     ccc19x$der_steroids_bl_10[which((ccc19x$concomitant_meds___unk == 1 & 
@@ -6978,9 +6978,9 @@ var.log <- data.frame(name = character(),
     ccc19x$der_race <- NA
     
     ccc19x$der_race[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
-                            ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic Black"
+                            ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic Black"
     ccc19x$der_race[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0 &
-                            ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic White"
+                            ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic White"
     
     ccc19x$der_race[which((ccc19x$race___1002_5 == 1|ccc19x$race___2028_9 == 1|
                              ccc19x$race___2076_8 ==1|ccc19x$race___2131_1 == 1|
@@ -7003,7 +7003,7 @@ var.log <- data.frame(name = character(),
     
     #D04b. Collapse all but NHW
     ccc19x$der_race_collapsed <- ccc19x$der_race
-    ccc19x$der_race_collapsed[ccc19x$der_race_collapsed %in% c('Hispanic','Non-Hispanic Black')] <- 'Other'
+    ccc19x$der_race_collapsed[ccc19x$der_race_collapsed %in% c('Hispanic', 'Non-Hispanic Black')] <- 'Other'
     ccc19x$der_race_collapsed <- droplevels(ccc19x$der_race_collapsed)
     
     temp <- summary(ccc19x$der_race_collapsed[ccc19x$redcap_repeat_instrument == ''])
@@ -7017,13 +7017,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_race_v2 <- NA
     
     ccc19x$der_race_v2[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
-                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic Black"
+                               ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic Black"
     ccc19x$der_race_v2[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0 &
-                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- "Non-Hispanic White"
+                               ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic White"
     
     #Overwrite the preceding if AAPI
     ccc19x$der_race_v2[which((ccc19x$race___2028_9 == 1|ccc19x$race___2076_8 ==1) &
-                               ccc19x$ethnicity %in% c('2186-5','UNK'))] <- 'Non-Hispanic AAPI'
+                               ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- 'Non-Hispanic AAPI'
     
     #Other
     ccc19x$der_race_v2[which((ccc19x$race___1002_5 == 1|ccc19x$race___2131_1 == 1|
@@ -7059,7 +7059,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_surgery[which((ccc19x$recent_treatment %in% 1:2 & ccc19x$treatment_modality___14051 == 1)|
                                (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing == '1'))] <- 'Recent surgery'
     ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment %in% c(3,88))|
-                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% c('2','3'))|
+                               (ccc19x$recent_surgery == 1 & ccc19x$surgery_timing %in% c('2', '3'))|
                                ccc19x$recent_surgery == 0
     )] <- 'None'
     ccc19x$der_surgery[which((ccc19x$treatment_modality___14051 == 1 & ccc19x$recent_treatment == 99)|
@@ -7257,7 +7257,7 @@ var.log <- data.frame(name = character(),
       temp.ref <- which(is.na(ccc19x$der_bmi) & grepl(ccc19x$height, pattern = '[0-9]') & grepl(ccc19x$weight, pattern = '[0-9]'))
       
       #removing rows that are missing height or weight
-      temp <- ccc19x[temp.ref,c('height','weight')]
+      temp <- ccc19x[temp.ref,c('height', 'weight')]
       temp$height <- trimws(temp$height)
       temp$weight <- trimws(temp$weight)
       
@@ -7509,14 +7509,14 @@ var.log <- data.frame(name = character(),
     
     #C03a. Simplified # of comorbidities
     ccc19x$der_comorbid_no_collapsed <- as.character(ccc19x$der_comorbid_no)
-    ccc19x$der_comorbid_no_collapsed[which(ccc19x$der_comorbid_no %in% c('2','3','4'))] <- 2
+    ccc19x$der_comorbid_no_collapsed[which(ccc19x$der_comorbid_no %in% c('2', '3', '4'))] <- 2
     ccc19x$der_comorbid_no_collapsed <- factor(ccc19x$der_comorbid_no_collapsed)
     summary(ccc19x$der_comorbid_no_collapsed[ccc19x$redcap_repeat_instrument == ''])
     
     #C03b. Simplified # of comorbidities 2
     ccc19x$der_comorbid_no_collapsed2 <- as.character(ccc19x$der_comorbid_no)
-    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('1','2'))] <- '1 to 2'
-    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('3','4'))] <- '3+'
+    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('1', '2'))] <- '1 to 2'
+    ccc19x$der_comorbid_no_collapsed2[which(ccc19x$der_comorbid_no %in% c('3', '4'))] <- '3+'
     ccc19x$der_comorbid_no_collapsed2 <- factor(ccc19x$der_comorbid_no_collapsed2)
     summary(ccc19x$der_comorbid_no_collapsed2[ccc19x$redcap_repeat_instrument == ''])
     
@@ -8423,7 +8423,7 @@ var.log <- data.frame(name = character(),
     
     #Tobacco use
     ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking == 'Current')] <- 1
-    ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking %in% c('Never','Former') &
+    ccc19x$der_CVD_risk_v3[which(ccc19x$der_smoking %in% c('Never', 'Former') &
                                    is.na(ccc19x$der_CVD_risk_v3))] <- 0
     
     #Unknowns
@@ -8497,14 +8497,14 @@ var.log <- data.frame(name = character(),
                                       ccc19x$der_htn == 0 & 
                                       ccc19x$der_hld == 0 & 
                                       ccc19x$der_dm2 == 0 &
-                                      ccc19x$der_smoking %in% c('Never','Former'))] <- 0
+                                      ccc19x$der_smoking %in% c('Never', 'Former'))] <- 0
       
       ccc19x$der_CVD_risk_num[which(ccc19x$der_sex == 'Female' & 
                                       ccc19x$der_age_trunc < 60 & 
                                       ccc19x$der_htn == 0 & 
                                       ccc19x$der_hld == 0 & 
                                       ccc19x$der_dm2 == 0 &
-                                      ccc19x$der_smoking %in% c('Never','Former'))] <- 0
+                                      ccc19x$der_smoking %in% c('Never', 'Former'))] <- 0
       
       #Unknown with risk score of 1 (needs 1+ unknowns)
       ccc19x$der_CVD_risk_num[which((ccc19x$der_htn == 99|ccc19x$der_hld == 99|
@@ -9681,11 +9681,11 @@ var.log <- data.frame(name = character(),
       ccc19x$der_any_targeted_ici_3mo <- ccc19x$der_anytx_3mo
       ccc19x$der_any_targeted_ici_3mo[which(ccc19x$der_any_targeted_ici_3mo == 1 & 
                                               (ccc19x$treatment_modality___58229 == 1|
-                                                 ccc19x$what_immunotherapy %in% c('45838','45446',
-                                                                                  '45170','45838-45446')))] <- 1
+                                                 ccc19x$what_immunotherapy %in% c('45838', '45446',
+                                                                                  '45170', '45838-45446')))] <- 1
       ccc19x$der_any_targeted_ici_3mo[which(ccc19x$der_any_targeted_ici_3mo == 1 & (ccc19x$treatment_modality___58229 == 0|
-                                                                                      !ccc19x$what_immunotherapy %in% c('45838','45446',
-                                                                                                                        '45170','45838-45446')))] <- 0
+                                                                                      !ccc19x$what_immunotherapy %in% c('45838', '45446',
+                                                                                                                        '45170', '45838-45446')))] <- 0
       
       ccc19x$der_any_targeted_ici_3mo <- factor(ccc19x$der_any_targeted_ici_3mo)
       
@@ -10431,7 +10431,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_metastatic <- NA
     
     #Yes
-    ccc19x$der_metastatic[which(ccc19x$stage %in% c(4,'764-7'))] <- 1
+    ccc19x$der_metastatic[which(ccc19x$stage %in% c(4, '764-7'))] <- 1
     ccc19x$der_metastatic[which(ccc19x$mets_yn == 1)] <- 1
   
     #No
@@ -10637,10 +10637,10 @@ var.log <- data.frame(name = character(),
     ccc19x$der_stage <- NA
     
     #Localized
-    ccc19x$der_stage[which(ccc19x$stage %in% c(1:3,'764-1'))] <- 'Localized'
+    ccc19x$der_stage[which(ccc19x$stage %in% c(1:3, '764-1'))] <- 'Localized'
     
     #Disseminated
-    ccc19x$der_stage[which(ccc19x$stage %in% c(4,'764-7'))] <- 'Disseminated'
+    ccc19x$der_stage[which(ccc19x$stage %in% c(4, '764-7'))] <- 'Disseminated'
     
     #Unknown
     ccc19x$der_stage[which(ccc19x$stage == 99)] <- 'Unknown'
@@ -10724,7 +10724,7 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$der_no_drugs[ccc19x$redcap_repeat_instrument == ''])
     
     #Add the drugs into the main data table
-    drugs <- drugs[,c('record_id','drug1','drug2','drug3','drug4','drug5','drug6','drug7','drug8')]
+    drugs <- drugs[,c('record_id', 'drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')]
     ccc19x$drug1 <- NA
     ccc19x$drug2 <- NA
     ccc19x$drug3 <- NA
@@ -10738,7 +10738,7 @@ var.log <- data.frame(name = character(),
     for(i in 1:nrow(drugs))
     {
       temp.ref <- which(ccc19x$record_id %in% drugs$record_id[i] & ccc19x$redcap_repeat_instrument == '')
-      if(length(temp.ref) == 1) ccc19x[temp.ref,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7','drug8')] <- drugs[i,2:9]
+      if(length(temp.ref) == 1) ccc19x[temp.ref,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] <- drugs[i,2:9]
     }
    
     #Result checking
@@ -10763,7 +10763,7 @@ var.log <- data.frame(name = character(),
       for(i in which(!is.na(ccc19x$drug1)))
       {
         #Get list of drugs
-        temp <- ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')]
+        temp <- ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')]
         temp <- temp[temp != '']
         temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
         
@@ -10787,13 +10787,13 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(ccc19x$der_Prostate == 1)
     ccc19x$der_ARA_1st_gen[temp.ref] <- 0
     ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___83008 == 1|ccc19x$prostate_tx___4508 == 1|ccc19x$prostate_tx___31805 == 1)] <- 1
-    ccc19x$der_ARA_1st_gen[which(ccc19x$drug1 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug2 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug3 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug4 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug5 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug6 %in% c('Bicalutamide','Flutamide','Nilutamide')|
-                                   ccc19x$drug7 %in% c('Bicalutamide','Flutamide','Nilutamide'))] <- 1
+    ccc19x$der_ARA_1st_gen[which(ccc19x$drug1 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug2 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug3 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug4 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug5 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug6 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide')|
+                                   ccc19x$drug7 %in% c('Bicalutamide', 'Flutamide', 'Nilutamide'))] <- 1
     
     #Unknown
     ccc19x$der_ARA_1st_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_1st_gen == 0)] <- 99
@@ -10810,13 +10810,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ARA_2nd_gen <- NA
     ccc19x$der_ARA_2nd_gen[which(ccc19x$der_Prostate == 1)] <- 0
     ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___1307298 == 1|ccc19x$prostate_tx___1999574 ==1|ccc19x$prostate_tx___2180325 == 1)] <- 1
-    ccc19x$der_ARA_2nd_gen[which(ccc19x$drug1 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug2 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug3 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug4 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug5 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug6 %in% c('Apalutamide','Enzalutamide','Darolutamide')|
-                                   ccc19x$drug7 %in% c('Apalutamide','Enzalutamide','Darolutamide'))] <- 1
+    ccc19x$der_ARA_2nd_gen[which(ccc19x$drug1 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug2 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug3 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug4 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug5 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug6 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide')|
+                                   ccc19x$drug7 %in% c('Apalutamide', 'Enzalutamide', 'Darolutamide'))] <- 1
     
     #Unknown
     ccc19x$der_ARA_2nd_gen[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_ARA_2nd_gen == 0)] <- 99
@@ -10856,13 +10856,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_chemo_prca <- NA
     ccc19x$der_chemo_prca[which(ccc19x$der_Prostate == 1)] <- 0
     ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___996051 == 1|ccc19x$prostate_tx___40048 == 1|ccc19x$prostate_tx___72962 == 1)] <- 1
-    ccc19x$der_chemo_prca[which(ccc19x$drug1 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug2 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug3 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug4 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug5 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug6 %in% c('Cabazitaxel','Carboplatin','Docetaxel')|
-                                  ccc19x$drug7 %in% c('Cabazitaxel','Carboplatin','Docetaxel'))] <- 1
+    ccc19x$der_chemo_prca[which(ccc19x$drug1 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug2 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug3 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug4 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug5 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug6 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel')|
+                                  ccc19x$drug7 %in% c('Cabazitaxel', 'Carboplatin', 'Docetaxel'))] <- 1
     
     #Unknown
     ccc19x$der_chemo_prca[which(ccc19x$prostate_tx___unk == 1 & ccc19x$der_chemo_prca == 0)] <- 99
@@ -10883,13 +10883,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_adt[which(ccc19x$orchiectomy == 1)] <- 1
     ccc19x$der_adt[which(is.na(ccc19x$adt) & ccc19x$treatment_modality___691 == 1 & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 1
     
-    ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug2 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug3 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug4 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug5 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug6 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin')|
-                            ccc19x$drug7 %in% c('ADT','Leuprolide','Degarelix','Goserelin','Histrelin','Triptorelin'))
+    ccc19x$der_adt[which((ccc19x$drug1 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug2 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug3 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug4 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug5 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug6 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin')|
+                            ccc19x$drug7 %in% c('ADT', 'Leuprolide', 'Degarelix', 'Goserelin', 'Histrelin', 'Triptorelin'))
                          & ccc19x$der_Prostate == 1 & is.na(ccc19x$der_adt))] <- 2
     
     #No
@@ -10919,8 +10919,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20[temp.ref[i]] <- 1 else
                ccc19x$der_cd20[temp.ref[i]] <- 0
     }
     
@@ -10934,8 +10934,8 @@ var.log <- data.frame(name = character(),
                         (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20_12mo[temp.ref[i]] <- 1 
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20_12mo[temp.ref[i]] <- 1 
     }
     
     #Another drug mentioned, within 12 months
@@ -10958,8 +10958,8 @@ var.log <- data.frame(name = character(),
                         (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1))
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Rituximab','Obinutuzumab','Ofatumumab','Ublituximab','Veltuzumab'))) ccc19x$der_cd20_3mo[temp.ref[i]] <- 1 
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20_3mo[temp.ref[i]] <- 1 
     }
     
     #Another drug mentioned, within 3 months
@@ -10981,8 +10981,8 @@ var.log <- data.frame(name = character(),
     
     #Extra level if they were also receiving a steroid (e.g., R-CHOP)
     for(i in which(ccc19x$der_cd20_cyto_12mo == 1))
-      if(any(ccc19x[i,c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Prednisone','Prednisolone','Methylprednisolone','Dexamethasone','Hydrocortisone'))) ccc19x$der_cd20_cyto_12mo[i] <- 2
+      if(any(ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Prednisone', 'Prednisolone', 'Methylprednisolone', 'Dexamethasone', 'Hydrocortisone'))) ccc19x$der_cd20_cyto_12mo[i] <- 2
     
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 99|ccc19x$der_any_cyto_12mo == 99)] <- 99
@@ -10996,8 +10996,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Daratumumab','Isatuximab'))) ccc19x$der_cd38[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Daratumumab', 'Isatuximab'))) ccc19x$der_cd38[temp.ref[i]] <- 1 else
                ccc19x$der_cd38[temp.ref[i]] <- 0
     }
     
@@ -11010,8 +11010,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Ibrutinib','Acalabrutinib','LOXO-305'))) ccc19x$der_btki[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Ibrutinib', 'Acalabrutinib', 'LOXO-305'))) ccc19x$der_btki[temp.ref[i]] <- 1 else
                ccc19x$der_btki[temp.ref[i]] <- 0
     }
     
@@ -11030,8 +11030,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Fedratinib','Ruxolitinib','Lestaurtinib','Momelotinib','Pacritinib','Tofacitinib'))) ccc19x$der_jaki[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Fedratinib', 'Ruxolitinib', 'Lestaurtinib', 'Momelotinib', 'Pacritinib', 'Tofacitinib'))) ccc19x$der_jaki[temp.ref[i]] <- 1 else
                ccc19x$der_jaki[temp.ref[i]] <- 0
     }
     
@@ -11050,9 +11050,9 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Asciminib','Bosutinib','Dasatinib','Flumatinib',
-               'Imatinib','Nilotinib','Ponatinib','Radotinib'))) ccc19x$der_bcrabli[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Asciminib', 'Bosutinib', 'Dasatinib', 'Flumatinib',
+               'Imatinib', 'Nilotinib', 'Ponatinib', 'Radotinib'))) ccc19x$der_bcrabli[temp.ref[i]] <- 1 else
                  ccc19x$der_bcrabli[temp.ref[i]] <- 0
     }
     
@@ -11071,7 +11071,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
              c('Venetoclax'))) ccc19x$der_venet[temp.ref[i]] <- 1 else
                ccc19x$der_venet[temp.ref[i]] <- 0
     }
@@ -11085,7 +11085,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
              c('Tamoxifen'))) ccc19x$der_tam[temp.ref[i]] <- 1 else
                ccc19x$der_tam[temp.ref[i]] <- 0
     }
@@ -11099,8 +11099,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Letrozole','Exemestane','Anastrozole','Aromatase inhibitor'))) ccc19x$der_ai[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Letrozole', 'Exemestane', 'Anastrozole', 'Aromatase inhibitor'))) ccc19x$der_ai[temp.ref[i]] <- 1 else
                ccc19x$der_ai[temp.ref[i]] <- 0
     }
     
@@ -11113,9 +11113,9 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Axitinib','Bevacizumab','Cabozantinib','Lenvatinib','Pazopanib',
-               'Sorafenib','Sunitinib','Vandetanib','Ramucirumab'))) ccc19x$der_vegfi[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Axitinib', 'Bevacizumab', 'Cabozantinib', 'Lenvatinib', 'Pazopanib',
+               'Sorafenib', 'Sunitinib', 'Vandetanib', 'Ramucirumab'))) ccc19x$der_vegfi[temp.ref[i]] <- 1 else
                ccc19x$der_vegfi[temp.ref[i]] <- 0
     }
     
@@ -11128,13 +11128,13 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Afatinib','Alectinib','Axitinib','Brigatinib','Cabozantinib','Ceritinib',
-               'Crizotinib','Entrectinib','Erlotinib','Gefitinib','Gilteritinib','Lapatinib',
-               'Lenvatinib','Lorlatinib','Neratinib','Nilotinib','Niraparib','Osimertinib',
-               'Pazopanib','Ponatinib','Regorafenib','Ripretinib','Selpercatinib','Sorafenib',
-               'Sunitinib','Acalabrutinib','Bosutinib','Dasatinib','Fedratinib','Ibrutinib',
-               'Imatinib','Midostaurin','Pexidartinib','Pralsetinib','Ruxolitinib','Tucatinib',
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Afatinib', 'Alectinib', 'Axitinib', 'Brigatinib', 'Cabozantinib', 'Ceritinib',
+               'Crizotinib', 'Entrectinib', 'Erlotinib', 'Gefitinib', 'Gilteritinib', 'Lapatinib',
+               'Lenvatinib', 'Lorlatinib', 'Neratinib', 'Nilotinib', 'Niraparib', 'Osimertinib',
+               'Pazopanib', 'Ponatinib', 'Regorafenib', 'Ripretinib', 'Selpercatinib', 'Sorafenib',
+               'Sunitinib', 'Acalabrutinib', 'Bosutinib', 'Dasatinib', 'Fedratinib', 'Ibrutinib',
+               'Imatinib', 'Midostaurin', 'Pexidartinib', 'Pralsetinib', 'Ruxolitinib', 'Tucatinib',
                'Vandetinib'))) ccc19x$der_tki[temp.ref[i]] <- 1 else
                  ccc19x$der_tki[temp.ref[i]] <- 0
     }
@@ -11148,8 +11148,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Abemaciclib','Palbociclib','Ribociclib'))) ccc19x$der_cdk46i[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Abemaciclib', 'Palbociclib', 'Ribociclib'))) ccc19x$der_cdk46i[temp.ref[i]] <- 1 else
                ccc19x$der_cdk46i[temp.ref[i]] <- 0
     }
     
@@ -11168,9 +11168,9 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('ADT','Goserelin','Histrelin','Leuprolide','Triptorelin',
-               'Abarelix','Degarelix','Relugolix'))) ccc19x$der_gnrh[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('ADT', 'Goserelin', 'Histrelin', 'Leuprolide', 'Triptorelin',
+               'Abarelix', 'Degarelix', 'Relugolix'))) ccc19x$der_gnrh[temp.ref[i]] <- 1 else
                  ccc19x$der_gnrh[temp.ref[i]] <- 0
     }
     
@@ -11183,9 +11183,9 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Abiraterone','Apalutamide','Darolutamide','Enzalutmide',
-               'Flutamide','Nilutamide','Bicalutamide'))) ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Abiraterone', 'Apalutamide', 'Darolutamide', 'Enzalutmide',
+               'Flutamide', 'Nilutamide', 'Bicalutamide'))) ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 1 else
                  ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 0
     }
     
@@ -11199,14 +11199,14 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Nivolumab','Pembrolizumab','Atezolizumab','Avelumab',
-               'Durvalumab','Cemiplimab','Anti-PD-1 antibody','Anti-PD-L1 antibody'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Nivolumab', 'Pembrolizumab', 'Atezolizumab', 'Avelumab',
+               'Durvalumab', 'Cemiplimab', 'Anti-PD-1 antibody', 'Anti-PD-L1 antibody'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
                  ccc19x$der_pd1_l1[temp.ref[i]] <- 0
     }
     
     #Structured data is present
-    ccc19x$der_pd1_l1[which(ccc19x$what_immunotherapy %in% c('45446','45170','45838-45446'))] <- 1
+    ccc19x$der_pd1_l1[which(ccc19x$what_immunotherapy %in% c('45446', '45170', '45838-45446'))] <- 1
     
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
     
@@ -11256,13 +11256,13 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Ipilimumab','Tremilimumab','Anti-CTLA4 antibody'))) ccc19x$der_ctla4[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Ipilimumab', 'Tremilimumab', 'Anti-CTLA4 antibody'))) ccc19x$der_ctla4[temp.ref[i]] <- 1 else
                ccc19x$der_ctla4[temp.ref[i]] <- 0
     }
     
     #Structured data is present
-    ccc19x$der_ctla4[which(ccc19x$what_immunotherapy %in% c('45838','45838-45446'))] <- 1
+    ccc19x$der_ctla4[which(ccc19x$what_immunotherapy %in% c('45838', '45838-45446'))] <- 1
     
     ccc19x$der_ctla4 <- factor(ccc19x$der_ctla4)
     summary(ccc19x$der_ctla4[ccc19x$redcap_repeat_instrument == ''])
@@ -11273,9 +11273,9 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Lapatinib','Neratinib','Tucatinib','Trastuzumab','Margetuximab',
-               'Trastuzumab emtansine','Trastuzumab deruxtecan','Pertuzumab'))) ccc19x$der_her2[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Lapatinib', 'Neratinib', 'Tucatinib', 'Trastuzumab', 'Margetuximab',
+               'Trastuzumab emtansine', 'Trastuzumab deruxtecan', 'Pertuzumab'))) ccc19x$der_her2[temp.ref[i]] <- 1 else
                  ccc19x$der_her2[temp.ref[i]] <- 0
     }
     
@@ -11294,10 +11294,10 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Doxorubicin','Epirubicin','Daunorubicin','Mitoxantrone',
-               'Aclarubicin','Amrubicin','Vyxeos','Daunorubicin liposomal',
-               'Idarubicin','Pegylated liposomal doxorubicin','Valrubicin'))) ccc19x$der_anthracycline[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Doxorubicin', 'Epirubicin', 'Daunorubicin', 'Mitoxantrone',
+               'Aclarubicin', 'Amrubicin', 'Vyxeos', 'Daunorubicin liposomal',
+               'Idarubicin', 'Pegylated liposomal doxorubicin', 'Valrubicin'))) ccc19x$der_anthracycline[temp.ref[i]] <- 1 else
                  ccc19x$der_anthracycline[temp.ref[i]] <- 0
     }
     
@@ -11316,8 +11316,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Docetaxel','Paclitaxel','Cabazitaxel','nab-Paclitaxel'))) ccc19x$der_taxane[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Docetaxel', 'Paclitaxel', 'Cabazitaxel', 'nab-Paclitaxel'))) ccc19x$der_taxane[temp.ref[i]] <- 1 else
                ccc19x$der_taxane[temp.ref[i]] <- 0
     }
     
@@ -11336,7 +11336,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
              c('Gemcitabine'))) ccc19x$der_gemcitabine[temp.ref[i]] <- 1 else
                ccc19x$der_gemcitabine[temp.ref[i]] <- 0
     }
@@ -11356,7 +11356,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
              c('Irinotecan'))) ccc19x$der_irinotecan[temp.ref[i]] <- 1 else
                ccc19x$der_irinotecan[temp.ref[i]] <- 0
     }
@@ -11376,8 +11376,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Cisplatin','Carboplatin','Oxaliplatin','Heptaplatin','Nedaplatin'))) ccc19x$der_platinum[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Cisplatin', 'Carboplatin', 'Oxaliplatin', 'Heptaplatin', 'Nedaplatin'))) ccc19x$der_platinum[temp.ref[i]] <- 1 else
                ccc19x$der_platinum[temp.ref[i]] <- 0
     }
     
@@ -11396,8 +11396,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Capecitabine','Doxifluridine','Fluorouracil','Floxuridine','Tegafur and uracil','Trifluridine and tipiracil'))) ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Capecitabine', 'Doxifluridine', 'Fluorouracil', 'Floxuridine', 'Tegafur and uracil', 'Trifluridine and tipiracil'))) ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 1 else
                ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 0
     }
     
@@ -11416,8 +11416,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Afatinib','Dacomitinib','Erlotinib','Gefitinib','Icotinib','Mobocertinib','Osimertinib'))) ccc19x$der_egfri[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Afatinib', 'Dacomitinib', 'Erlotinib', 'Gefitinib', 'Icotinib', 'Mobocertinib', 'Osimertinib'))) ccc19x$der_egfri[temp.ref[i]] <- 1 else
                ccc19x$der_egfri[temp.ref[i]] <- 0
     }
     
@@ -11436,8 +11436,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Amivantamab','Cetuximab','Necitumumab','Panitumumab'))) ccc19x$der_egfr_mab[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Amivantamab', 'Cetuximab', 'Necitumumab', 'Panitumumab'))) ccc19x$der_egfr_mab[temp.ref[i]] <- 1 else
                ccc19x$der_egfr_mab[temp.ref[i]] <- 0
     }
     
@@ -11456,8 +11456,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Olaparib','Niraparib','Rucaparib','Talazoparib','Veliparib'))) ccc19x$der_parpi[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Olaparib', 'Niraparib', 'Rucaparib', 'Talazoparib', 'Veliparib'))) ccc19x$der_parpi[temp.ref[i]] <- 1 else
                  ccc19x$der_parpi[temp.ref[i]] <- 0
     }
     
@@ -11470,13 +11470,13 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Alpelisib','Bevacizumab','Bortezomib','Cetuximab','Daratumumab',
-               'Dasatinib','Erlotinib','Everolimus','Fedratinib','Gemtuzumab ozogamicin',
-               'Gilteritinib','Ibrutinib','Imatinib','Lenalidomide','Neratinib',
-               'Olaparib','Osimertinib','Rituximab','Rucaparib','Ruxolitinib',
-               'Sacituzimab','Sacituzimab govitecan','SAR439859','Selpercatinib','Sunitinib',
-               'Talazoparib','Tucatinib','Venetoclax','Zandelisib'))) ccc19x$der_targeted_not_her2_cdk46i[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Alpelisib', 'Bevacizumab', 'Bortezomib', 'Cetuximab', 'Daratumumab',
+               'Dasatinib', 'Erlotinib', 'Everolimus', 'Fedratinib', 'Gemtuzumab ozogamicin',
+               'Gilteritinib', 'Ibrutinib', 'Imatinib', 'Lenalidomide', 'Neratinib',
+               'Olaparib', 'Osimertinib', 'Rituximab', 'Rucaparib', 'Ruxolitinib',
+               'Sacituzimab', 'Sacituzimab govitecan', 'SAR439859', 'Selpercatinib', 'Sunitinib',
+               'Talazoparib', 'Tucatinib', 'Venetoclax', 'Zandelisib'))) ccc19x$der_targeted_not_her2_cdk46i[temp.ref[i]] <- 1 else
                  ccc19x$der_targeted_not_her2_cdk46i[temp.ref[i]] <- 0
     }
     
@@ -11495,8 +11495,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Blinatumomab','Amivantamab'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Blinatumomab', 'Amivantamab'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
                ccc19x$der_BiTE[temp.ref[i]] <- 0
     }
     
@@ -11525,8 +11525,8 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1','drug2','drug3','drug4','drug5','drug6','drug7')] %in%
-             c('Thalidomide','Lenalidomide','Pomalidomide'))) ccc19x$der_imid[temp.ref[i]] <- 1 else
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Thalidomide', 'Lenalidomide', 'Pomalidomide'))) ccc19x$der_imid[temp.ref[i]] <- 1 else
                ccc19x$der_imid[temp.ref[i]] <- 0
     }
     
@@ -11747,7 +11747,7 @@ var.log <- data.frame(name = character(),
                                           ccc19x$practice_setting___6[temp.ref] == 1)]] <- 'TCC'
     
     #Recode
-    ccc19x$der_site_type[which(ccc19x$der_site_type %in% c('NCI-CC','NCI-CCC','CCC'))] <- 'TCC'
+    ccc19x$der_site_type[which(ccc19x$der_site_type %in% c('NCI-CC', 'NCI-CCC', 'CCC'))] <- 'TCC'
     
     #Factor
     ccc19x$der_site_type <- as.factor(ccc19x$der_site_type)
@@ -11770,12 +11770,12 @@ var.log <- data.frame(name = character(),
     ccc19x$der_nlr_cat <- NA
     
     #High
-    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('LO','WNL'))] <- 'HI'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'HI' & ccc19x$alc_range %in% c('LO', 'WNL'))] <- 'HI'
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('LO'))] <- 'HI'
     
     #Low
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('HI'))] <- 'LO'
-    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('WNL','HI'))] <- 'LO'
+    ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'LO' & ccc19x$alc_range %in% c('WNL', 'HI'))] <- 'LO'
     
     #Neither high nor low
     ccc19x$der_nlr_cat[which(ccc19x$anc_range == 'WNL' & ccc19x$alc_range %in% c('WNL'))] <- 'Neither'
@@ -11989,7 +11989,7 @@ var.log <- data.frame(name = character(),
     
     #L15a. lymphopenia
     ccc19x$der_lymphopenia <- NA
-    ccc19x$der_lymphopenia[which(ccc19x$alc_range %in% c('WNL','HI'))] <- 'Not lymphopenic'
+    ccc19x$der_lymphopenia[which(ccc19x$alc_range %in% c('WNL', 'HI'))] <- 'Not lymphopenic'
     ccc19x$der_lymphopenia[which(ccc19x$alc_range == 'LO')] <- 'Lymphopenic'
     ccc19x$der_lymphopenia[which(ccc19x$alc_range == 99)] <- 'Unknown'
     ccc19x$der_lymphopenia[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
@@ -12029,7 +12029,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_lnpenia[which(ccc19x$anc_range == 'LO')] <- 'Neutropenia'
     ccc19x$der_lnpenia[which(ccc19x$alc_range == 'LO')] <- 'Lymphopenia'
     ccc19x$der_lnpenia[which(ccc19x$alc_range == 'LO' & ccc19x$anc_range == 'LO')] <- 'Both'
-    ccc19x$der_lnpenia[which(ccc19x$alc_range %in% c('WNL','HI') & ccc19x$anc_range %in% c('WNL','HI'))] <- 'Neither'
+    ccc19x$der_lnpenia[which(ccc19x$alc_range %in% c('WNL', 'HI') & ccc19x$anc_range %in% c('WNL', 'HI'))] <- 'Neither'
     
     #If either is unknown - mark as unknown
     ccc19x$der_lnpenia[which(ccc19x$alc_range == 99 | ccc19x$anc_range == 99)] <- 'Unknown'
@@ -12460,7 +12460,7 @@ var.log <- data.frame(name = character(),
     #X3a. Khorana risk with collapsed categories
     ############################################
     ccc19x$der_VTE_risk_v3a <- ccc19x$der_VTE_risk_v3
-    ccc19x$der_VTE_risk_v3a[which(ccc19x$der_VTE_risk_v3a %in% c('Other heme malignancy','Other solid malignancy'))] <- 'Low-risk VTE malignancy'
+    ccc19x$der_VTE_risk_v3a[which(ccc19x$der_VTE_risk_v3a %in% c('Other heme malignancy', 'Other solid malignancy'))] <- 'Low-risk VTE malignancy'
     ccc19x$der_VTE_risk_v3a <- droplevels(ccc19x$der_VTE_risk_v3a)
     
     temp <- summary(ccc19x$der_VTE_risk_v3a[ccc19x$redcap_repeat_instrument == ''])
@@ -12677,9 +12677,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Major criteria (5 points)',
                                                    'Acceptable level of baseline missingness',
-                                                   paste(format(length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$missing <= threshold & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12689,17 +12689,17 @@ var.log <- data.frame(name = character(),
       
       u1 <- dict.unk$name[dict.unk$Field.Type == 'radio']
       temp <- dict.unk$name[dict.unk$Field.Type == 'checkbox']
-      u2 <- colnames(ccc19x)[colnames(ccc19x) %in% c(paste(temp,'___unk',sep = ''),
-                                                     paste(temp,'___99', sep = ''),
-                                                     paste(temp,'___la4489_6', sep = ''),
-                                                     paste(temp,'___1506_98', sep = ''),
-                                                     paste(temp,'___1502_99', sep = ''),
-                                                     paste(temp,'___1504_99', sep = ''))]
+      u2 <- colnames(ccc19x)[colnames(ccc19x) %in% c(paste(temp, '___unk',sep = ''),
+                                                     paste(temp, '___99', sep = ''),
+                                                     paste(temp, '___la4489_6', sep = ''),
+                                                     paste(temp, '___1506_98', sep = ''),
+                                                     paste(temp, '___1502_99', sep = ''),
+                                                     paste(temp, '___1504_99', sep = ''))]
       
       ccc19x$unknown <- 0
       for(i in which(ccc19x$redcap_repeat_instrument == ''))
       {
-        ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK','99','261665006')))
+        ccc19x$unknown[i] <- length(which(ccc19x[i,u1] %in% c('UNK', '99', '261665006')))
         ccc19x$unknown[i] <- ccc19x$unknown[i] + length(which(ccc19x[i,u2] == 1))
       }
       
@@ -12709,9 +12709,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Major criteria (5 points)',
                                                    'Acceptable level of unknowns',
-                                                   paste(format(length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$unknown < 20 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12729,9 +12729,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Cancer status not missing',
-                                                   paste(format(length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(!is.na(ccc19x$der_cancer_status) & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12745,9 +12745,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'ECOG performance status not missing',
-                                                   paste(format(length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(!is.na(ccc19x$der_ecogcat) & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12761,9 +12761,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Death status not missing or unknown',
-                                                   paste(format(length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$der_deadbinary %in% 0:1 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12777,9 +12777,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    'Baseline COVID-19 severity not missing or unknown',
-                                                   paste(format(length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$severity_of_covid_19_v2 %in% 1:3 & ccc19x$redcap_repeat_instrument == ''))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12795,9 +12795,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (3 points)',
                                                    '30-day f/u is at least 60 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12813,9 +12813,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (unscored)',
                                                    '90-day f/u is at least 60 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12831,9 +12831,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Moderate criteria (unscored)',
                                                    '180-day f/u is at least 60 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12854,9 +12854,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (prostate cancer only)',
                                                    'Recent ADT exposure missing or unknown',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(np, big.mark = ','),
+                                                         format(np, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/np, digits = 2),
                                                          '%)', sep = ''))
@@ -12873,9 +12873,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (breast cancer only)',
                                                    'Breast cancer biomarkers missing or unknown',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(nb, big.mark = ','),
+                                                         format(nb, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/nb, digits = 2),
                                                          '%)', sep = ''))
@@ -12902,9 +12902,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Baseline cancer status non-missing with a known value',
-                                                   paste(format(length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n1, big.mark = ','),
+                                                         format(n1, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$cancer_status %in% 1:5 & ccc19x$redcap_repeat_instrument == ''))/n1, digits = 2),
                                                          '%)', sep = ''))
@@ -12912,7 +12912,7 @@ var.log <- data.frame(name = character(),
       #Mets status missing or unknown, unless patient has stage IV/disseminated cancer with active disease
       temp.ref <- which((ccc19x$mets_yn == 99|is.na(ccc19x$mets_yn)) &
                           ccc19x$cancer_status != '1' &
-                          !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4','764-7')) &
+                          !(ccc19x$cancer_status %in% 2:5 & ccc19x$stage %in% c('4', '764-7')) &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
@@ -12920,9 +12920,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Metastatic status with a known value',
-                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                   paste(format(n - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n - length(temp.ref))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12938,9 +12938,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Baseline ECOG performance status non-missing with a known value, including not documented in the 3 months preceding COVID-19 diagnosis',
-                                                   paste(format(length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == '')), big.mark = ','),
+                                                   paste(format(length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == '')), big.mark = ', '),
                                                          ' of ',
-                                                         format(n1, big.mark = ','),
+                                                         format(n1, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(which(ccc19x$ecog_status %in% 0:88 & ccc19x$redcap_repeat_instrument == ''))/n1, digits = 2),
                                                          '%)', sep = ''))
@@ -12954,9 +12954,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'ICU status with a known value',
-                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                   paste(format(n - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n - length(temp.ref))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12970,9 +12970,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Hospital status with a known value',
-                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                   paste(format(n - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n - length(temp.ref))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -12986,9 +12986,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Intubation status with a known value',
-                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                   paste(format(n - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n - length(temp.ref))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -13002,9 +13002,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Supplemental oxygen status with a known value',
-                                                   paste(format(n - length(temp.ref), big.mark = ','),
+                                                   paste(format(n - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n - length(temp.ref))/n, digits = 2),
                                                          '%)', sep = ''))
@@ -13021,9 +13021,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    'Days to death non-missing with a known value',
-                                                   paste(format(n1 - length(temp.ref), big.mark = ','),
+                                                   paste(format(n1 - length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n1, big.mark = ','),
+                                                         format(n1, big.mark = ', '),
                                                          ' (', 
                                                          round(100*(n1 - length(temp.ref))/n1, digits = 2),
                                                          '%)', sep = ''))
@@ -13039,9 +13039,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (1 point)',
                                                    '30-day f/u is 30-59 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -13057,9 +13057,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (unscored)',
                                                    '90-day f/u is 30-59 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -13075,9 +13075,9 @@ var.log <- data.frame(name = character(),
       
       quality_report[nrow(quality_report)+1,] <- c('Minor criteria (unscored)',
                                                    '180-day f/u is 30-59 days overdue',
-                                                   paste(format(length(temp.ref), big.mark = ','),
+                                                   paste(format(length(temp.ref), big.mark = ', '),
                                                          ' of ',
-                                                         format(n, big.mark = ','),
+                                                         format(n, big.mark = ', '),
                                                          ' (', 
                                                          round(100*length(temp.ref)/n, digits = 2),
                                                          '%)', sep = ''))
@@ -13123,14 +13123,14 @@ var.log <- data.frame(name = character(),
     #X08. Gleason
     #############
     ccc19x$der_gleason <- ccc19x$gleason
-    ccc19x$der_gleason[which(ccc19x$der_gleason %in% c('X7','X8','X9'))] <- 'Unknown'
+    ccc19x$der_gleason[which(ccc19x$der_gleason %in% c('X7', 'X8', 'X9'))] <- 'Unknown'
     ccc19x$der_gleason[ccc19x$der_gleason == ''] <- NA
     ccc19x$der_gleason <- factor(ccc19x$der_gleason)
     summary(ccc19x$der_gleason[ccc19x$der_Prostate == 1])
     
     #X08a. Gleason with grouped categories
     ccc19x$der_gleason_v2 <- as.character(ccc19x$der_gleason)
-    ccc19x$der_gleason_v2[which(ccc19x$der_gleason_v2 %in% c('03','04','05'))] <- 'Less than 6'
+    ccc19x$der_gleason_v2[which(ccc19x$der_gleason_v2 %in% c('03', '04', '05'))] <- 'Less than 6'
     ccc19x$der_gleason_v2 <- factor(ccc19x$der_gleason_v2)
     summary(ccc19x$der_gleason_v2[ccc19x$der_Prostate == 1])
     
@@ -13315,17 +13315,17 @@ var.log <- data.frame(name = character(),
     #Yes - patient marked as having ongoing infection or recovered with complications at 90 days or beyond
     
     #Baseline
-    ccc19x$der_pasc[which(t.status %in% c('1b','2') &
+    ccc19x$der_pasc[which(t.status %in% c('1b', '2') &
                             ccc19x$covid_19_dx_interval %in% 6:10)] <- 1
     
     #Follow-up, alive
-    ccc19x$der_pasc[which(t.status %in% c('1b','2') &
+    ccc19x$der_pasc[which(t.status %in% c('1b', '2') &
                             (ccc19x$fu_weeks %in% c(90,180,365)|
                                ccc19x$timing_of_report_weeks >= 13))] <- 1
     
     #For those reported as having died at 90+ days having recovered or having ongoing infection, 
     #additionally require that cause of death is at least partially attributed to COVID-19 or "other"
-    ccc19x$der_pasc[which(t.status %in% c('1b','3') &
+    ccc19x$der_pasc[which(t.status %in% c('1b', '3') &
                             (ccc19x$cause_of_death_fu %in% c(1,3,88)|ccc19x$cause_of_death_fu_2 %in% c(1,3,88)) &
                             ccc19x$der_days_to_death_combined >= 90)] <- 1
     
@@ -13339,7 +13339,7 @@ var.log <- data.frame(name = character(),
     
     #For those reported as having died at 90+ days having recovered or having ongoing infection, 
     #and cause of death is cancer or unknown, assign to unknown (require queries)
-    ccc19x$der_pasc[which(t.status %in% c('1b','3') &
+    ccc19x$der_pasc[which(t.status %in% c('1b', '3') &
                             (ccc19x$cause_of_death_fu %in% c(2,99)|ccc19x$cause_of_death_fu_2 %in% c(2,99)) &
                             ccc19x$der_days_to_death_combined >= 90)] <- 99
     
@@ -13386,7 +13386,7 @@ var.log <- data.frame(name = character(),
     
     #Fully vaccinated
     ccc19x$der_vax[which((ccc19x$sars_vax_which == 4 & ccc19x$sars_vax_when %in% 2:4)|
-                           (ccc19x$sars_vax_which %in% c('1b','2b') & ccc19x$sars_vax_when %in% 3:4)|
+                           (ccc19x$sars_vax_which %in% c('1b', '2b') & ccc19x$sars_vax_when %in% 3:4)|
                            (ccc19x$sars_vax_which %in% c('3b') & ccc19x$sars_vax_when %in% 2:4))
                      ] <- 'Fully vaccinated'
     
@@ -13419,10 +13419,10 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vax_collapsed <- NA
     
     #At least one dose prior to COVID-19
-    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Partially vaccinated','Fully vaccinated'))] <- 1
+    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Partially vaccinated', 'Fully vaccinated'))] <- 1
     
     #Unvaccinated or vaccinated after COVID-19
-    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Unvaccinated','After COVID-19'))] <- 0
+    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Unvaccinated', 'After COVID-19'))] <- 0
     
     #Unknown
     ccc19x$der_vax_collapsed[which(ccc19x$der_vax == 'Unknown')] <- 99
@@ -13548,11 +13548,11 @@ var.log <- data.frame(name = character(),
   #   ccc19x$der_any_targeted_ici <- ccc19x$der_anytx
   #   ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & 
   #                                       (ccc19x$treatment_modality___58229 == 1|
-  #                                          ccc19x$what_immunotherapy %in% c('45838','45446',
-  #                                                                           '45170','45838-45446')))] <- 1
+  #                                          ccc19x$what_immunotherapy %in% c('45838', '45446',
+  #                                                                           '45170', '45838-45446')))] <- 1
   #   ccc19x$der_any_targeted_ici[which(ccc19x$der_any_targeted_ici == 1 & (ccc19x$treatment_modality___58229 == 0|
-  #                                                                           !ccc19x$what_immunotherapy %in% c('45838','45446',
-  #                                                                                                             '45170','45838-45446')))] <- 0
+  #                                                                           !ccc19x$what_immunotherapy %in% c('45838', '45446',
+  #                                                                                                             '45170', '45838-45446')))] <- 0
   #   
   #   ccc19x$der_any_targeted_ici <- factor(ccc19x$der_any_targeted_ici)
   #   summary(ccc19x$der_any_targeted_ici[ccc19x$redcap_repeat_instrument == ''])
@@ -13898,7 +13898,7 @@ var.log <- data.frame(name = character(),
      # ccc19x$der_deadbinary_old[which(ccc19x$current_status_retro == 99)] <- 99
      # 
      # #Alive on followup form
-     # temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1','1b','2') |
+     # temp.ref <- which(ccc19x$covid_19_status_fu %in% c('1', '1b', '2') |
      #                     ccc19x$fu_reason %in% 1:2)
      # 
      # ccc19x$der_deadbinary_old[temp.ref] <- 0
@@ -13957,10 +13957,10 @@ for(i in 1:length(temp.ref))
     out$values[i] <- paste(paste(names(temp), temp, sep = ': '), collapse = '; ')
   } else out$values[i] <- 'Not a factor or an integer variable'
 }
-write.csv(out, file = paste(stamp,'.summary of derived variables results.csv', sep = ''), row.names = F)
+write.csv(out, file = paste(stamp, '.summary of derived variables results.csv', sep = ''), row.names = F)
 
 #Save here
-save(ccc19x, stamp, var.log, file = paste(stamp,'.',
+save(ccc19x, stamp, var.log, file = paste(stamp, '.',
                               suffix,
                               ' saved on ',
                               gsub(Sys.time(), pattern = ':', replacement = '-'),
