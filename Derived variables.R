@@ -11799,7 +11799,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ddimer <- NA
     ccc19x$der_ddimer[which(ccc19x$ddimer == 0)] <- 'Normal'
     ccc19x$der_ddimer[which(ccc19x$ddimer == 1)] <- 'Abnormal'
-    ccc19x$der_ddimer[which(ccc19x$ddimer == 99)] <- 'Unknown'
+    ccc19x$der_ddimer[which(ccc19x$ddimer == 99|(ccc19x$labs == 'UNK' & ccc19x$ddimer == ''))] <- 'Unknown'
     ccc19x$der_ddimer[which(ccc19x$labs == 3|ccc19x$ddimer == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ddimer <- factor(ccc19x$der_ddimer)
     ccc19x$der_ddimer <- relevel(ccc19x$der_ddimer, ref = 'Normal')
@@ -11815,7 +11815,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_fibrinogen <- NA
     ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 0)] <- 'Normal'
     ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 1)] <- 'Abnormal'
-    ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 99)] <- 'Unknown'
+    ccc19x$der_fibrinogen[which(ccc19x$fibrinogen == 99|(ccc19x$labs == 'UNK' & ccc19x$fibrinogen == ''))] <- 'Unknown'
     ccc19x$der_fibrinogen[which(ccc19x$labs == 3|ccc19x$fibrinogen == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_fibrinogen <- factor(ccc19x$der_fibrinogen)
     ccc19x$der_fibrinogen <- relevel(ccc19x$der_fibrinogen, ref = 'Normal')
@@ -11831,7 +11831,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_pt <- NA
     ccc19x$der_pt[which(ccc19x$pt == 0)] <- 'Normal'
     ccc19x$der_pt[which(ccc19x$pt == 1)] <- 'Abnormal'
-    ccc19x$der_pt[which(ccc19x$pt == 99)] <- 'Unknown'
+    ccc19x$der_pt[which(ccc19x$pt == 99|(ccc19x$labs == 'UNK' & ccc19x$pt == ''))] <- 'Unknown'
     ccc19x$der_pt[which(ccc19x$labs == 3|ccc19x$pt == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_pt <- factor(ccc19x$der_pt)
     ccc19x$der_pt <- relevel(ccc19x$der_pt, ref = 'Normal')
@@ -11841,7 +11841,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_aptt <- NA
     ccc19x$der_aptt[which(ccc19x$aptt == 0)] <- 'Normal'
     ccc19x$der_aptt[which(ccc19x$aptt == 1)] <- 'Abnormal'
-    ccc19x$der_aptt[which(ccc19x$aptt == 99)] <- 'Unknown'
+    ccc19x$der_aptt[which(ccc19x$aptt == 99|(ccc19x$labs == 'UNK' & ccc19x$aptt == ''))] <- 'Unknown'
     ccc19x$der_aptt[which(ccc19x$labs == 3|ccc19x$aptt == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_aptt <- factor(ccc19x$der_aptt)
     ccc19x$der_aptt <- relevel(ccc19x$der_aptt, ref = 'Normal')
@@ -11851,7 +11851,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_hs_trop <- NA
     ccc19x$der_hs_trop[which(ccc19x$hs_trop == 0)] <- 'Normal'
     ccc19x$der_hs_trop[which(ccc19x$hs_trop == 1)] <- 'Abnormal'
-    ccc19x$der_hs_trop[which(ccc19x$hs_trop == 99)] <- 'Unknown'
+    ccc19x$der_hs_trop[which(ccc19x$hs_trop == 99|(ccc19x$labs == 'UNK' & ccc19x$hs_trop == ''))] <- 'Unknown'
     ccc19x$der_hs_trop[which(ccc19x$labs == 3|ccc19x$hs_trop == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_hs_trop <- factor(ccc19x$der_hs_trop)
     ccc19x$der_hs_trop <- relevel(ccc19x$der_hs_trop, ref = 'Normal')
@@ -11861,7 +11861,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_bnp <- NA
     ccc19x$der_bnp[which(ccc19x$bnp == 0)] <- 'Normal'
     ccc19x$der_bnp[which(ccc19x$bnp == 1)] <- 'Abnormal'
-    ccc19x$der_bnp[which(ccc19x$bnp == 99)] <- 'Unknown'
+    ccc19x$der_bnp[which(ccc19x$bnp == 99|(ccc19x$labs == 'UNK' & ccc19x$bnp == ''))] <- 'Unknown'
     ccc19x$der_bnp[which(ccc19x$labs == 3|ccc19x$bnp == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_bnp <- factor(ccc19x$der_bnp)
     ccc19x$der_bnp <- relevel(ccc19x$der_bnp, ref = 'Normal')
@@ -11871,7 +11871,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_crp <- NA
     ccc19x$der_crp[which(ccc19x$crp == 0)] <- 'Normal'
     ccc19x$der_crp[which(ccc19x$crp == 1)] <- 'Abnormal'
-    ccc19x$der_crp[which(ccc19x$crp == 99)] <- 'Unknown'
+    ccc19x$der_crp[which(ccc19x$crp == 99|(ccc19x$labs == 'UNK' & ccc19x$crp == ''))] <- 'Unknown'
     ccc19x$der_crp[which(ccc19x$labs == 3|ccc19x$crp == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_crp <- factor(ccc19x$der_crp)
     ccc19x$der_crp <- relevel(ccc19x$der_crp, ref = 'Normal')
@@ -11887,17 +11887,23 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ldh <- NA
     ccc19x$der_ldh[which(ccc19x$ldh == 0)] <- 'Normal'
     ccc19x$der_ldh[which(ccc19x$ldh == 1)] <- 'Abnormal'
-    ccc19x$der_ldh[which(ccc19x$ldh == 99)] <- 'Unknown'
+    ccc19x$der_ldh[which(ccc19x$ldh == 99|(ccc19x$labs == 'UNK' & ccc19x$ldh == ''))] <- 'Unknown'
     ccc19x$der_ldh[which(ccc19x$labs == 3|ccc19x$ldh == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ldh <- factor(ccc19x$der_ldh)
     ccc19x$der_ldh <- relevel(ccc19x$der_ldh, ref = 'Normal')
-    summary(ccc19x$der_ldh[ccc19x$redcap_repeat_instrument == ''])
+    
+    temp <- summary(ccc19x$der_ldh[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ldh',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     #L10. il6
     ccc19x$der_il6 <- NA
     ccc19x$der_il6[which(ccc19x$il6 == 0)] <- 'Normal'
     ccc19x$der_il6[which(ccc19x$il6 == 1)] <- 'Abnormal'
-    ccc19x$der_il6[which(ccc19x$il6 == 99)] <- 'Unknown'
+    ccc19x$der_il6[which(ccc19x$il6 == 99|(ccc19x$labs == 'UNK' & ccc19x$il6 == ''))] <- 'Unknown'
     ccc19x$der_il6[which(ccc19x$labs == 3|ccc19x$il6 == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_il6 <- factor(ccc19x$der_il6)
     ccc19x$der_il6 <- relevel(ccc19x$der_il6, ref = 'Normal')
@@ -11913,7 +11919,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_creat <- NA
     ccc19x$der_creat[which(ccc19x$creat == 0)] <- 'Normal'
     ccc19x$der_creat[which(ccc19x$creat == 1)] <- 'Abnormal'
-    ccc19x$der_creat[which(ccc19x$creat == 99)] <- 'Unknown'
+    ccc19x$der_creat[which(ccc19x$creat == 99|(ccc19x$labs == 'UNK' & ccc19x$creat == ''))] <- 'Unknown'
     ccc19x$der_creat[which(ccc19x$labs == 3|ccc19x$creat == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_creat <- factor(ccc19x$der_creat)
     ccc19x$der_creat <- relevel(ccc19x$der_creat, ref = 'Normal')
@@ -11930,7 +11936,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_wbc[which(ccc19x$wbc_range == 'WNL')] <- 'Normal'
     ccc19x$der_wbc[which(ccc19x$wbc_range == 'LO')] <- 'Low'
     ccc19x$der_wbc[which(ccc19x$wbc_range == 'HI')] <- 'High'
-    ccc19x$der_wbc[which(ccc19x$wbc_range == 99)] <- 'Unknown'
+    ccc19x$der_wbc[which(ccc19x$wbc_range == 99|(ccc19x$labs == 'UNK' & ccc19x$wbc_range == ''))] <- 'Unknown'
     ccc19x$der_wbc[which(ccc19x$labs == 3|ccc19x$wbc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_wbc <- factor(ccc19x$der_wbc)
     ccc19x$der_wbc <- relevel(ccc19x$der_wbc, ref = 'Normal')
@@ -11942,12 +11948,25 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #L12t. WBC value transformation
+    
+    #creating the transformed row
+    ccc19x$transformed_wbc <- ccc19x$wbc_numeric
+    
+    #Determine the units (cells/uL or cells*10^9/L) for any wbc with a decimal value, greater than 500, or less than 100 (proper units for this variable is cells*10^9/L, as stated on REDCAP variable description)
+    
+    ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"] <- ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"]/1000
+    
+    summary(ccc19x$wbc_numeric[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_wbc[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(ccc19x$transformed_wbc[which(as.numeric(ccc19x$transformed_wbc) <= 100)])
+    
     #L13. hgb
     ccc19x$der_hgb <- NA
     ccc19x$der_hgb[which(ccc19x$hgb_range == 'WNL')] <- 'Normal'
     ccc19x$der_hgb[which(ccc19x$hgb_range == 'LO')] <- 'Low'
     ccc19x$der_hgb[which(ccc19x$hgb_range == 'HI')] <- 'High'
-    ccc19x$der_hgb[which(ccc19x$hgb_range == 99)] <- 'Unknown'
+    ccc19x$der_hgb[which(ccc19x$hgb_range == 99|(ccc19x$labs == 'UNK' & ccc19x$hgb == ''))] <- 'Unknown'
     ccc19x$der_hgb[which(ccc19x$labs == 3|ccc19x$hgb_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_hgb <- factor(ccc19x$der_hgb)
     ccc19x$der_hgb <- relevel(ccc19x$der_hgb, ref = 'Normal')
@@ -11958,7 +11977,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_plt[which(ccc19x$plt_range == 'WNL')] <- 'Normal'
     ccc19x$der_plt[which(ccc19x$plt_range == 'LO')] <- 'Low'
     ccc19x$der_plt[which(ccc19x$plt_range == 'HI')] <- 'High'
-    ccc19x$der_plt[which(ccc19x$plt_range == 99)] <- 'Unknown'
+    ccc19x$der_plt[which(ccc19x$plt_range == 99|(ccc19x$labs == 'UNK' & ccc19x$plt_range == ''))] <- 'Unknown'
     ccc19x$der_plt[which(ccc19x$labs == 3|ccc19x$plt_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_plt <- factor(ccc19x$der_plt)
     ccc19x$der_plt <- relevel(ccc19x$der_plt, ref = 'Normal')
@@ -11975,7 +11994,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_alc[which(ccc19x$alc_range == 'WNL')] <- 'Normal'
     ccc19x$der_alc[which(ccc19x$alc_range == 'LO')] <- 'Low'
     ccc19x$der_alc[which(ccc19x$alc_range == 'HI')] <- 'High'
-    ccc19x$der_alc[which(ccc19x$alc_range == 99)] <- 'Unknown'
+    ccc19x$der_alc[which(ccc19x$alc_range == 99|(ccc19x$labs == 'UNK' & ccc19x$alc_range == ''))] <- 'Unknown'
     ccc19x$der_alc[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_alc <- factor(ccc19x$der_alc)
     ccc19x$der_alc <- relevel(ccc19x$der_alc, ref = 'Normal')
@@ -11991,7 +12010,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_lymphopenia <- NA
     ccc19x$der_lymphopenia[which(ccc19x$alc_range %in% c('WNL', 'HI'))] <- 'Not lymphopenic'
     ccc19x$der_lymphopenia[which(ccc19x$alc_range == 'LO')] <- 'Lymphopenic'
-    ccc19x$der_lymphopenia[which(ccc19x$alc_range == 99)] <- 'Unknown'
+    ccc19x$der_lymphopenia[which(ccc19x$alc_range == 99|(ccc19x$labs == 'UNK' & ccc19x$alc_range == ''))] <- 'Unknown'
     ccc19x$der_lymphopenia[which(ccc19x$labs == 3|ccc19x$alc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_lymphopenia <- factor(ccc19x$der_lymphopenia)
     ccc19x$der_lymphopenia <- relevel(ccc19x$der_lymphopenia, ref = 'Not lymphopenic')
@@ -12002,7 +12021,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_anc[which(ccc19x$anc_range == 'WNL')] <- 'Normal'
     ccc19x$der_anc[which(ccc19x$anc_range == 'LO')] <- 'Low'
     ccc19x$der_anc[which(ccc19x$anc_range == 'HI')] <- 'High'
-    ccc19x$der_anc[which(ccc19x$anc_range == 99)] <- 'Unknown'
+    ccc19x$der_anc[which(ccc19x$anc_range == 99|(ccc19x$labs == 'UNK' & ccc19x$anc_range == ''))] <- 'Unknown'
     ccc19x$der_anc[which(ccc19x$labs == 3|ccc19x$anc_range == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_anc <- factor(ccc19x$der_anc)
     ccc19x$der_anc <- relevel(ccc19x$der_anc, ref = 'Normal')
@@ -12018,7 +12037,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_tni <- NA
     ccc19x$der_tni[which(ccc19x$tni == 0)] <- 'Normal'
     ccc19x$der_tni[which(ccc19x$tni == 1)] <- 'Abnormal'
-    ccc19x$der_tni[which(ccc19x$tni == 99)] <- 'Unknown'
+    ccc19x$der_tni[which(ccc19x$tni == 99|(ccc19x$labs == 'UNK' & ccc19x$tni == ''))] <- 'Unknown'
     ccc19x$der_tni[which(ccc19x$labs == 3|ccc19x$tni == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_tni <- factor(ccc19x$der_tni)
     ccc19x$der_tni <- relevel(ccc19x$der_tni, ref = 'Normal')
@@ -12061,19 +12080,6 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
-    
-    #L20. WBC value transformation
-    
-    #creating the transformed row
-    ccc19x$transformed_wbc <- ccc19x$wbc_numeric
-    
-    #Determine the units (cells/uL or cells*10^9/L) for any wbc with a decimal value, greater than 500, or less than 100 (proper units for this variable is cells*10^9/L, as stated on REDCAP variable description)
-    
-    ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"] <- ccc19x[which(ccc19x[,"transformed_wbc"] > 500), "transformed_wbc"]/1000
-    
-    summary(ccc19x$wbc_numeric[ccc19x$redcap_repeat_instrument == ''])
-    summary(ccc19x$transformed_wbc[ccc19x$redcap_repeat_instrument == ''])
-    boxplot(ccc19x$transformed_wbc)
     
     #L21. ALC value transformation (started out with alc_flag set to all NA values since this variable was slightly more complicated to deal with)
     
@@ -12208,7 +12214,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ast <- NA
     ccc19x$der_ast[which(ccc19x$ast == 0)] <- 'Normal'
     ccc19x$der_ast[which(ccc19x$ast == 1)] <- 'Abnormal'
-    ccc19x$der_ast[which(ccc19x$ast == 99)] <- 'Unknown'
+    ccc19x$der_ast[which(ccc19x$ast == 99|(ccc19x$labs == 'UNK' & ccc19x$ast == ''))] <- 'Unknown'
     ccc19x$der_ast[which(ccc19x$labs == 3|ccc19x$ast == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_ast <- factor(ccc19x$der_ast)
     ccc19x$der_ast <- relevel(ccc19x$der_ast, ref = 'Normal')
@@ -12224,7 +12230,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_alt <- NA
     ccc19x$der_alt[which(ccc19x$alt == 0)] <- 'Normal'
     ccc19x$der_alt[which(ccc19x$alt == 1)] <- 'Abnormal'
-    ccc19x$der_alt[which(ccc19x$alt == 99)] <- 'Unknown'
+    ccc19x$der_alt[which(ccc19x$alt == 99|(ccc19x$labs == 'UNK' & ccc19x$alt == ''))] <- 'Unknown'
     ccc19x$der_alt[which(ccc19x$labs == 3|ccc19x$alt == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_alt <- factor(ccc19x$der_alt)
     ccc19x$der_alt <- relevel(ccc19x$der_alt, ref = 'Normal')
@@ -12240,7 +12246,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_tbili <- NA
     ccc19x$der_tbili[which(ccc19x$tbili == 0)] <- 'Normal'
     ccc19x$der_tbili[which(ccc19x$tbili == 1)] <- 'Abnormal'
-    ccc19x$der_tbili[which(ccc19x$tbili == 99)] <- 'Unknown'
+    ccc19x$der_tbili[which(ccc19x$tbili == 99|(ccc19x$labs == 'UNK' & ccc19x$tbili == ''))] <- 'Unknown'
     ccc19x$der_tbili[which(ccc19x$labs == 3|ccc19x$tbili == 'NT')] <- 'Not drawn/Not available'
     ccc19x$der_tbili <- factor(ccc19x$der_tbili)
     ccc19x$der_tbili <- relevel(ccc19x$der_tbili, ref = 'Normal')
