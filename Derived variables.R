@@ -197,7 +197,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #O2a. Hospitalization within first 30 days
+    #O2a. Hospitalization within first 30 days -- NEEDS TO BE REDONE
     ccc19x$der_hosp_30 <- NA
     
     #Initial form
@@ -4823,6 +4823,145 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    
+    
+    #Total hospital LOS for the index hospitalization
+    #This variable assumes that follow-up forms are entered in linear (temporal) order
+    ccc19x$der_los_total <- NA
+    
+    #Create a temporary data frame to hold the hospitalization intervals
+    temp.df <- data.frame(record_id = ccc19x$record_id[which(ccc19x$der_hosp == 1 & ccc19x$redcap_repeat_instrument == '')],
+                          hosp_los = 0,
+                          hosp_los_2 = 0,
+                          icu_los = 0,
+                          chained = F,
+                          hosp_los_fu = 0,
+                          hosp_los_fu_2 = 0,
+                          icu_los_fu = 0,
+                          der_los_total = NA,
+                          exact = F,
+                          stringsAsFactors = F)
+    
+    for(i in 1:nrow(temp.df))
+    {
+      temp.ref <- which(ccc19x$record_id == temp.df$record_id[i])
+      
+      #Only baseline information present
+      if(length(temp.ref) == 1)
+      {
+        if(!is.na(ccc19x$hosp_los[temp.ref]) & ccc19x$hosp_los[temp.ref] < 9999) temp.df$hosp_los[i] <- ccc19x$hosp_los[temp.ref]
+        if(!is.na(ccc19x$hosp_los_2[temp.ref]) & ccc19x$hosp_los_2[temp.ref] < 9999) temp.df$hosp_los_2[i] <- ccc19x$hosp_los_2[temp.ref]
+        if(!is.na(ccc19x$icu_los[temp.ref]) & ccc19x$icu_los[temp.ref] < 9999) temp.df$icu_los[i] <- ccc19x$icu_los[temp.ref]
+      }
+      
+      #Follow-up forms are present
+      if(length(temp.ref) > 1)
+      {
+        temp.ref2 <- which(ccc19x$redcap_repeat_instrument[temp.ref] == '')
+        if(!is.na(ccc19x$hosp_los[temp.ref][temp.ref2]) & ccc19x$hosp_los[temp.ref][temp.ref2] < 9999) temp.df$hosp_los[i] <- ccc19x$hosp_los[temp.ref][temp.ref2]
+        if(!is.na(ccc19x$hosp_los_2[temp.ref][temp.ref2]) & ccc19x$hosp_los_2[temp.ref][temp.ref2] < 9999) temp.df$hosp_los_2[i] <- ccc19x$hosp_los_2[temp.ref][temp.ref2]
+        if(!is.na(ccc19x$icu_los[temp.ref][temp.ref2]) & ccc19x$icu_los[temp.ref][temp.ref2] < 9999) temp.df$icu_los[i] <- ccc19x$icu_los[temp.ref][temp.ref2]
+        
+        #Look for forward chaining
+        if(!is.na(ccc19x$hosp_los[temp.ref][temp.ref2]) & ccc19x$hosp_los[temp.ref][temp.ref2] == 9999) temp.df$chained[i] <- T
+        if(!is.na(ccc19x$icu_los[temp.ref][temp.ref2]) & ccc19x$icu_los[temp.ref][temp.ref2] == 9999) temp.df$chained[i] <- T
+        
+      }
+    }
+    
+    #Look for backward chaining from 1st follow-up to baseline form
+    temp.ref <- which(ccc19x$redcap_repeat_instance == 1 & ccc19x$hosp_status_fu == 88)
+    temp.df$chained[temp.df$record_id %in% ccc19x$record_id[temp.ref]] <- T
+    
+    #Add 1st follow-up data for chained cases
+    index <- which(temp.df$chained)
+    for(i in 1:length(index))
+    {
+      temp.ref <- which(ccc19x$record_id == temp.df$record_id[index[i]] &
+                          ccc19x$redcap_repeat_instance == 1)
+      if(!is.na(ccc19x$hosp_los_fu[temp.ref]) & ccc19x$hosp_los_fu[temp.ref] < 9999) temp.df$hosp_los_fu[index[i]] <- ccc19x$hosp_los_fu[temp.ref]
+      if(!is.na(ccc19x$hosp_los_fu_2[temp.ref]) & ccc19x$hosp_los_fu_2[temp.ref] < 9999) temp.df$hosp_los_fu_2[index[i]] <- ccc19x$hosp_los_fu_2[temp.ref]
+      if(!is.na(ccc19x$icu_los_fu[temp.ref]) & ccc19x$icu_los_fu[temp.ref] < 9999) temp.df$icu_los_fu[index[i]] <- ccc19x$icu_los_fu[temp.ref]
+    }
+    
+    #Pull LOS for first hospitalization not mentioned on the baseline form
+    index <- which(temp.df$record_id %in% ccc19x$record_id[which(ccc19x$der_hosp == 1 & ccc19x$der_hosp_bl == 0)])
+    for(i in 1:length(index))
+    {
+      temp.ref <- which(ccc19x$record_id == temp.df$record_id[index[i]] &
+                          ccc19x$redcap_repeat_instrument == 'followup')
+      
+      #Only one follow-up form present
+      if(length(temp.ref) == 1)
+      {
+        if(!is.na(ccc19x$hosp_los_fu[temp.ref]) & ccc19x$hosp_los_fu[temp.ref] < 9999) temp.df$hosp_los_fu[index[i]] <- ccc19x$hosp_los_fu[temp.ref]
+        if(!is.na(ccc19x$hosp_los_fu_2[temp.ref]) & ccc19x$hosp_los_fu_2[temp.ref] < 9999) temp.df$hosp_los_fu_2[index[i]] <- ccc19x$hosp_los_fu_2[temp.ref]
+        if(!is.na(ccc19x$icu_los_fu[temp.ref]) & ccc19x$icu_los_fu[temp.ref] < 9999) temp.df$icu_los_fu[index[i]] <- ccc19x$icu_los_fu[temp.ref]
+      }
+      
+      #More than one follow-up form present - find the earliest hospitalization
+      if(length(temp.ref) > 1)
+      {
+        temp.ref2 <- which(ccc19x$fu_reason[temp.ref] == 1 | 
+                             ccc19x$hosp_status_fu[temp.ref] %in% c(1:3) | 
+                             ccc19x$current_status_fu[temp.ref] %in% c(5:8) |
+                             ccc19x$current_status_clinical_fu[temp.ref] %in% c(4:8) |
+                             ccc19x$who_ordinal_scale[temp.ref] %in% 3:7|
+                             ccc19x$c19_anticoag_reason_fu___3[temp.ref] == 1|
+                             ccc19x$resp_failure_tx_fu[temp.ref] %in% 2:6)
+        temp.ref2 <- min(temp.ref2)
+        if(!is.na(ccc19x$hosp_los_fu[temp.ref][temp.ref2]) & ccc19x$hosp_los_fu[temp.ref][temp.ref2] < 9999) temp.df$hosp_los_fu[index[i]] <- ccc19x$hosp_los_fu[temp.ref][temp.ref2]
+        if(!is.na(ccc19x$hosp_los_fu_2[temp.ref][temp.ref2]) & ccc19x$hosp_los_fu_2[temp.ref][temp.ref2] < 9999) temp.df$hosp_los_fu_2[index[i]] <- ccc19x$hosp_los_fu_2[temp.ref][temp.ref2]
+        if(!is.na(ccc19x$icu_los_fu[temp.ref][temp.ref2]) & ccc19x$icu_los_fu[temp.ref][temp.ref2] < 9999) temp.df$icu_los_fu[index[i]] <- ccc19x$icu_los_fu[temp.ref][temp.ref2]
+      }
+    }
+    
+    #Tally up
+    
+    #Exact unchained baseline
+    temp.ref <- which(temp.df$hosp_los != 0 & !temp.df$chained)
+    temp.df$der_los_total[temp.ref] <- temp.df$hosp_los[temp.ref]
+    temp.df$exact[temp.ref] <- T
+    
+    #Exact unchained follow-up
+    temp.ref <- which(temp.df$hosp_los_fu != 0 & !temp.df$chained)
+    temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_fu[temp.ref]
+    temp.df$exact[temp.ref] <- T
+    
+    #Exact chained (these need manual review)
+    temp.ref <- which((temp.df$hosp_los != 0|temp.df$hosp_los_fu != 0) & temp.df$chained)
+    
+    #Inexact unchained with baseline LOS
+    temp.ref <- which((temp.df$hosp_los_2 != 0|temp.df$icu_los != 0) & !temp.df$chained)
+    temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_2[temp.ref] + temp.df$icu_los[temp.ref]
+    
+    #Inexact unchained follow-up
+    temp.ref <- which((temp.df$hosp_los_fu_2 != 0|temp.df$icu_los_fu != 0) & !temp.df$chained)
+    temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_fu_2[temp.ref] + temp.df$icu_los_fu[temp.ref]
+    
+    #Inexact chained with baseline or f/u LOS
+    temp.ref <- which((temp.df$hosp_los_2 != 0|temp.df$icu_los != 0|temp.df$hosp_los_fu_2 != 0|temp.df$icu_los_fu != 0) & temp.df$chained)
+    temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_2[temp.ref] + temp.df$icu_los[temp.ref] + 
+      temp.df$hosp_los_fu_2[temp.ref] + temp.df$icu_los_fu[temp.ref]
+    
+    #Add the tally to the derived variable
+    for(i in which(!is.na(temp.df$der_los_total)))
+    {
+      temp.ref <- which(ccc19x$record_id == temp.df$record_id[i])
+      if(temp.df$exact[i]) ccc19x$der_los_total[temp.ref] <- temp.df$der_los_total[i] else
+        ccc19x$der_los_total[temp.ref] <- paste(temp.df$der_los_total[i], '+', sep = '')
+    }
+    
+    ccc19x$der_los_total <- factor(ccc19x$der_los_total)
+    
+    temp <- summary(ccc19x$der_los_total[which(ccc19x$der_hosp == 1 & ccc19x$redcap_repeat_instrument == '')])
+    temp.var.log <- data.frame(name = 'der_los_total',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     
     }
   print('Time measurements completed')
@@ -11899,6 +12038,13 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #L09t. Transformed LDH - normalize to U/L (same as IU/L)
+    ccc19x$transformed_ldh <- ccc19x$ldh_numeric
+    
+    #Strip away U/L and IU/L
+    ccc19x$transformed_ldh <- gsub(ccc19x$transformed_ldh, pattern = '[ ]?[I]?U/L[ ]?$|[ ]?unit[s]?/L[ ]?$', ignore.case = T, replacement = '')
+    
+    
     #L10. il6
     ccc19x$der_il6 <- NA
     ccc19x$der_il6[which(ccc19x$il6 == 0)] <- 'Normal'
@@ -11930,6 +12076,20 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    #L11t. Creatinine transformation
+    ccc19x$creat_flag <- FALSE
+    ccc19x$transformed_creat <- ccc19x$creat_numeric
+    ccc19x[which(ccc19x[,"creat_numeric"] > 30), "transformed_creat"] <- ccc19x[which(ccc19x[,"creat_numeric"] > 30, arr.ind=TRUE), "transformed_creat"] / 88.4
+    ccc19x$transformed_creat <- round(ccc19x$transformed_creat, digits = 2)
+    
+    #couldn't determine units for 2 rows
+    ccc19x[which(ccc19x[,"creat_numeric"] == 42), "creat_flag"] <- TRUE
+    ccc19x[which(ccc19x[,"creat_numeric"] == 14), "creat_flag"] <- TRUE
+    
+    summary(ccc19x$creat[ccc19x$redcap_repeat_instrument == ''])
+    summary(ccc19x$transformed_creat[ccc19x$redcap_repeat_instrument == ''])
+    boxplot(log10(ccc19x$transformed_creat))
     
     #L12. wbc
     ccc19x$der_wbc <- NA
@@ -12194,21 +12354,6 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$plt[ccc19x$redcap_repeat_instrument == ''])
     summary(ccc19x$transformed_plt[ccc19x$redcap_repeat_instrument == ''])
     boxplot(ccc19x$transformed_plt)
-    
-    #L26. Creatinine transformation
-    
-    ccc19x$creat_flag <- FALSE
-    ccc19x$transformed_creat <- ccc19x$creat_numeric
-    ccc19x[which(ccc19x[,"creat_numeric"] > 30), "transformed_creat"] <- ccc19x[which(ccc19x[,"creat_numeric"] > 30, arr.ind=TRUE), "transformed_creat"] / 88.4
-    ccc19x$transformed_creat <- round(ccc19x$transformed_creat, digits = 2)
-    
-    #couldn't determine units for 2 rows
-    ccc19x[which(ccc19x[,"creat_numeric"] == 42), "creat_flag"] <- TRUE
-    ccc19x[which(ccc19x[,"creat_numeric"] == 14), "creat_flag"] <- TRUE
-    
-    summary(ccc19x$creat[ccc19x$redcap_repeat_instrument == ''])
-    summary(ccc19x$transformed_creat[ccc19x$redcap_repeat_instrument == ''])
-    boxplot(log10(ccc19x$transformed_creat))
     
     #L27. AST
     ccc19x$der_ast <- NA
