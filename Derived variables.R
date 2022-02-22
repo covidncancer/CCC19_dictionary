@@ -4824,9 +4824,8 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    
-    
-    #Total hospital LOS for the index hospitalization
+    ######################################################
+    #T15. Total hospital LOS for the index hospitalization
     #This variable assumes that follow-up forms are entered in linear (temporal) order
     ccc19x$der_los_total <- NA
     
@@ -12044,6 +12043,10 @@ var.log <- data.frame(name = character(),
     #Strip away U/L and IU/L
     ccc19x$transformed_ldh <- gsub(ccc19x$transformed_ldh, pattern = '[ ]?[I]?U/L[ ]?$|[ ]?unit[s]?/L[ ]?$', ignore.case = T, replacement = '')
     
+    #Transform to numeric (this will cause loss of the values reported in atypical units, for now)
+    ccc19x$transformed_ldh <- as.numeric(ccc19x$transformed_ldh)
+    length(which(!is.na(ccc19x$transformed_ldh)))
+    summary(ccc19x$transformed_ldh)
     
     #L10. il6
     ccc19x$der_il6 <- NA
