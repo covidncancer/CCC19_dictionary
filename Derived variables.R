@@ -197,51 +197,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #O2a. Hospitalization within first 30 days -- NEEDS TO BE REDONE
-    ccc19x$der_hosp_30 <- NA
-    
-    #Initial form
-    
-    #No
-    ccc19x$der_hosp_30[which(ccc19x$hosp_status == 0| 
-                            ccc19x$current_status %in% c(1,3)| #Outpatient or ER - new COVID-19 diagnosis
-                            ccc19x$worst_status_clinical %in% c(0:3)|
-                              ccc19x$worst_complications_severity___0 == 1)] <- 0
-    
-    #Yes
-    ccc19x$der_hosp_30[which(ccc19x$hosp_status %in% c(1:88) | 
-                               ccc19x$current_status %in% c(5:8)|
-                               ccc19x$c19_anticoag_reason___3 == 1| #Can only be true if patient was hospitalized
-                               ccc19x$worst_status_clinical %in% c(5:8)| 
-                               ccc19x$labs == '2a'| #Labs drawn at time of hospitalization
-                               ccc19x$current_status_clinical %in% c(4:8))] <- 1
-    
-    #Interventions that could only happen in a hospital
-    ccc19x$der_hosp_30[which(ccc19x$resp_failure_tx %in% 2:6 |
-                               ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
-    
-    #Unknown
-    ccc19x$der_hosp_30[which((ccc19x$hosp_status == 99 |
-                             ccc19x$worst_status_clinical == 99) & 
-                            is.na(ccc19x$der_hosp_30))] <- 99
-    
-    #Followup ONLY if less than or equal to 30 days and for hospitalization
-    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
-                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
-                                        ccc19x$fu_weeks == 30))]
-    ccc19x$der_hosp_30[which(ccc19x$record_id %in% temp & ccc19x$redcap_repeat_instrument == '')] <- 1
-    
-    #Factor
-    ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
-    
-    temp <- summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_hosp_30',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #O2b. Hospitalization based on baseline form only
+    #O2a. Hospitalization based on baseline form only
     ccc19x$der_hosp_bl <- NA
     
     #Initial form
@@ -279,6 +235,122 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #O2b. Hospitalization within first 30 days
+    ccc19x$der_hosp_30 <- NA
+    
+    #Definite - diagnosis-to-hospital interval is provided and less than or equal to 30
+    temp.ref <- which(ccc19x$dx_hosp_interval <= 30)
+    ccc19x$der_hosp_30[temp.ref] <- 'Definite'
+    
+    #Definitely not - diagnosis-to-hospital interval is provided and greater than 30 (and less than 9999)
+    temp.ref <- which(ccc19x$dx_hosp_interval > 30 & ccc19x$dx_hosp_interval < 9999)
+    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+    
+    #Definitely not - der_hosp is 0
+    temp.ref <- which(ccc19x$der_hosp == 0 & is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+    
+    #Definite - baseline form has hospitalization and interval from diagnosis to reporting is 4 weeks or less
+    temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$covid_19_dx_interval %in% 1:3 &
+                        is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Definite'
+    
+    #Definite - follow-up form has hospitalization as reason for f/u and within 30 days
+    temp.ref <- which(ccc19x$fu_reason == 1 & 
+                        ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
+                           ccc19x$fu_weeks == 30) &
+                        is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 'Definite'
+    
+    #Definitely not - baseline form doesn't have hospitalization, f/u does but is >30 days
+    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
+                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 5)|
+                                        ccc19x$fu_weeks %in% c(90,180,365)))]
+    temp.ref <- which(ccc19x$record_id %in% temp &
+                        ccc19x$der_hosp_bl == 0 &
+                        is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+    
+    #Unknown timing and not otherwise already calculated
+    temp.ref <- which(ccc19x$dx_hosp_interval == 9999 & is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
+    
+    #Unknown hospitalization status
+    temp.ref <- which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
+    
+    #The remainder are possibly hospitalized within 30 days
+    temp.ref <- which(ccc19x$der_hosp == 1 & is.na(ccc19x$der_hosp_30))
+    ccc19x$der_hosp_30[temp.ref] <- 'Possible'
+    
+    #Factor
+    ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
+    
+    temp <- summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hosp_30',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #O2c. Hospitalization within first 14 days
+    ccc19x$der_hosp_14 <- NA
+    
+    #Definite - diagnosis-to-hospital interval is provided and less than or equal to 14
+    temp.ref <- which(ccc19x$dx_hosp_interval <= 14)
+    ccc19x$der_hosp_14[temp.ref] <- 'Definite'
+    
+    #Definitely not - diagnosis-to-hospital interval is provided and greater than 14 (and less than 9999)
+    temp.ref <- which(ccc19x$dx_hosp_interval > 14 & ccc19x$dx_hosp_interval < 9999)
+    ccc19x$der_hosp_14[temp.ref] <- 'Definitely not'
+    
+    #Definitely not - der_hosp is 0
+    temp.ref <- which(ccc19x$der_hosp == 0 & is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Definitely not'
+    
+    #Definite - baseline form has hospitalization and interval from diagnosis to reporting is 2 weeks or less
+    temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$covid_19_dx_interval %in% 1:2 &
+                        is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Definite'
+    
+    #Definite - follow-up form has hospitalization as reason for f/u and within 14 days
+    temp.ref <- which(ccc19x$fu_reason == 1 & 
+                        ccc19x$fu_weeks == 'OTH' & 
+                        ccc19x$timing_of_report_weeks <= 2 &
+                        is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 'Definite'
+    
+    #Definitely not - baseline form doesn't have hospitalization, f/u does but is >14 days
+    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
+                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 2)|
+                                        ccc19x$fu_weeks %in% c(30,90,180,365)))]
+    temp.ref <- which(ccc19x$record_id %in% temp &
+                        ccc19x$der_hosp_bl == 0 &
+                        is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Definitely not'
+    
+    #Unknown timing and not otherwise already calculated
+    temp.ref <- which(ccc19x$dx_hosp_interval == 9999 & is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Unknown'
+    
+    #Unknown hospitalization status
+    temp.ref <- which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Unknown'
+    
+    #The remainder are possibly hospitalized within 14 days
+    temp.ref <- which(ccc19x$der_hosp == 1 & is.na(ccc19x$der_hosp_14))
+    ccc19x$der_hosp_14[temp.ref] <- 'Possible'
+    
+    #Factor
+    ccc19x$der_hosp_14 <- as.factor(ccc19x$der_hosp_14)
+    
+    temp <- summary(ccc19x$der_hosp_14[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_hosp_14',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     "ICU"
     #O3. Derived variable indicating time in the ICU (ever/never)
     ccc19x$der_ICU <- NA
@@ -299,7 +371,7 @@ var.log <- data.frame(name = character(),
                            ccc19x$current_status_clinical %in% c("7","8"))] <- 1
     
     #Unknown
-    ccc19x$der_ICU[which((ccc19x$hosp_status == 99 |
+    ccc19x$der_ICU[which((ccc19x$hosp_status %in% 88:99 |
                             ccc19x$worst_status_clinical == 99) & 
                            is.na(ccc19x$der_ICU))] <- 99
     
@@ -7260,6 +7332,7 @@ var.log <- data.frame(name = character(),
     ############
     #D14. Region
     ccc19x$der_region <- NA
+    
     ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT", 
                                                                      "PA", "NY", "NJ"))] <- "US Northeast"
     ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("WI", "MI", "IL", "IN", "OH", "MO", "ND", 
@@ -7269,6 +7342,7 @@ var.log <- data.frame(name = character(),
                                                                      "OK", "TX", "LA", "AR"))] <- "US South"
     ccc19x$der_region[which(ccc19x$state_of_patient_residence %in% c("ID", "MT", "WY", "NV", "UT", "CO", "AZ", 
                                                                      "NM", "AK", "WA", "OR", "CA", "HI"))] <- "US West"
+    
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 39)] <- "Canada"
     ccc19x$der_region[which(ccc19x$country_of_patient_residen == 197)] <- "Spain"
     ccc19x$der_region[is.na(ccc19x$der_region) & ccc19x$redcap_repeat_instrument == ''] <- 'Other'
@@ -7331,6 +7405,34 @@ var.log <- data.frame(name = character(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
+    
+    #D16. Sunbelt residence
+    ccc19x$der_sunbelt <- NA
+    
+    ccc19x$der_sunbelt[which(ccc19x$state_of_patient_residence %in% c("AL", "AR", "AZ", "CA", "CO", "GA", "FL", 
+                                                                      "KS", "LA", "MS", "NC", "NM", "NV", 
+                                                                      "SC", "TN", "OK", "TX", "UT"))] <- 1
+    ccc19x$der_sunbelt[which(ccc19x$state_of_patient_residence %in% c("ME", "NH", "VT", "MA", "RI", "CT", 
+                                                                     "PA", "NY", "NJ", "WI", "MI", "IL", "IN", "OH", "MO", "ND", 
+                                                                     "SD", "NE", "MN", "IA", "DE","MD", "DC", 
+                                                                     "VA", "WV", "KY", "ID", "MT", "WY",  
+                                                                     "AK", "WA", "OR", "HI"))] <- 0
+    #Spain & Mexico
+    ccc19x$der_sunbelt[which(ccc19x$country_of_patient_residen %in% c(140,197))] <- 1
+    
+    #Canada
+    ccc19x$der_sunbelt[which(ccc19x$country_of_patient_residen %in% c(39))] <- 0
+    
+    #Factor
+    ccc19x$der_sunbelt <- as.factor(ccc19x$der_sunbelt)
+    
+    temp <- summary(ccc19x$der_sunbelt[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_sunbelt',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     
     #D20. Insurance 
     ccc19x$der_insurance <- NA
