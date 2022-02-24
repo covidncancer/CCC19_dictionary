@@ -271,10 +271,6 @@ var.log <- data.frame(name = character(),
                           is.na(ccc19x$der_hosp_30))
       ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
       
-      #Unknown timing and not otherwise already calculated
-      temp.ref <- which(ccc19x$dx_hosp_interval == 9999 & is.na(ccc19x$der_hosp_30))
-      ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
-      
       #Unknown hospitalization status
       temp.ref <- which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_hosp_30))
       ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
