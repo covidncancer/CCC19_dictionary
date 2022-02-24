@@ -13693,6 +13693,51 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #X12b. Simple derived variable counting doses prior to COVID-19
+    ccc19x$der_vax_count <- NA
+    
+    #No doses
+    temp.ref <- which(ccc19x$sars_vax == 0|ccc19x$sars_vax_when == 88)
+    ccc19x$der_vax_count[temp.ref] <- '0 doses'
+    
+    #One dose non-mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1a','4') & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- '1 non-mrna dose'
+    
+    #One dose mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a') & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- '1 mrna dose'
+    
+    #Two or more doses non-mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1b','4b') & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- '2+ non-mrna doses'
+    
+    #Two dose mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b') & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- '2 mrna doses'
+    
+    #Three or more doses mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c') & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- '3+ mrna doses'
+    
+    #Others
+    temp.ref <- which(ccc19x$sars_vax_which %in% c(88) & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- 'Other'
+    
+    #Unknown
+    temp.ref <- which((ccc19x$sars_vax == 99|
+                         ccc19x$sars_vax_which == 99|
+                         ccc19x$sars_vax_when == 99) & is.na(ccc19x$der_vax_count))
+    ccc19x$der_vax_count[temp.ref] <- 'Unknown (dose and/or timing)'
+    
+    ccc19x$der_vax_count <- factor(ccc19x$der_vax_count)
+    
+    temp <- summary(ccc19x$der_vax_count[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vax_count',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
   }
   print('Other derived variables completed')
