@@ -237,61 +237,62 @@ var.log <- data.frame(name = character(),
     
     #O2b. Hospitalization within first 30 days
     ccc19x$der_hosp_30 <- NA
-    
-    #Definite - diagnosis-to-hospital interval is provided and less than or equal to 30
-    temp.ref <- which(ccc19x$dx_hosp_interval <= 30)
-    ccc19x$der_hosp_30[temp.ref] <- 'Definite'
-    
-    #Definitely not - diagnosis-to-hospital interval is provided and greater than 30 (and less than 9999)
-    temp.ref <- which(ccc19x$dx_hosp_interval > 30 & ccc19x$dx_hosp_interval < 9999)
-    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
-    
-    #Definitely not - der_hosp is 0
-    temp.ref <- which(ccc19x$der_hosp == 0 & is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
-    
-    #Definite - baseline form has hospitalization and interval from diagnosis to reporting is 4 weeks or less
-    temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$covid_19_dx_interval %in% 1:3 &
-                        is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Definite'
-    
-    #Definite - follow-up form has hospitalization as reason for f/u and within 30 days
-    temp.ref <- which(ccc19x$fu_reason == 1 & 
-                        ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
-                           ccc19x$fu_weeks == 30) &
-                        is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 'Definite'
-    
-    #Definitely not - baseline form doesn't have hospitalization, f/u does but is >30 days
-    temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
-                                     ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 5)|
-                                        ccc19x$fu_weeks %in% c(90,180,365)))]
-    temp.ref <- which(ccc19x$record_id %in% temp &
-                        ccc19x$der_hosp_bl == 0 &
-                        is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
-    
-    #Unknown timing and not otherwise already calculated
-    temp.ref <- which(ccc19x$dx_hosp_interval == 9999 & is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
-    
-    #Unknown hospitalization status
-    temp.ref <- which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
-    
-    #The remainder are possibly hospitalized within 30 days
-    temp.ref <- which(ccc19x$der_hosp == 1 & is.na(ccc19x$der_hosp_30))
-    ccc19x$der_hosp_30[temp.ref] <- 'Possible'
-    
-    #Factor
-    ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
-    
-    temp <- summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_hosp_30',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
+    {
+      #Definite - diagnosis-to-hospital interval is provided and less than or equal to 30
+      temp.ref <- which(ccc19x$dx_hosp_interval <= 30)
+      ccc19x$der_hosp_30[temp.ref] <- 'Definite'
+      
+      #Definitely not - diagnosis-to-hospital interval is provided and greater than 30 (and less than 9999)
+      temp.ref <- which(ccc19x$dx_hosp_interval > 30 & ccc19x$dx_hosp_interval < 9999)
+      ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+      
+      #Definitely not - der_hosp is 0
+      temp.ref <- which(ccc19x$der_hosp == 0 & is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+      
+      #Definite - baseline form has hospitalization and interval from diagnosis to reporting is 4 weeks or less
+      temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$covid_19_dx_interval %in% 1:3 &
+                          is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Definite'
+      
+      #Definite - follow-up form has hospitalization as reason for f/u and within 30 days
+      temp.ref <- which(ccc19x$fu_reason == 1 & 
+                          ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks <= 4)|
+                             ccc19x$fu_weeks == 30) &
+                          is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 'Definite'
+      
+      #Definitely not - baseline form doesn't have hospitalization, f/u does but is >30 days
+      temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
+                                       ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 5)|
+                                          ccc19x$fu_weeks %in% c(90,180,365)))]
+      temp.ref <- which(ccc19x$record_id %in% temp &
+                          ccc19x$der_hosp_bl == 0 &
+                          is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Definitely not'
+      
+      #Unknown timing and not otherwise already calculated
+      temp.ref <- which(ccc19x$dx_hosp_interval == 9999 & is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
+      
+      #Unknown hospitalization status
+      temp.ref <- which(ccc19x$der_hosp == 99 & is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Unknown'
+      
+      #The remainder are possibly hospitalized within 30 days
+      temp.ref <- which(ccc19x$der_hosp == 1 & is.na(ccc19x$der_hosp_30))
+      ccc19x$der_hosp_30[temp.ref] <- 'Possible'
+      
+      #Factor
+      ccc19x$der_hosp_30 <- as.factor(ccc19x$der_hosp_30)
+      
+      temp <- summary(ccc19x$der_hosp_30[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_hosp_30',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+    }
     
     #O2c. Hospitalization within first 14 days
     ccc19x$der_hosp_14 <- NA
