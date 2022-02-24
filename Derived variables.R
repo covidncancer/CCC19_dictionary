@@ -4897,10 +4897,11 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    ######################################################
-    #T15. Total hospital LOS for the index hospitalization
-    #This variable assumes that follow-up forms are entered in linear (temporal) order
+    ####################################################################
+    #T15 & T16. Total hospital and ICU LOS for the index hospitalization
+    #These variables assume that follow-up forms are entered in linear (temporal) order
     ccc19x$der_los_total <- NA
+    ccc19x$der_los_icu <- NA
     
     #Create a temporary data frame to hold the hospitalization intervals
     temp.df <- data.frame(record_id = ccc19x$record_id[which(ccc19x$der_hosp == 1 & ccc19x$redcap_repeat_instrument == '')],
@@ -4912,6 +4913,7 @@ var.log <- data.frame(name = character(),
                           hosp_los_fu_2 = 0,
                           icu_los_fu = 0,
                           der_los_total = NA,
+                          der_los_icu = NA,
                           exact = F,
                           stringsAsFactors = F)
     
@@ -4989,7 +4991,7 @@ var.log <- data.frame(name = character(),
       }
     }
     
-    #Tally up
+    #Tally up - total LOS first
     
     #Exact unchained baseline
     temp.ref <- which(temp.df$hosp_los != 0 & !temp.df$chained)
@@ -5005,11 +5007,15 @@ var.log <- data.frame(name = character(),
     temp.ref <- which((temp.df$hosp_los != 0|temp.df$hosp_los_fu != 0) & temp.df$chained)
     
     #Inexact unchained with baseline LOS
-    temp.ref <- which((temp.df$hosp_los_2 != 0|temp.df$icu_los != 0) & !temp.df$chained)
+    temp.ref <- which(temp.df$hosp_los == 0 &
+                        (temp.df$hosp_los_2 != 0|temp.df$icu_los != 0) & 
+                        !temp.df$chained)
     temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_2[temp.ref] + temp.df$icu_los[temp.ref]
     
     #Inexact unchained follow-up
-    temp.ref <- which((temp.df$hosp_los_fu_2 != 0|temp.df$icu_los_fu != 0) & !temp.df$chained)
+    temp.ref <- which(temp.df$hosp_los_fu == 0 &
+                        (temp.df$hosp_los_fu_2 != 0|temp.df$icu_los_fu != 0) & 
+                        !temp.df$chained)
     temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_fu_2[temp.ref] + temp.df$icu_los_fu[temp.ref]
     
     #Inexact chained with baseline or f/u LOS
@@ -5017,12 +5023,31 @@ var.log <- data.frame(name = character(),
     temp.df$der_los_total[temp.ref] <- temp.df$hosp_los_2[temp.ref] + temp.df$icu_los[temp.ref] + 
       temp.df$hosp_los_fu_2[temp.ref] + temp.df$icu_los_fu[temp.ref]
     
-    #Add the tally to the derived variable
+    #ICU LOS, next
+    
+    #Baseline unchained
+    temp.ref <- which(temp.df$icu_los != 0 & !temp.df$chained)
+    temp.df$der_los_icu[temp.ref] <- temp.df$icu_los[temp.ref]
+    
+    #Follow-up unchained
+    temp.ref <- which(temp.df$hosp_los == 0 & temp.df$hosp_los_2 == 0 &
+                        temp.df$icu_los == 0 & temp.df$icu_los_fu != 0 &
+                        !temp.df$chained)
+    temp.df$der_los_icu[temp.ref] <- temp.df$icu_los_fu[temp.ref]
+    
+    #Chained
+    temp.ref <- which((temp.df$icu_los != 0|temp.df$icu_los_fu != 0) &
+                        temp.df$chained)
+    temp.df$der_los_icu[temp.ref] <- temp.df$icu_los[temp.ref] + temp.df$icu_los_fu[temp.ref]
+    
+    #Add the tally to the derived variables
     for(i in which(!is.na(temp.df$der_los_total)))
     {
       temp.ref <- which(ccc19x$record_id == temp.df$record_id[i])
       if(temp.df$exact[i]) ccc19x$der_los_total[temp.ref] <- temp.df$der_los_total[i] else
         ccc19x$der_los_total[temp.ref] <- paste(temp.df$der_los_total[i], '+', sep = '')
+      
+      if(!is.na(temp.df$der_los_icu[i])) ccc19x$der_los_icu[temp.ref] <- temp.df$der_los_icu[i]
     }
     
     ccc19x$der_los_total <- factor(ccc19x$der_los_total)
@@ -5034,6 +5059,14 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    temp <- summary(ccc19x$der_los_icu[which(ccc19x$der_ICU == 1 & ccc19x$redcap_repeat_instrument == '')])
+    temp.var.log <- data.frame(name = 'der_los_icu',
+                               timestamp = Sys.time(), 
+                               values = paste(c(paste('Median:', temp[3], 'days'),
+                                                paste('IQR:', temp[2], '-', temp[5]),
+                                                paste('NA:', temp[7])), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
     
     }
   print('Time measurements completed')
