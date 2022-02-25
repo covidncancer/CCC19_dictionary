@@ -11026,6 +11026,14 @@ var.log <- data.frame(name = character(),
     length(unique(temp))
     temp <- factor(temp)
      
+    #Create drug list for data dictionary and QA needs
+    temp <- c(ccc19x$drug1, ccc19x$drug2, ccc19x$drug3, ccc19x$drug4, ccc19x$drug5, ccc19x$drug6, ccc19x$drug7, ccc19x$drug8)
+    temp <- temp[!is.na(temp)]
+    temp <- temp[temp != '']
+    temp <- unique(temp)
+    temp <- temp[order(temp)]
+    write.csv(temp, file = paste('Mapping - medications/', Sys.Date(), ' anticancer treatment list.csv',sep=''), row.names = F)
+    
     #Ca24: Regimen match - this will only work if the HemOnc ontology is in the workspace
     ccc19x$der_regimen <- NA
     if(exists('concept_stage'))
