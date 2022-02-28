@@ -11385,7 +11385,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_ai <- factor(ccc19x$der_ai)
     summary(ccc19x$der_ai[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4f: VEGF inhibitor
+    #Ca04f: VEGF inhibitor
     ccc19x$der_vegfi <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -11400,7 +11400,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vegfi <- factor(ccc19x$der_vegfi)
     summary(ccc19x$der_vegfi[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4g: TKI inhibitor (incomplete list, possibly)
+    #Ca04g: TKI inhibitor (incomplete list, possibly)
     ccc19x$der_tki <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -11420,7 +11420,21 @@ var.log <- data.frame(name = character(),
     ccc19x$der_tki <- factor(ccc19x$der_tki)
     summary(ccc19x$der_tki[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4h: CDK4/6 inhibitor
+    #Ca04g2: TKI inhibitors used in lung cancer
+    ccc19x$der_tki_lung <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+             c('Afatinib', 'Alectinib', 'Brigatinib', 'Ceritinib', 'Crizotinib', 'Entrectinib', 'Erlotinib', 'Gefitinib', 'Lorlatinib', 'Osimertinib', 'Selpercatinib'))) ccc19x$der_tki_lung[temp.ref[i]] <- 1 else
+                 ccc19x$der_tki_lung[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_tki_lung <- factor(ccc19x$der_tki_lung)
+    summary(ccc19x$der_tki_lung[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ca04h: CDK4/6 inhibitor
     ccc19x$der_cdk46i <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -11440,7 +11454,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4i: GNRH agonists and antagonists
+    #Ca04i: GNRH agonists and antagonists
     ccc19x$der_gnrh <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -11455,7 +11469,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_gnrh <- factor(ccc19x$der_gnrh)
     summary(ccc19x$der_gnrh[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4j: Oral anti-androgen
+    #Ca04j: Oral anti-androgen
     ccc19x$der_oral_antiandrogen <- NA
     
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
@@ -11470,7 +11484,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_oral_antiandrogen <- factor(ccc19x$der_oral_antiandrogen)
     summary(ccc19x$der_oral_antiandrogen[ccc19x$redcap_repeat_instrument == ''])
     
-    #Ca4k: PD-1/PD-L1 antibodies
+    #Ca04k: PD-1/PD-L1 antibodies
     ccc19x$der_pd1_l1 <- NA
     
     #Named exposure in the drug table
@@ -11495,7 +11509,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4k1: PD-1 or PD-L1 inhibitor within 3 months
+    #Ca04k1: PD-1 or PD-L1 inhibitor within 3 months
     ccc19x$der_pd1_l1_3mo <- NA
     
     ccc19x$der_pd1_l1_3mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_3mo == 1)] <- 1
@@ -11511,7 +11525,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4k2: PD-1 or PD-L1 inhibitor within 12 months
+    #Ca04k2: PD-1 or PD-L1 inhibitor within 12 months
     ccc19x$der_pd1_l1_12mo <- NA
     
     ccc19x$der_pd1_l1_12mo[which(ccc19x$der_pd1_l1 == 1 & ccc19x$der_any_systemic_v2 == 1)] <- 1
@@ -11527,7 +11541,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca4s: CTLA4 antibodies
+    #Ca04s: CTLA4 antibodies
     ccc19x$der_ctla4 <- NA
     
     #Named exposure in the drug table
