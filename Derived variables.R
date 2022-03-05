@@ -3520,38 +3520,38 @@ var.log <- data.frame(name = character(),
     ccc19x$ts_5 <- gsub(ccc19x$ts_5, pattern = '/20 ', replacement = '/2020 ')
     
     #T1 & T2. Time of last known followup (if alive) or to death (if dead) in days
-    ccc19x$meta_lefttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_lefttime_lb <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 7*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 7*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 14*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 14*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 28*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 28*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 56*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 56*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 84*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 84*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 180*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 180*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 270*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 270*24*60*60
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
+    ccc19x$meta_lefttime_lb[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
     
     #Pin the open-ended intervals at January 1, 2020
     temp.ref <- which(ccc19x$covid_19_dx_interval %in% c(7,10))
-    ccc19x$meta_lefttime[temp.ref] <- as.POSIXlt("2020-01-01 00:00:00 CDT")
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXlt("2020-01-01 00:00:00 CDT")
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -3579,17 +3579,17 @@ var.log <- data.frame(name = character(),
     }
     
     #Fix left time if there is a discrepancy with the year of diagnosis
-    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2019 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2019 &
                         ccc19x$dx_year == 2020)
-    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
     
-    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2020 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2020 &
                         ccc19x$dx_year == 2021)
-    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
     
-    temp.ref <- which(substr(ccc19x$meta_lefttime, start=1, stop=4) == 2021 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2021 &
                         ccc19x$dx_year == 2022)
-    ccc19x$meta_lefttime[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
     
     ###############
     #T3. Median f/u
@@ -3783,47 +3783,47 @@ var.log <- data.frame(name = character(),
     }
     
     #T4 & T5 Median f/u in days anchored to actual dates
-    ccc19x$meta_lefttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+    ccc19x$meta_lefttime_med <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime2 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
     ccc19x$meta_righttime2[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
     
     #First initial form
     temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - 7*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - 7*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (7+14)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (7+14)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (14+28)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (14+28)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (28+56)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (28+56)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (56+84)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (56+84)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (90+180)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (90+180)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 8)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+270)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+270)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-    ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (270+360)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (270+360)*24*60*60/2
     
     #Pin the open-ended intervals at January 1, 2020
     temp.ref <- which(ccc19x$covid_19_dx_interval == 7)
     temp <- as.numeric(difftime(ccc19x$ts_0[temp.ref], 
                      as.POSIXlt("2020-01-01 00:00:00 CDT"), 
                      units = 'days'))
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+temp)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+temp)*24*60*60/2
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
     temp <- as.numeric(difftime(ccc19x$ts_0[temp.ref], 
                                 as.POSIXlt("2020-01-01 00:00:00 CDT"), 
                                 units = 'days'))
-    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (360+temp)*24*60*60/2
+    ccc19x$meta_lefttime_med[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (360+temp)*24*60*60/2
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -3851,17 +3851,17 @@ var.log <- data.frame(name = character(),
     }
     
     #Fix left time if there is a discrepancy with the year of diagnosis
-    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2019 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_med, start=1, stop=4) == 2019 &
                         ccc19x$dx_year == 2020)
-    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_med[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
     
-    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2020 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_med, start=1, stop=4) == 2020 &
                         ccc19x$dx_year == 2021)
-    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_med[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
     
-    temp.ref <- which(substr(ccc19x$meta_lefttime2, start=1, stop=4) == 2021 &
+    temp.ref <- which(substr(ccc19x$meta_lefttime_med, start=1, stop=4) == 2021 &
                         ccc19x$dx_year == 2022)
-    ccc19x$meta_lefttime2[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+    ccc19x$meta_lefttime_med[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
     
     #T6. 30-day follow-up available (0 = no; 1 = yes; 99 = unknown)
     {
@@ -3881,37 +3881,37 @@ var.log <- data.frame(name = character(),
       ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
       
       #T7 & T8 Calculated time from diagnosis has to be at least 30 days
-      ccc19x$meta_lefttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
+      ccc19x$meta_lefttime_ub <- as.POSIXlt("2099-12-31 00:00:00 CDT")
       ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
       ccc19x$meta_righttime3[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
       
       #First initial form
       temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
-      ccc19x$meta_lefttime3[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
       
       # #now deal with followup time based on time stamps
       temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -3939,19 +3939,19 @@ var.log <- data.frame(name = character(),
       }
       
       #Fix left time if there is a discrepancy with the year of diagnosis
-      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2019 &
+      temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2019 &
                           ccc19x$dx_year == 2020)
-      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
+      ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2020-01-01 00:00:00 CST')
       
-      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2020 &
+      temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2020 &
                           ccc19x$dx_year == 2021)
-      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
+      ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
       
-      temp.ref <- which(substr(ccc19x$meta_lefttime3, start=1, stop=4) == 2021 &
+      temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2021 &
                           ccc19x$dx_year == 2022)
-      ccc19x$meta_lefttime3[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+      ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
       
-      temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime_ub, units = 'days')
       temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
       
       ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
@@ -3980,7 +3980,7 @@ var.log <- data.frame(name = character(),
       temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
       
       #1. Calculated time to death is <= 30 days
-      temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
+      temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
       temp.ref2 <- which(temp.diff[temp.ref] <= 30)
       temp <- ccc19x$record_id[temp.ref[temp.ref2]]
       ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
@@ -4101,7 +4101,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
     #1. Calculated time to death is <= 30 days
-    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 30)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 1
@@ -4221,7 +4221,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 90 days
-    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 90)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
@@ -4341,7 +4341,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 0
     
     #1. Calculated time to death is <= 90 days
-    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 90)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 1
@@ -4461,7 +4461,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
     
     #1. Calculated time to death is <= 180 days
-    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime, units = 'days')
+    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 180)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
     ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
@@ -4606,12 +4606,12 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
     
     #First, extract month and year from the POSIXlt objects
-    x1 <- months(ccc19x$meta_lefttime[temp.ref], abbreviate = T)
-    xm <- months(ccc19x$meta_lefttime2[temp.ref], abbreviate = T)
-    x2 <- months(ccc19x$meta_lefttime3[temp.ref], abbreviate = T)
-    y1 <- format(ccc19x$meta_lefttime[temp.ref], format = '%Y')
-    ym <- format(ccc19x$meta_lefttime2[temp.ref], format = '%Y')
-    y2 <- format(ccc19x$meta_lefttime3[temp.ref], format = '%Y')
+    x1 <- months(ccc19x$meta_lefttime_lb[temp.ref], abbreviate = T)
+    xm <- months(ccc19x$meta_lefttime_med[temp.ref], abbreviate = T)
+    x2 <- months(ccc19x$meta_lefttime_ub[temp.ref], abbreviate = T)
+    y1 <- format(ccc19x$meta_lefttime_lb[temp.ref], format = '%Y')
+    ym <- format(ccc19x$meta_lefttime_med[temp.ref], format = '%Y')
+    y2 <- format(ccc19x$meta_lefttime_ub[temp.ref], format = '%Y')
     
     #Format months for table ordering later
     x1[x1 == 'Jan'] <- '01 (Jan)'
@@ -12885,13 +12885,13 @@ var.log <- data.frame(name = character(),
     ccc19x$meta_365d_due <- NA
     
     temp.ref <- which(ccc19x$redcap_repeat_instrument == '')
-    ccc19x$meta_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 30*24*60*60)
+    ccc19x$meta_30d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime_ub[temp.ref]) + 30*24*60*60)
     ccc19x$meta_30d_due[temp.ref] <- gsub(ccc19x$meta_30d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$meta_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 90*24*60*60)
+    ccc19x$meta_90d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime_ub[temp.ref]) + 90*24*60*60)
     ccc19x$meta_90d_due[temp.ref] <- gsub(ccc19x$meta_90d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$meta_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 180*24*60*60)
+    ccc19x$meta_180d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime_ub[temp.ref]) + 180*24*60*60)
     ccc19x$meta_180d_due[temp.ref] <- gsub(ccc19x$meta_180d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
-    ccc19x$meta_365d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime3[temp.ref]) + 365*24*60*60)
+    ccc19x$meta_365d_due[temp.ref] <- as.character(as.POSIXct(ccc19x$meta_lefttime_ub[temp.ref]) + 365*24*60*60)
     ccc19x$meta_365d_due[temp.ref] <- gsub(ccc19x$meta_365d_due[temp.ref], pattern = ' [0-9]{2}:[0-9]{2}:[0-9]{2}', replacement = '')
     
     
@@ -13110,7 +13110,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #30-day f/u is 60+ days overdue (if applicable and not superseded by 90-day f/u)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
@@ -13128,7 +13128,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #90-day f/u is 60+ days overdue (if applicable)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
@@ -13146,7 +13146,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #180-day f/u is 60+ days overdue (if applicable)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 240 & ccc19x$der_days_fu < 180 & ccc19x$der_180d_complete == 'No')
@@ -13354,7 +13354,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #30-day f/u is 30+ days overdue (if applicable and not superseded by 90-day f/u)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 60 & temp < 90 & ccc19x$der_days_fu < 30 & ccc19x$der_30d_complete == 'No')
@@ -13372,7 +13372,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #90-day f/u is 30+ days overdue (if applicable)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 120 & temp < 150 & ccc19x$der_days_fu < 90 & ccc19x$der_90d_complete == 'No')
@@ -13390,7 +13390,7 @@ var.log <- data.frame(name = character(),
                                                          '%)', sep = ''))
       
       #180-day f/u is 30+ days overdue (if applicable)
-      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime3, units = 'days')
+      temp.diff <- difftime(Sys.time(), ccc19x$meta_lefttime_ub, units = 'days')
       temp <- as.numeric(temp.diff)
       
       temp.ref <- which(temp >= 210 & temp < 240 & ccc19x$der_days_fu < 180 & ccc19x$der_180d_complete == 'No')
