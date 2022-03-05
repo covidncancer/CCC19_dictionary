@@ -13645,65 +13645,26 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    ##########################
-    #X12. COVID-19 vaccination
-    ##########################
-    ccc19x$der_vax <- NA
-    
-    #No
-    ccc19x$der_vax[which(ccc19x$sars_vax == 0)] <- 'Unvaccinated'
-    
-    #Fully vaccinated
-    ccc19x$der_vax[which((ccc19x$sars_vax_which == 4 & ccc19x$sars_vax_when %in% 2:4)|
-                           (ccc19x$sars_vax_which %in% c('1b', '2b') & ccc19x$sars_vax_when %in% 3:4)|
-                           (ccc19x$sars_vax_which %in% c('3b') & ccc19x$sars_vax_when %in% 2:4))
-                     ] <- 'Fully vaccinated'
-    
-    ccc19x$der_vax[which(ccc19x$sars_vax_when == 1|
-                           (ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax)))] <- 'Partially vaccinated'
-    
-    # #Partial early (0-4 weeks)
-    # ccc19x$der_vax[which(ccc19x$sars_vax_when == 1)] <- 'Partially vaccinated, early (0-4 wks)'
+    # #X12a. COVID-19 vaccination with temporal collapse -- needs updating
+    # ccc19x$der_vax_collapsed <- NA
     # 
-    # #Partial late (4+ weeks)
-    # ccc19x$der_vax[which(ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax))] <- 'Partially vaccinated, late (4+ weeks)'
+    # #At least one dose prior to COVID-19
+    # ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Partially vaccinated', 'Fully vaccinated'))] <- 1
     # 
-    #After COVID-19
-    ccc19x$der_vax[which(ccc19x$sars_vax_when == 88)] <- 'After COVID-19'
-    
-    #Unknown
-    ccc19x$der_vax[which(ccc19x$sars_vax == 99|
-                           ccc19x$sars_vax_when == 99)] <- 'Unknown'
-    
-    ccc19x$der_vax <- factor(ccc19x$der_vax)
-    
-    temp <- summary(ccc19x$der_vax[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_vax',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #X12a. COVID-19 vaccination with temporal collapse
-    ccc19x$der_vax_collapsed <- NA
-    
-    #At least one dose prior to COVID-19
-    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Partially vaccinated', 'Fully vaccinated'))] <- 1
-    
-    #Unvaccinated or vaccinated after COVID-19
-    ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Unvaccinated', 'After COVID-19'))] <- 0
-    
-    #Unknown
-    ccc19x$der_vax_collapsed[which(ccc19x$der_vax == 'Unknown')] <- 99
-    
-    ccc19x$der_vax_collapsed <- factor(ccc19x$der_vax_collapsed)
-    
-    temp <- summary(ccc19x$der_vax_collapsed[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_vax_collapsed',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
+    # #Unvaccinated or vaccinated after COVID-19
+    # ccc19x$der_vax_collapsed[which(ccc19x$der_vax %in% c('Unvaccinated', 'After COVID-19'))] <- 0
+    # 
+    # #Unknown
+    # ccc19x$der_vax_collapsed[which(ccc19x$der_vax == 'Unknown')] <- 99
+    # 
+    # ccc19x$der_vax_collapsed <- factor(ccc19x$der_vax_collapsed)
+    # 
+    # temp <- summary(ccc19x$der_vax_collapsed[ccc19x$redcap_repeat_instrument == ''])
+    # temp.var.log <- data.frame(name = 'der_vax_collapsed',
+    #                            timestamp = Sys.time(),
+    #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+    #                            stringsAsFactors = F)
+    # var.log <- rbind(var.log, temp.var.log)
     
     #X12b. Simple derived variable counting doses prior to COVID-19
     ccc19x$der_vax_count <- NA
@@ -13717,7 +13678,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vax_count[temp.ref] <- '1 non-mrna dose'
     
     #One dose mrna
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a') & is.na(ccc19x$der_vax_count))
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a','5a') & is.na(ccc19x$der_vax_count))
     ccc19x$der_vax_count[temp.ref] <- '1 mrna dose'
     
     #Two or more doses non-mrna
@@ -13725,11 +13686,11 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vax_count[temp.ref] <- '2+ non-mrna doses'
     
     #Two dose mrna
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b') & is.na(ccc19x$der_vax_count))
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b','5b') & is.na(ccc19x$der_vax_count))
     ccc19x$der_vax_count[temp.ref] <- '2 mrna doses'
     
     #Three or more doses mrna
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c') & is.na(ccc19x$der_vax_count))
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c','5c') & is.na(ccc19x$der_vax_count))
     ccc19x$der_vax_count[temp.ref] <- '3+ mrna doses'
     
     #Others
@@ -14252,6 +14213,46 @@ var.log <- data.frame(name = character(),
      #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
      #                            stringsAsFactors = F)
      # var.log <- rbind(var.log, temp.var.log)
+     
+     ##########################
+     #zDep21. COVID-19 vaccination
+     ##########################
+     # ccc19x$der_vax <- NA
+     # 
+     # #No
+     # ccc19x$der_vax[which(ccc19x$sars_vax == 0)] <- 'Unvaccinated'
+     # 
+     # #Fully vaccinated
+     # ccc19x$der_vax[which((ccc19x$sars_vax_which == 4 & ccc19x$sars_vax_when %in% 2:4)|
+     #                        (ccc19x$sars_vax_which %in% c('1b', '2b') & ccc19x$sars_vax_when %in% 3:4)|
+     #                        (ccc19x$sars_vax_which %in% c('3b') & ccc19x$sars_vax_when %in% 2:4))
+     #                  ] <- 'Fully vaccinated'
+     # 
+     # ccc19x$der_vax[which(ccc19x$sars_vax_when == 1|
+     #                        (ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax)))] <- 'Partially vaccinated'
+     # 
+     # # #Partial early (0-4 weeks)
+     # # ccc19x$der_vax[which(ccc19x$sars_vax_when == 1)] <- 'Partially vaccinated, early (0-4 wks)'
+     # # 
+     # # #Partial late (4+ weeks)
+     # # ccc19x$der_vax[which(ccc19x$sars_vax_when %in% 2:4 & is.na(ccc19x$der_vax))] <- 'Partially vaccinated, late (4+ weeks)'
+     # # 
+     # #After COVID-19
+     # ccc19x$der_vax[which(ccc19x$sars_vax_when == 88)] <- 'After COVID-19'
+     # 
+     # #Unknown
+     # ccc19x$der_vax[which(ccc19x$sars_vax == 99|
+     #                        ccc19x$sars_vax_when == 99)] <- 'Unknown'
+     # 
+     # ccc19x$der_vax <- factor(ccc19x$der_vax)
+     # 
+     # temp <- summary(ccc19x$der_vax[ccc19x$redcap_repeat_instrument == ''])
+     # temp.var.log <- data.frame(name = 'der_vax',
+     #                            timestamp = Sys.time(),
+     #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                            stringsAsFactors = F)
+     # var.log <- rbind(var.log, temp.var.log)
+     # 
      
    }
 }
