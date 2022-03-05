@@ -13664,7 +13664,7 @@ var.log <- data.frame(name = character(),
     #                            stringsAsFactors = F)
     # var.log <- rbind(var.log, temp.var.log)
     
-    #X12b. Simple derived variable counting doses prior to COVID-19
+    #X12b. Simple derived variable counting doses of COVID-19 vaccine
     ccc19x$der_vax_count <- NA
     
     #No doses
@@ -13705,6 +13705,109 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_vax_count[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_vax_count',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #X12c. Derived variable counting doses of COVID-19 vaccine before COVID-19
+    ccc19x$der_vax_count_before <- NA
+    
+    #No doses before
+    temp.ref <- which(ccc19x$sars_vax == 0|ccc19x$sars_vax_when == 88|ccc19x$sars_vax_before_num == 0)
+    ccc19x$der_vax_count_before[temp.ref] <- '0 doses before'
+    
+    #One dose non-mrna
+    
+    #Definite
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1a','4') & ccc19x$sars_vax_when %in% 1:4 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '1 non-mrna dose before, definite'
+    
+    #Unknown
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1a','4') & ccc19x$sars_vax_when %in% 1:4 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '1 non-mrna dose before, unknown'
+    
+    #One dose mrna
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a','5a') & ccc19x$sars_vax_when %in% 1:4 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '1 mrna dose before, definite'
+    
+    #Unknown
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a','5a') & ccc19x$sars_vax_when %in% 1:4 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '1 mrna dose before, unknown'
+    
+    #Two or more doses non-mrna
+    
+    #Definite
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1b','4b') & 
+                        (ccc19x$sars_vax_before_num == 2|ccc19x$sars_vax_before == 1) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2+ non-mrna doses before, definite'
+    
+    #Probable
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1b','4b') & 
+                        (ccc19x$covid_19_dx_interval %in% 1:4|ccc19x$sars_vax_when_exact >= 30) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2+ non-mrna doses before, probable'
+    
+    #Possible
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1b','4b') & ccc19x$covid_19_dx_interval %in% 5:99 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2+ non-mrna doses before, possible'
+    
+    #Two dose mrna
+    #Definite
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b','5b') & 
+                        (ccc19x$sars_vax_before_num == 2|ccc19x$sars_vax_before == 1) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2 mrna doses before, definite'
+    
+    #Probable
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b','5b') & 
+                        (ccc19x$covid_19_dx_interval %in% 1:4|ccc19x$sars_vax_when_exact >= 30) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2 mrna doses before, probable'
+    
+    #Possible
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b','5b') & ccc19x$covid_19_dx_interval %in% 5:99 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '2 mrna doses before, possible'
+    
+    #Three or more doses mrna
+    #Definite
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c','5c') & 
+                        (ccc19x$sars_vax_before_num >= 3|ccc19x$sars_vax_before == 1) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '3+ mrna doses before, definite'
+    
+    #Probable
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c','5c') & 
+                        (ccc19x$covid_19_dx_interval %in% 1:4|ccc19x$sars_vax_when_exact >= 180) &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '3+ mrna doses before, probable'
+    
+    #Possible
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('2c','3c','5c') & ccc19x$covid_19_dx_interval %in% 5:99 &
+                        is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- '3+ mrna doses before, possible'
+    
+    #Others
+    temp.ref <- which(ccc19x$sars_vax_which %in% c(88) & is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- 'Other'
+    
+    #Unknown
+    temp.ref <- which((ccc19x$sars_vax == 99|
+                         ccc19x$sars_vax_which == 99|
+                         ccc19x$sars_vax_when == 99) & is.na(ccc19x$der_vax_count_before))
+    ccc19x$der_vax_count_before[temp.ref] <- 'Unknown (dose and/or timing)'
+    
+    ccc19x$der_vax_count_before <- factor(ccc19x$der_vax_count_before)
+    
+    temp <- summary(ccc19x$der_vax_count_before[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vax_count_before',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
