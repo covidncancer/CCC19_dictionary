@@ -3549,6 +3549,10 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
     ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
     
+    #Pin the open-ended intervals at January 1, 2020
+    temp.ref <- which(ccc19x$covid_19_dx_interval %in% c(7,10))
+    ccc19x$meta_lefttime[temp.ref] <- as.POSIXlt("2020-01-01 00:00:00 CDT")
+    
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
     for(i in 1:length(temp))
@@ -3807,6 +3811,19 @@ var.log <- data.frame(name = character(),
     
     temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
     ccc19x$meta_lefttime2[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (270+360)*24*60*60/2
+    
+    #Pin the open-ended intervals at January 1, 2020
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 7)
+    temp <- as.numeric(difftime(ccc19x$ts_0[temp.ref], 
+                     as.POSIXlt("2020-01-01 00:00:00 CDT"), 
+                     units = 'days'))
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (180+temp)*24*60*60/2
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
+    temp <- as.numeric(difftime(ccc19x$ts_0[temp.ref], 
+                                as.POSIXlt("2020-01-01 00:00:00 CDT"), 
+                                units = 'days'))
+    ccc19x$meta_lefttime[temp.ref] <- ccc19x$meta_righttime2[temp.ref] - (360+temp)*24*60*60/2
     
     # #now deal with followup time based on time stamps
     temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
