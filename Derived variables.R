@@ -8,10 +8,10 @@ require("dplyr")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-# suffix <- 'data with derived variables for analysis'
-# suffix <- 'data with derived variables for site QA'
+suffix <- 'data with derived variables for analysis'
+suffix <- 'data with derived variables for site QA'
 suffix <- 'data with derived variables for central QA'
-# suffix <- 'data with derived variables for appeal'
+suffix <- 'data with derived variables for appeal'
 
 #Create a table to log the variables as they are created
 var.log <- data.frame(name = character(),
@@ -3811,36 +3811,34 @@ var.log <- data.frame(name = character(),
       
       #T7 & T8 Calculated time from diagnosis has to be at least 30 days
       ccc19x$meta_lefttime_ub <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-      ccc19x$meta_righttime3 <- as.POSIXlt("2099-12-31 00:00:00 CDT")
-      ccc19x$meta_righttime3[ccc19x$ts_0 != ''] <- as.POSIXct(ccc19x$ts_0[ccc19x$ts_0 != ''])
       
       #First initial form
       temp.ref <- which(ccc19x$covid_19_dx_interval == 1)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 0*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 0*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 2)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 7*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 7*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 3)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 14*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 14*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 4)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 28*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 28*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 5)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 56*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 56*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 6)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 90*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 90*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval %in% 7:8)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 180*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 180*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 9)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 270*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 270*24*60*60
       
       temp.ref <- which(ccc19x$covid_19_dx_interval == 10)
-      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime3[temp.ref] - 360*24*60*60
+      ccc19x$meta_lefttime_ub[temp.ref] <- ccc19x$meta_righttime[temp.ref] - 360*24*60*60
       
       # #now deal with followup time based on time stamps
       temp <- unique(ccc19x$record_id[ccc19x$redcap_repeat_instrument == 'followup'])
@@ -3863,7 +3861,7 @@ var.log <- data.frame(name = character(),
                                                             '%Y-%m-%d %H:%M',
                                                             '%Y-%m-%d'))
           temp.time <- temp.time[which(temp.time == max(temp.time))]
-          ccc19x$meta_righttime3[temp.ref] <- temp.time[1]
+          ccc19x$meta_righttime[temp.ref] <- temp.time[1]
         }
       }
       
@@ -3888,7 +3886,7 @@ var.log <- data.frame(name = character(),
                           ccc19x$dx_year == 2021)
       ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2021-12-31 00:00:00 CST')
       
-      temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime_ub, units = 'days')
+      temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_ub, units = 'days')
       temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
       
       ccc19x$der_d30[which(ccc19x$record_id %in% temp)] <- 1
