@@ -3588,8 +3588,16 @@ var.log <- data.frame(name = character(),
     ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
     
     temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2021 &
+                        ccc19x$dx_year == 2020)
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2020-12-31 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2021 &
                         ccc19x$dx_year == 2022)
     ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+    
+    temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2022 &
+                        ccc19x$dx_year == 2021)
+    ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2020-12-31 00:00:00 CST')
     
     ###############
     #T3. Median f/u
@@ -3948,8 +3956,16 @@ var.log <- data.frame(name = character(),
       ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2021-01-01 00:00:00 CST')
       
       temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2021 &
+                          ccc19x$dx_year == 2020)
+      ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2020-12-31 00:00:00 CST')
+      
+      temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2021 &
                           ccc19x$dx_year == 2022)
       ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2022-01-01 00:00:00 CST')
+      
+      temp.ref <- which(substr(ccc19x$meta_lefttime_ub, start=1, stop=4) == 2022 &
+                          ccc19x$dx_year == 2021)
+      ccc19x$meta_lefttime_ub[temp.ref] <- as.POSIXct('2021-12-31 00:00:00 CST')
       
       temp.diff <- difftime(ccc19x$meta_righttime3, ccc19x$meta_lefttime_ub, units = 'days')
       temp <- ccc19x$record_id[which(as.numeric(temp.diff) >= 30)]
