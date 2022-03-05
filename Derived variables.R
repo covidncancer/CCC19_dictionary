@@ -13720,7 +13720,8 @@ var.log <- data.frame(name = character(),
     #One dose non-mrna
     
     #Definite
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('1a','4') & ccc19x$sars_vax_when %in% 1:4 &
+    temp.ref <- which(ccc19x$sars_vax_which %in% c('1a','4') & 
+                        (ccc19x$sars_vax_when %in% 1:4|ccc19x$sars_vax_before_num == 1) &
                         is.na(ccc19x$der_vax_count_before))
     ccc19x$der_vax_count_before[temp.ref] <- '1 non-mrna dose before, definite'
     
@@ -13730,7 +13731,12 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vax_count_before[temp.ref] <- '1 non-mrna dose before, unknown'
     
     #One dose mrna
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('2a','3a','5a') & ccc19x$sars_vax_when %in% 1:4 &
+    
+    #Definite
+    temp.ref <- which(((ccc19x$sars_vax_which %in% c('2a','3a','5a') & 
+                          ccc19x$sars_vax_when %in% 1:4) |
+                         (ccc19x$sars_vax_which %in% c('2a','3a','5a','2b','3b','5b','2c','3c','5c') & 
+                            ccc19x$sars_vax_before_num == 1)) &
                         is.na(ccc19x$der_vax_count_before))
     ccc19x$der_vax_count_before[temp.ref] <- '1 mrna dose before, definite'
     
@@ -13760,8 +13766,10 @@ var.log <- data.frame(name = character(),
     
     #Two dose mrna
     #Definite
-    temp.ref <- which(ccc19x$sars_vax_which %in% c('2b','3b','5b') & 
-                        (ccc19x$sars_vax_before_num == 2|ccc19x$sars_vax_before == 1) &
+    temp.ref <- which(((ccc19x$sars_vax_which %in% c('2b','3b','5b') & 
+                          ccc19x$sars_vax_before == 1) |
+                         (ccc19x$sars_vax_which %in% c('2b','3b','5b','2c','3c','5c') & 
+                            ccc19x$sars_vax_before_num == 2)) &
                         is.na(ccc19x$der_vax_count_before))
     ccc19x$der_vax_count_before[temp.ref] <- '2 mrna doses before, definite'
     
