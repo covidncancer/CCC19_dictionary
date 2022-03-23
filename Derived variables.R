@@ -11868,6 +11868,9 @@ var.log <- data.frame(name = character(),
       der_vegfi_3m = ifelse(der_any_targeted_3mo == 1 & der_vegfi == 1, 1,
                             ifelse(der_any_targeted_3mo == 1 & der_vegfi == 0 | der_any_targeted_3mo == 0, 0, NA)) %>% as.factor()
       
+      der_tki_vegfi_3m = ifelse(der_any_targeted_3mo == 1 & (der_tki == 1|der_vegfi == 1), 1,
+                                 ifelse(der_any_targeted_3mo == 1 & der_tki == 0 & der_vegfi == 0 | der_any_targeted_3mo == 0, 0, NA)) %>% as.factor()
+      
       der_pd1_l1_3m = ifelse(der_any_immuno_3mo == 1 & der_pd1_l1 == 1, 1,
                           ifelse((der_any_immuno_3mo == 1 & der_pd1_l1 == 0) | der_any_immuno_3mo == 0, 0, NA)) %>% as.factor()
       
@@ -11889,6 +11892,13 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    temp <- summary(ccc19x$der_tki_vegfi_3m[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_tki_vegfi_3m',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     temp <- summary(ccc19x$der_pd1_l1_3m[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_pd1_l1_3m',
                                timestamp = Sys.time(),
@@ -11898,6 +11908,42 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_anthracycline_3m[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_anthracycline_3m',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    # Drug variables within 12 months (requires modality/drug matching to be correct!)
+    ccc19x=within(ccc19x, {
+      
+      der_tki_12m = ifelse(der_any_targeted_12mo == 1 & der_tki == 1, 1,
+                           ifelse(der_any_targeted_12mo == 1 & der_tki == 0 | der_any_targeted_12mo == 0, 0, NA)) %>% as.factor()
+      
+      der_vegfi_12m = ifelse(der_any_targeted_12mo == 1 & der_vegfi == 1, 1,
+                             ifelse(der_any_targeted_12mo == 1 & der_vegfi == 0 | der_any_targeted_12mo == 0, 0, NA)) %>% as.factor()
+      
+      der_tki_vegfi_12m = ifelse(der_any_targeted_12mo == 1 & (der_tki == 1|der_vegfi == 1), 1,
+                                 ifelse(der_any_targeted_12mo == 1 & der_tki == 0 & der_vegfi == 0 | der_any_targeted_12mo == 0, 0, NA)) %>% as.factor()
+      
+      
+    })
+    
+    temp <- summary(ccc19x$der_tki_12m[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_tki_12m',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    temp <- summary(ccc19x$der_vegfi_12m[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vegfi_12m',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    temp <- summary(ccc19x$der_tki_vegfi_12m[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_tki_vegfi_12m',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
