@@ -3901,7 +3901,7 @@ var.log <- data.frame(name = character(),
       var.log <- rbind(var.log, temp.var.log)
     }
     
-    #T4. Median of meta_lefttime_lb and meta_lefttime_ub
+    #T4. Middle of meta_lefttime_lb and meta_lefttime_ub
     temp <- as.numeric(difftime(ccc19x$meta_lefttime_ub, 
                                 ccc19x$meta_lefttime_lb, 
                                 units = 'days'))/2
@@ -4522,6 +4522,7 @@ var.log <- data.frame(name = character(),
     x2[x2 == 'Nov'] <- '11 (Nov)'
     x2[x2 == 'Dec'] <- '12 (Dec)'
     
+    #T09 Month and year of diagnosis, accounting for interval bounds (missing if it crosses bounds)
     ccc19x$der_month_dx <- NA
     temp.ref2 <- which(x1 == x2 & y1 == y2 & y1 != 2099)
     
@@ -4529,7 +4530,13 @@ var.log <- data.frame(name = character(),
     ccc19x$der_month_dx <- factor(ccc19x$der_month_dx)
     summary(ccc19x$der_month_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T09a Month and year of diagnosis, using the right side of the interval as the anchor
+    #T09a Month and year of diagnosis, using the middle of the interval as the anchor
+    ccc19x$der_month_mid_dx <- NA
+    ccc19x$der_month_mid_dx[temp.ref] <- paste(ym, '-', xm, sep = '')
+    ccc19x$der_month_mid_dx <- factor(ccc19x$der_month_mid_dx)
+    summary(ccc19x$der_month_mid_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T09b Month and year of diagnosis, using the right side of the interval as the anchor
     ccc19x$der_month_rt_dx <- NA
     ccc19x$der_month_rt_dx[temp.ref] <- paste(y2, '-', x2, sep = '')
     ccc19x$der_month_rt_dx <- factor(ccc19x$der_month_rt_dx)
@@ -4561,7 +4568,29 @@ var.log <- data.frame(name = character(),
     ccc19x$der_quarter_dx <- factor(ccc19x$der_quarter_dx)
     summary(ccc19x$der_quarter_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T10a Quarter and year of diagnosis, using the right side of the interval as the anchor
+    #T10a Quarter and year of diagnosis, using the middle of the interval as the anchor
+    ccc19x$der_quarter_mid_dx <- NA
+    
+    #Q1
+    temp.ref2 <- which(xm %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)') & ym != 2099)
+    ccc19x$der_quarter_mid_dx[temp.ref[temp.ref2]] <- paste('Q1', ym[temp.ref2])
+    
+    #Q2
+    temp.ref2 <- which(xm %in% c('04 (Apr)', '05 (May)', '06 (Jun)') & ym != 2099)
+    ccc19x$der_quarter_mid_dx[temp.ref[temp.ref2]] <- paste('Q2', ym[temp.ref2])
+    
+    #Q3
+    temp.ref2 <- which(xm %in% c('07 (Jul)', '08 (Aug)', '09 (Sep)') & ym != 2099)
+    ccc19x$der_quarter_mid_dx[temp.ref[temp.ref2]] <- paste('Q3', ym[temp.ref2])
+    
+    #Q4
+    temp.ref2 <- which(xm %in% c('10 (Oct)', '11 (Nov)', '12 (Dec)') & ym != 2099)
+    
+    ccc19x$der_quarter_mid_dx[temp.ref[temp.ref2]] <- paste('Q4', ym[temp.ref2])
+    ccc19x$der_quarter_mid_dx <- factor(ccc19x$der_quarter_mid_dx)
+    summary(ccc19x$der_quarter_mid_dx[ccc19x$redcap_repeat_instrument == ''])
+    
+    #T10b Quarter and year of diagnosis, using the right side of the interval as the anchor
     ccc19x$der_quarter_rt_dx <- NA
     
     #Q1
@@ -4583,7 +4612,31 @@ var.log <- data.frame(name = character(),
     ccc19x$der_quarter_rt_dx <- factor(ccc19x$der_quarter_rt_dx)
     summary(ccc19x$der_quarter_rt_dx[ccc19x$redcap_repeat_instrument == ''])
     
-    #T11 Trimester (actually "quadrimester") and year of diagnosis, using the right side of the interval as the anchor
+    #T11a Trimester (actually "quadrimester") and year of diagnosis, using the middle of the interval as the anchor
+    ccc19x$der_tri_mid_dx <- NA
+    
+    #T1
+    temp.ref2 <- which(xm %in% c('01 (Jan)', '02 (Feb)', '03 (Mar)', '04 (Apr)') & ym != 2099)
+    ccc19x$der_tri_mid_dx[temp.ref[temp.ref2]] <- paste('T1', ym[temp.ref2])
+    
+    #T2
+    temp.ref2 <- which(xm %in% c('05 (May)', '06 (Jun)', '07 (Jul)', '08 (Aug)') & ym != 2099)
+    ccc19x$der_tri_mid_dx[temp.ref[temp.ref2]] <- paste('T2', ym[temp.ref2])
+    
+    #T3
+    temp.ref2 <- which(xm %in% c('09 (Sep)', '10 (Oct)', '11 (Nov)', '12 (Dec)') & ym != 2099)
+    ccc19x$der_tri_mid_dx[temp.ref[temp.ref2]] <- paste('T3', ym[temp.ref2])
+    
+    ccc19x$der_tri_mid_dx <- factor(ccc19x$der_tri_mid_dx)
+    
+    temp <- summary(ccc19x$der_tri_mid_dx[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_tri_mid_dx',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #T11b Trimester (actually "quadrimester") and year of diagnosis, using the right side of the interval as the anchor
     ccc19x$der_tri_rt_dx <- NA
     
     #T1
