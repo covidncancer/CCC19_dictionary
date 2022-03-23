@@ -3764,13 +3764,13 @@ var.log <- data.frame(name = character(),
       
       #90-day
       temp.ref <- which(ccc19x$der_days_fu < 90 &
-                          ccc19x$der_dead90 == 0 &
+                          ccc19x$der_dead90a == 0 &
                           (ccc19x$mortality_90 == 1|ccc19x$d90_vital_status == 0))
       ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 90
       
       #180-day
       temp.ref <- which(ccc19x$der_days_fu < 180 &
-                          ccc19x$der_dead180 == 0 &
+                          ccc19x$der_dead180a == 0 &
                           (ccc19x$mortality_180 == 1|ccc19x$d180_vital_status == 0))
       ccc19x$der_days_fu[ccc19x$record_id %in% ccc19x$record_id[temp.ref]] <- 180
       
@@ -4007,7 +4007,7 @@ var.log <- data.frame(name = character(),
       }
       
       #10. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
-      temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180) & 
+      temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180,365) & 
                                        ccc19x$redcap_repeat_instance > 1 &
                                        (ccc19x$fu_reason == 3 |
                                           ccc19x$covid_19_status_fu == 3 |
@@ -4038,7 +4038,7 @@ var.log <- data.frame(name = character(),
     #Alive on followup form
     temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
-                         (ccc19x$fu_weeks %in% c(30,90,180) | ccc19x$timing_of_report_weeks > 4))
+                         (ccc19x$fu_weeks %in% c(30,90,180,365) | ccc19x$timing_of_report_weeks > 4))
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -4137,8 +4137,8 @@ var.log <- data.frame(name = character(),
       }
     }
     
-    #10. Rescind unknown status if 90-day or 180-day follow-up form is filled out as death and is not the first f/u form
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180) & 
+    #10. Rescind unknown status if 90/180/365-day follow-up form is filled out as death and is not the first f/u form
+    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(90,180,365) & 
                                      ccc19x$redcap_repeat_instance > 1 &
                                      (ccc19x$fu_reason == 3 |
                                         ccc19x$covid_19_status_fu == 3 |
@@ -4155,117 +4155,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #O24. Dead within 90 days
-    
-    #Default is not dead at 90 days
-    ccc19x$der_dead90 <- 0
-    
-    temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
-    
-    #1. Calculated time to death is <= 90 days
-    temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
-    temp.ref2 <- which(temp.diff[temp.ref] <= 90)
-    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #2. 90-day mortality flag is set (baseline)
-    temp.ref2 <- which(ccc19x$mortality_90[temp.ref] == 0)
-    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #3. 90-day mortality flag is set (follow-up)
-    temp.ref2 <- which(ccc19x$d90_vital_status[temp.ref] == 1)
-    temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #4. 90-day follow-up form is filled out as death
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 90 & (
-      ccc19x$fu_reason == 3 |
-        ccc19x$covid_19_status_fu == 3 |
-        ccc19x$current_status_fu == 9 ))]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #5. Follow-up form filled out as other and timing < 13 weeks
-    temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks < 13 & (
-      ccc19x$fu_reason == 3 |
-        ccc19x$covid_19_status_fu == 3 |
-        ccc19x$current_status_fu == 9 ))]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #6. Days to death <= 90
-    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 90)]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
-    
-    #7. Rescind status if days to death > 90
-    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 90)]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 0
-    
-    #8. Declare unknown if days to death cannot be calculated and mortality flag not set
-    temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead90 == 0 &
-                                     (is.na(ccc19x$mortality_90)|ccc19x$mortality_90 == 99) & 
-                                     (is.na(ccc19x$d90_vital_status)|ccc19x$d90_vital_status == 99) & #Mortality flags
-                                     (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
-    flag <- rep(T, length(temp))
-    for(i in 1:length(temp))
-    {
-      temp.ref <- which(ccc19x$record_id == temp[i])
-      temp2 <- c(ccc19x$hosp_los[temp.ref],
-                 ccc19x$hosp_los_2[temp.ref],
-                 ccc19x$hosp_los_fu[temp.ref],
-                 ccc19x$hosp_los_fu_2[temp.ref],
-                 ccc19x$icu_los[temp.ref],
-                 ccc19x$icu_los_fu[temp.ref])
-      temp2 <- temp2[!is.na(temp2)]
-      temp3 <- ccc19x$mortality_90[temp.ref] == 1
-      temp3 <- temp3[!is.na(temp3)]
-      if(length(temp2) > 0)
-      {
-        temp2 <- sum(temp2)
-        if(temp2 > 90) flag[i] <- F
-      }
-      if(length(temp3) > 0)
-        if(any(temp3)) flag[i] <- F
-    }
-    temp <- temp[flag]
-    
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 99
-    
-    #9. Recover some patients with unknown or missing days to death
-    #Estimate days to death for patients with missing/unknown days and retrospective reporting (baseline form only)
-    #Estimate as the maximum length of time possible based on the interval
-    temp <- ccc19x$record_id[which(ccc19x$der_dead90 %in% c(0,99) &
-                                     (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
-                                     ccc19x$current_status_retro == 3)]
-    if(length(temp) > 0)
-    {
-      for(i in 1:length(temp))
-      {
-        temp.ref <- which(ccc19x$record_id == temp[i])
-        temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
-        temp2 <- temp2[!is.na(temp2)]
-        if(temp2 %in% 1:5) ccc19x$der_dead90[temp.ref] <- 1
-      }
-    }
-    
-    #10. Rescind unknown status if 180-day follow-up form is filled out as death and is not the first f/u form
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(180) & 
-                                     ccc19x$redcap_repeat_instance > 1 &
-                                     (ccc19x$fu_reason == 3 |
-                                        ccc19x$covid_19_status_fu == 3 |
-                                        ccc19x$current_status_fu == 9 ) &
-                                     ccc19x$der_dead90 == 99)]
-    ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 0
-    
-    ccc19x$der_dead90 <- as.factor(ccc19x$der_dead90)
-    
-    temp <- summary(ccc19x$der_dead90[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_dead90',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    #Alternate variable that does NOT default to alive at 90 days
+    #O24. Dead within 90 days, does NOT default to alive at 90 days
     ccc19x$der_dead90a <- NA
     
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
@@ -4278,7 +4168,7 @@ var.log <- data.frame(name = character(),
     #Alive on followup form
     temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
-                         (ccc19x$fu_weeks %in% c(90,180) | ccc19x$timing_of_report_weeks > 12))
+                         (ccc19x$fu_weeks %in% c(90,180,365) | ccc19x$timing_of_report_weeks > 12))
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -4332,7 +4222,7 @@ var.log <- data.frame(name = character(),
     
     #8. Declare unknown if days to death cannot be calculated and mortality flag not set
     temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead90a == 0 &
-                                     (is.na(ccc19x$mortality)|ccc19x$mortality == 99) & 
+                                     (is.na(ccc19x$mortality_90)|ccc19x$mortality_90 == 99) & 
                                      (is.na(ccc19x$d90_vital_status)|ccc19x$d90_vital_status == 99) & #Mortality flags
                                      (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
     flag <- rep(T, length(temp))
@@ -4377,8 +4267,8 @@ var.log <- data.frame(name = character(),
       }
     }
     
-    #10. Rescind unknown status if 180-day follow-up form is filled out as death and is not the first f/u form
-    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(180) & 
+    #10. Rescind unknown status if 180-day or 365-day follow-up form is filled out as death and is not the first f/u form
+    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(180,365) & 
                                      ccc19x$redcap_repeat_instance > 1 &
                                      (ccc19x$fu_reason == 3 |
                                         ccc19x$covid_19_status_fu == 3 |
@@ -4395,53 +4285,73 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #O25. Dead within 180 days
-    
-    #Default is not dead at 180 days
-    ccc19x$der_dead180 <- 0
+    #O25. Dead within 180 days, default is missing
+    ccc19x$der_dead180a <- NA
     
     temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
+    
+    #0. Median f/u time is > 180 days or alive on a follow-up form
+    temp.ref2 <- which(ccc19x$der_dead180a[which(ccc19x$der_days_fu > 180)])
+    temp <- ccc19x$record_id[temp.ref2]
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
+    
+    #Alive on followup form
+    temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
+                          ccc19x$fu_reason %in% 1:2) &
+                         (ccc19x$fu_weeks %in% c(180,365) | ccc19x$timing_of_report_weeks > 12))
+    temp <- ccc19x$record_id[temp.ref2]
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
     #1. Calculated time to death is <= 180 days
     temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
     temp.ref2 <- which(temp.diff[temp.ref] <= 180)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
     #2. 180-day mortality flag is set (baseline)
     temp.ref2 <- which(ccc19x$mortality_180[temp.ref] == 0)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
+    
+    #2a. 180-day mortality flag is set to alive (baseline)
+    temp.ref2 <- which(ccc19x$mortality_180 == 1 & is.na(ccc19x$der_dead180a))
+    temp <- ccc19x$record_id[temp.ref2]
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
     #3. 180-day mortality flag is set (follow-up)
     temp.ref2 <- which(ccc19x$d180_vital_status[temp.ref] == 1)
     temp <- ccc19x$record_id[temp.ref[temp.ref2]]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
+    
+    #3a. 180-day mortality flag is set to alive (follow-up)
+    temp.ref2 <- which(ccc19x$d180_vital_status == 0 & is.na(ccc19x$der_dead180a))
+    temp <- ccc19x$record_id[temp.ref2]
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
     #4. 180-day follow-up form is filled out as death
     temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 180 & (
       ccc19x$fu_reason == 3 |
         ccc19x$covid_19_status_fu == 3 |
         ccc19x$current_status_fu == 9 ))]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
-    #5. Follow-up form filled out as other and timing < 26 weeks
-    temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks < 26 & (
+    #5. Follow-up form filled out as other and timing <= 13 weeks
+    temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks <= 13 & (
       ccc19x$fu_reason == 3 |
         ccc19x$covid_19_status_fu == 3 |
         ccc19x$current_status_fu == 9 ))]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
     #6. Days to death <= 180
     temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 180)]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
     #7. Rescind status if days to death > 180
     temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 180)]
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 0
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
     #8. Declare unknown if days to death cannot be calculated and mortality flag not set
-    temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead180 == 0 &
+    temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead180a == 0 &
                                      (is.na(ccc19x$mortality_180)|ccc19x$mortality_180 == 99) & 
                                      (is.na(ccc19x$d180_vital_status)|ccc19x$d180_vital_status == 99) & #Mortality flags
                                      (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
@@ -4468,12 +4378,12 @@ var.log <- data.frame(name = character(),
     }
     temp <- temp[flag]
     
-    ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 99
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 99
     
     #9. Recover some patients with unknown or missing days to death
     #Estimate days to death for patients with missing/unknown days and retrospective reporting (baseline form only)
     #Estimate as the maximum length of time possible based on the interval
-    temp <- ccc19x$record_id[which(ccc19x$der_dead180 %in% c(0,99) &
+    temp <- ccc19x$record_id[which(ccc19x$der_dead180a %in% c(0,99) &
                                      (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
                                      ccc19x$current_status_retro == 3)]
     if(length(temp) > 0)
@@ -4483,12 +4393,29 @@ var.log <- data.frame(name = character(),
         temp.ref <- which(ccc19x$record_id == temp[i])
         temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
         temp2 <- temp2[!is.na(temp2)]
-        if(temp2 %in% 1:6) ccc19x$der_dead180[temp.ref] <- 1
+        if(temp2 %in% 1:5) ccc19x$der_dead180a[temp.ref] <- 1
       }
     }
     
-    ccc19x$der_dead180 <- as.factor(ccc19x$der_dead180)
-    summary(ccc19x$der_dead180[ccc19x$redcap_repeat_instrument == ''])
+    #10. Rescind unknown status if 365-day follow-up form is filled out as death and is not the first f/u form
+    temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(365) & 
+                                     ccc19x$redcap_repeat_instance > 1 &
+                                     (ccc19x$fu_reason == 3 |
+                                        ccc19x$covid_19_status_fu == 3 |
+                                        ccc19x$current_status_fu == 9 ) &
+                                     ccc19x$der_dead180a == 99)]
+    ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
+    
+    ccc19x$der_dead180a <- as.factor(ccc19x$der_dead180a)
+    
+    temp <- summary(ccc19x$der_dead180a[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_dead180a',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+   
     
     #O9. Composite outcome - hospitalization (ever/never), or death within 30 days
     ccc19x$der_composite_hosp_death <- NA
@@ -5128,7 +5055,7 @@ var.log <- data.frame(name = character(),
       ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 1)] <- 4
       #Only declare unknown if patient not known to be alive at 30, 90, or 180 days
       ccc19x$der_ordinal_v1a[which(ccc19x$der_deadbinary == 99 &
-                                     !(ccc19x$der_dead30 == 0|ccc19x$der_dead90 == 0|ccc19x$der_dead180 == 0))] <- 99
+                                     !(ccc19x$der_dead30 == 0|ccc19x$der_dead90a == 0|ccc19x$der_dead180a == 0))] <- 99
       
       ccc19x$der_ordinal_v1a <- as.integer(ccc19x$der_ordinal_v1a)
       
@@ -14362,6 +14289,207 @@ var.log <- data.frame(name = character(),
      #                            stringsAsFactors = F)
      # var.log <- rbind(var.log, temp.var.log)
      # 
+     
+     # #zDep22 Death within 90 days, with default is not dead at 90 days
+     # ccc19x$der_dead90 <- 0
+     # 
+     # temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
+     # 
+     # #1. Calculated time to death is <= 90 days
+     # temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
+     # temp.ref2 <- which(temp.diff[temp.ref] <= 90)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #2. 90-day mortality flag is set (baseline)
+     # temp.ref2 <- which(ccc19x$mortality_90[temp.ref] == 0)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #3. 90-day mortality flag is set (follow-up)
+     # temp.ref2 <- which(ccc19x$d90_vital_status[temp.ref] == 1)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #4. 90-day follow-up form is filled out as death
+     # temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 90 & (
+     #   ccc19x$fu_reason == 3 |
+     #     ccc19x$covid_19_status_fu == 3 |
+     #     ccc19x$current_status_fu == 9 ))]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #5. Follow-up form filled out as other and timing < 13 weeks
+     # temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks < 13 & (
+     #   ccc19x$fu_reason == 3 |
+     #     ccc19x$covid_19_status_fu == 3 |
+     #     ccc19x$current_status_fu == 9 ))]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #6. Days to death <= 90
+     # temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 90)]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #7. Rescind status if days to death > 90
+     # temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 90)]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 0
+     # 
+     # #8. Declare unknown if days to death cannot be calculated and mortality flag not set
+     # temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead90 == 0 &
+     #                                  (is.na(ccc19x$mortality_90)|ccc19x$mortality_90 == 99) & 
+     #                                  (is.na(ccc19x$d90_vital_status)|ccc19x$d90_vital_status == 99) & #Mortality flags
+     #                                  (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
+     # flag <- rep(T, length(temp))
+     # for(i in 1:length(temp))
+     # {
+     #   temp.ref <- which(ccc19x$record_id == temp[i])
+     #   temp2 <- c(ccc19x$hosp_los[temp.ref],
+     #              ccc19x$hosp_los_2[temp.ref],
+     #              ccc19x$hosp_los_fu[temp.ref],
+     #              ccc19x$hosp_los_fu_2[temp.ref],
+     #              ccc19x$icu_los[temp.ref],
+     #              ccc19x$icu_los_fu[temp.ref])
+     #   temp2 <- temp2[!is.na(temp2)]
+     #   temp3 <- ccc19x$mortality_90[temp.ref] == 1
+     #   temp3 <- temp3[!is.na(temp3)]
+     #   if(length(temp2) > 0)
+     #   {
+     #     temp2 <- sum(temp2)
+     #     if(temp2 > 90) flag[i] <- F
+     #   }
+     #   if(length(temp3) > 0)
+     #     if(any(temp3)) flag[i] <- F
+     # }
+     # temp <- temp[flag]
+     # 
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 99
+     # 
+     # #9. Recover some patients with unknown or missing days to death
+     # #Estimate days to death for patients with missing/unknown days and retrospective reporting (baseline form only)
+     # #Estimate as the maximum length of time possible based on the interval
+     # temp <- ccc19x$record_id[which(ccc19x$der_dead90 %in% c(0,99) &
+     #                                  (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
+     #                                  ccc19x$current_status_retro == 3)]
+     # if(length(temp) > 0)
+     # {
+     #   for(i in 1:length(temp))
+     #   {
+     #     temp.ref <- which(ccc19x$record_id == temp[i])
+     #     temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+     #     temp2 <- temp2[!is.na(temp2)]
+     #     if(temp2 %in% 1:5) ccc19x$der_dead90[temp.ref] <- 1
+     #   }
+     # }
+     # 
+     # #10. Rescind unknown status if 180-day follow-up form is filled out as death and is not the first f/u form
+     # temp <- ccc19x$record_id[which(ccc19x$fu_weeks %in% c(180) & 
+     #                                  ccc19x$redcap_repeat_instance > 1 &
+     #                                  (ccc19x$fu_reason == 3 |
+     #                                     ccc19x$covid_19_status_fu == 3 |
+     #                                     ccc19x$current_status_fu == 9 ) &
+     #                                  ccc19x$der_dead90 == 99)]
+     # ccc19x$der_dead90[which(ccc19x$record_id %in% temp)] <- 0
+     # 
+     # ccc19x$der_dead90 <- as.factor(ccc19x$der_dead90)
+     # 
+     # temp <- summary(ccc19x$der_dead90[ccc19x$redcap_repeat_instrument == ''])
+     # temp.var.log <- data.frame(name = 'der_dead90',
+     #                            timestamp = Sys.time(),
+     #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+     #                            stringsAsFactors = F)
+     # var.log <- rbind(var.log, temp.var.log)
+     
+     # #zDep23. Dead within 180 days (default is alive)
+     # ccc19x$der_dead180 <- 0
+     # 
+     # temp.ref <- which(ccc19x$der_deadbinary == 1 & ccc19x$redcap_repeat_instrument == '')
+     # 
+     # #1. Calculated time to death is <= 180 days
+     # temp.diff <- difftime(ccc19x$meta_righttime, ccc19x$meta_lefttime_lb, units = 'days')
+     # temp.ref2 <- which(temp.diff[temp.ref] <= 180)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #2. 180-day mortality flag is set (baseline)
+     # temp.ref2 <- which(ccc19x$mortality_180[temp.ref] == 0)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #3. 180-day mortality flag is set (follow-up)
+     # temp.ref2 <- which(ccc19x$d180_vital_status[temp.ref] == 1)
+     # temp <- ccc19x$record_id[temp.ref[temp.ref2]]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #4. 180-day follow-up form is filled out as death
+     # temp <- ccc19x$record_id[which(ccc19x$fu_weeks == 180 & (
+     #   ccc19x$fu_reason == 3 |
+     #     ccc19x$covid_19_status_fu == 3 |
+     #     ccc19x$current_status_fu == 9 ))]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #5. Follow-up form filled out as other and timing < 26 weeks
+     # temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks < 26 & (
+     #   ccc19x$fu_reason == 3 |
+     #     ccc19x$covid_19_status_fu == 3 |
+     #     ccc19x$current_status_fu == 9 ))]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #6. Days to death <= 180
+     # temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined <= 180)]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 1
+     # 
+     # #7. Rescind status if days to death > 180
+     # temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 180)]
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 0
+     # 
+     # #8. Declare unknown if days to death cannot be calculated and mortality flag not set
+     # temp <- ccc19x$record_id[which(ccc19x$der_deadbinary == 1 & ccc19x$der_dead180 == 0 &
+     #                                  (is.na(ccc19x$mortality_180)|ccc19x$mortality_180 == 99) & 
+     #                                  (is.na(ccc19x$d180_vital_status)|ccc19x$d180_vital_status == 99) & #Mortality flags
+     #                                  (is.na(ccc19x$der_days_to_death_combined) | ccc19x$der_days_to_death_combined == 9999))]
+     # flag <- rep(T, length(temp))
+     # for(i in 1:length(temp))
+     # {
+     #   temp.ref <- which(ccc19x$record_id == temp[i])
+     #   temp2 <- c(ccc19x$hosp_los[temp.ref],
+     #              ccc19x$hosp_los_2[temp.ref],
+     #              ccc19x$hosp_los_fu[temp.ref],
+     #              ccc19x$hosp_los_fu_2[temp.ref],
+     #              ccc19x$icu_los[temp.ref],
+     #              ccc19x$icu_los_fu[temp.ref])
+     #   temp2 <- temp2[!is.na(temp2)]
+     #   temp3 <- ccc19x$mortality_180[temp.ref] == 1
+     #   temp3 <- temp3[!is.na(temp3)]
+     #   if(length(temp2) > 0)
+     #   {
+     #     temp2 <- sum(temp2)
+     #     if(temp2 > 180) flag[i] <- F
+     #   }
+     #   if(length(temp3) > 0)
+     #     if(any(temp3)) flag[i] <- F
+     # }
+     # temp <- temp[flag]
+     # 
+     # ccc19x$der_dead180[which(ccc19x$record_id %in% temp)] <- 99
+     # 
+     # #9. Recover some patients with unknown or missing days to death
+     # #Estimate days to death for patients with missing/unknown days and retrospective reporting (baseline form only)
+     # #Estimate as the maximum length of time possible based on the interval
+     # temp <- ccc19x$record_id[which(ccc19x$der_dead180 %in% c(0,99) &
+     #                                  (ccc19x$der_days_to_death == 9999|is.na(ccc19x$der_days_to_death)) &
+     #                                  ccc19x$current_status_retro == 3)]
+     # if(length(temp) > 0)
+     # {
+     #   for(i in 1:length(temp))
+     #   {
+     #     temp.ref <- which(ccc19x$record_id == temp[i])
+     #     temp2 <- ccc19x$covid_19_dx_interval[temp.ref]
+     #     temp2 <- temp2[!is.na(temp2)]
+     #     if(temp2 %in% 1:6) ccc19x$der_dead180[temp.ref] <- 1
+     #   }
+     # }
+     # 
+     # ccc19x$der_dead180 <- as.factor(ccc19x$der_dead180)
+     # summary(ccc19x$der_dead180[ccc19x$redcap_repeat_instrument == ''])
      
    }
 }
