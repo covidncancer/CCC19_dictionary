@@ -264,7 +264,7 @@ var.log <- data.frame(name = character(),
       
       #Definitely not - baseline form doesn't have hospitalization, f/u does but is >30 days
       temp <- ccc19x$record_id[which(ccc19x$fu_reason == 1 & 
-                                       ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 5)|
+                                       ((ccc19x$fu_weeks == 'OTH' & ccc19x$timing_of_report_weeks > 4)|
                                           ccc19x$fu_weeks %in% c(90,180,365)))]
       temp.ref <- which(ccc19x$record_id %in% temp &
                           ccc19x$der_hosp_bl == 0 &
@@ -4168,7 +4168,7 @@ var.log <- data.frame(name = character(),
     #Alive on followup form
     temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
-                         (ccc19x$fu_weeks %in% c(90,180,365) | ccc19x$timing_of_report_weeks > 12))
+                         (ccc19x$fu_weeks %in% c(90,180,365) | ccc19x$timing_of_report_weeks > 13))
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -4298,7 +4298,7 @@ var.log <- data.frame(name = character(),
     #Alive on followup form
     temp.ref2 <- which((ccc19x$covid_19_status_fu %in% c('1', '1b', '2') | 
                           ccc19x$fu_reason %in% 1:2) &
-                         (ccc19x$fu_weeks %in% c(180,365) | ccc19x$timing_of_report_weeks > 12))
+                         (ccc19x$fu_weeks %in% c(180,365) | ccc19x$timing_of_report_weeks > 26))
     temp <- ccc19x$record_id[temp.ref2]
     ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
@@ -4335,8 +4335,8 @@ var.log <- data.frame(name = character(),
         ccc19x$current_status_fu == 9 ))]
     ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
-    #5. Follow-up form filled out as other and timing <= 13 weeks
-    temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks <= 13 & (
+    #5. Follow-up form filled out as other and timing <= 26 weeks
+    temp <- ccc19x$record_id[which(ccc19x$timing_of_report_weeks <= 26 & (
       ccc19x$fu_reason == 3 |
         ccc19x$covid_19_status_fu == 3 |
         ccc19x$current_status_fu == 9 ))]
