@@ -3600,7 +3600,7 @@ var.log <- data.frame(name = character(),
       
       temp.ref <- which(substr(ccc19x$meta_lefttime_lb, start=1, stop=4) == 2022 &
                           ccc19x$dx_year == 2021)
-      ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2020-12-31 00:00:00 CST')
+      ccc19x$meta_lefttime_lb[temp.ref] <- as.POSIXct('2021-12-31 00:00:00 CST')
       
       #T7 & T8 Calculated time from diagnosis has to be at least 30 days
       ccc19x$meta_lefttime_ub <- as.POSIXlt("2099-12-31 00:00:00 CDT")
