@@ -10673,7 +10673,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca19. Metastatic status (only applicable to solid tumors/lymphoma)
+    #Ca19. Metastatic status with stage assumption (only applicable to solid tumors/lymphoma)
     ccc19x$der_metastatic <- NA
     
     #Yes
@@ -10693,6 +10693,37 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_metastatic[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_metastatic',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19x. Metastatic status without stage assumption
+    ccc19x$der_metastatic_v2 <- NA
+    
+    #Yes
+    ccc19x$der_metastatic_v2[which(ccc19x$mets_yn == 1)] <- 'Yes'
+    
+    #Yes, but sites missing
+    temp.ref <- grep(colnames(ccc19x), pattern = 'mets_sites___')
+    ccc19x$der_metastatic_v2[which(ccc19x$mets_yn == 1 &
+                                     rowSums(ccc19x[,temp.ref]) == 0)] <- 'Yes, sites missing'
+    
+    #No
+    ccc19x$der_metastatic_v2[which(ccc19x$mets_yn == 0)] <- 'No'
+    ccc19x$der_metastatic_v2[which(ccc19x$cancer_status == 1 & is.na(ccc19x$der_metastatic_v2))] <- 'No'
+    
+    #Not applicable
+    ccc19x$der_metastatic_v2[which(ccc19x$mets_yn == 88)] <- 'Not applicable'
+    
+    #Unknown
+    ccc19x$der_metastatic_v2[which(ccc19x$cancer_status == 99 & is.na(ccc19x$der_metastatic_v2))] <- 'Unknown'
+    ccc19x$der_metastatic_v2[which(ccc19x$mets_yn == 99 & is.na(ccc19x$der_metastatic_v2))] <- 'Unknown'
+    
+    ccc19x$der_metastatic_v2 <- as.factor(ccc19x$der_metastatic_v2)
+    
+    temp <- summary(ccc19x$der_metastatic_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_metastatic_v2',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
