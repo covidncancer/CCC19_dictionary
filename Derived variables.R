@@ -9517,6 +9517,39 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #Dx32. Primary cancer type, with 8 levels (5 solid, 3 heme)
+    ccc19x$der_pri_tumor_type <- NA
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C4872"))] <- 'Breast'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C9291","C4910","C9330","C7724","C2955",
+                                                              "C9382","C3844","C3850","C4436","C4911",
+                                                              "C3099", "C3513"))] <- 'GI'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C4863","C9061","C9063","C4912","C6389",
+                                                              "C7355","C9385","C3267","C7558", "C9039", 
+                                                              "C7431","C3867","C3555","C3917","C4866",
+                                                              "C3708"))] <- 'GYN/GU'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C4917", "C2926", "C4878", "C3234","C3411"))] <- 'Thoracic'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C132146","C9325","C9312","C5111","C132067",
+                                                              "C3059","C4627","C4817","C3868","C4013",
+                                                              "C4819","C2921","C4039","C3224","C9231",
+                                                              "C3270","C3809","C9145","C4906","C7541",
+                                                              "C3359","C9306","C4815","C8538","C3267",
+                                                              "C3538","C3871","OTH_S"))] <- 'Other solid'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C3171","C4345","C3174","C3247"))] <- 'Myeloid'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C3457","C9244","C9357","C3211","C8851",
+                                                              "C2912","C27908","C3167","C3163","C3209",
+                                                              "C8504","C4341","C4337","C9308","C3242",
+                                                              "C3819","C4665"))] <- 'Lymphoid'
+    ccc19x$der_pri_tumor_type[which(ccc19x$cancer_type %in% c("C27134","C9300","C3106","OTH_H"))] <- 'Other heme'
+    
+    ccc19x$der_pri_tumor_type <- factor(ccc19x$der_pri_tumor_type)
+    
+    temp <- summary(ccc19x$der_pri_tumor_type[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_pri_tumor_type',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
   }
   print('Cancer types completed')
   
