@@ -384,7 +384,7 @@ role_2,respondent_details,,radio,"What is your role in relationship to the patie
 other_role,respondent_details,,text,"Please specify",,,,,,,"[role] = '7'",y,,,,,
 email_1,respondent_details,,descriptive,"<div class=""rich-text-field-label""><p><span style=""font-weight: normal; color: #236fa1;"">Thank you very much for filling out this short survey. Due to IRB restrictions, we are not able to collect further personal details from you at this time. You may learn more about CCC19 by <a href=""https://ccc19us.org/"" target=""_blank"" rel=""noopener"">visiting the CCC19 website</a> (clicking this link will open a new window).</span></p></div>",,,,,,,,,,,,,
 comments_form_4,respondent_details,,notes,"Please leave any general comments here, including what if anything we can do to make the survey better.",,,,,,,,,,,,,
-ts_5,followup,,text,"Timestamp for the follow-up form",,,datetime_dmy,,,,,y,,,,," @HIDDEN @NOW_UTC"
+ts_5,followup,,text,"Timestamp for the follow-up form",,,,,,,,y,,,,," @HIDDEN @NOW_UTC"
 followup_header,followup,,descriptive,"Site ID: [ccc19_institution]
 Local identifier: [patient_id]
 Year of diagnosis: [dx_year]",,,,,,,,,,,,,
