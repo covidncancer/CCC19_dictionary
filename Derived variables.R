@@ -8,10 +8,10 @@ require("dplyr")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
-suffix <- 'data with derived variables for analysis'
-suffix <- 'data with derived variables for site QA'
+# suffix <- 'data with derived variables for analysis'
+# suffix <- 'data with derived variables for site QA'
 suffix <- 'data with derived variables for central QA'
-suffix <- 'data with derived variables for appeal'
+# suffix <- 'data with derived variables for appeal'
 
 #Create a table to log the variables as they are created
 var.log <- data.frame(name = character(),
