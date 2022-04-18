@@ -13292,6 +13292,9 @@ var.log <- data.frame(name = character(),
       temp.ref <- which(ccc19x$der_ecogcat == 'Unknown' &
                           ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_quality[temp.ref] <- ccc19x$meta_quality[temp.ref] + 1
+      
+      temp.ref <- which(ccc19x$ecog_status == 99 &
+                          ccc19x$redcap_repeat_instrument == '')
       ccc19x$meta_problems[temp.ref] <- paste(ccc19x$meta_problems[temp.ref],
                                               '; ECOG PS unknown', sep = '')
       
