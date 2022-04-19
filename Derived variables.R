@@ -772,7 +772,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_severe[which(ccc19x$severity_of_covid_19_v2 == 3)] <- 1
     ccc19x$der_severe[which(ccc19x$current_status_clinical %in% 6:8)] <- 1
     ccc19x$der_severe[which(ccc19x$worst_status_clinical %in% 6:8)] <- 1
-    ccc19x$der_severe[which(ccc19x$current_status_clinical %in% 6:8)] <- 1
+    ccc19x$der_severe[which(ccc19x$current_status_clinical_fu %in% 6:8)] <- 1
     
     #Absent (requires all 3 derived variables to be absent, and not meeting another criteria)
     ccc19x$der_severe[which(ccc19x$der_deadbinary == 0 &
