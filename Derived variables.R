@@ -7841,6 +7841,10 @@ var.log <- data.frame(name = character(),
       )) ccc19x$der_pulm[i] <- 0
     }
     
+    #Declare missing values to be No if patient is known NOT to have an O2 requirement
+    temp.ref <- which(ccc19x$o2_requirement == 0 & is.na(ccc19x$der_pulm))
+    ccc19x$der_pulm[temp.ref] <- 0
+    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
                         !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
