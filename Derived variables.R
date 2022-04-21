@@ -217,8 +217,7 @@ var.log <- data.frame(name = character(),
                                ccc19x$current_status_clinical %in% c(4:8))] <- 1
     
     #Interventions that could only happen in a hospital
-    ccc19x$der_hosp_bl[which(ccc19x$resp_failure_tx %in% 2:6 |
-                               ccc19x$resp_failure_tx_fu %in% 2:6)] <- 1
+    ccc19x$der_hosp_bl[which(ccc19x$resp_failure_tx %in% 2:6)] <- 1
     
     #Unknown
     ccc19x$der_hosp_bl[which((ccc19x$hosp_status == 99 |
@@ -12491,6 +12490,15 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$alc[ccc19x$redcap_repeat_instrument == ''])
     summary(ccc19x$transformed_alc[ccc19x$redcap_repeat_instrument == ''])
     boxplot(log10(ccc19x$transformed_alc))
+    
+    #L30. Transformed CD4
+    ccc19x$transformed_cd4 <- ccc19x$hiv_cd4
+    temp.ref <- which(!is.na(ccc19x$transformed_cd4))
+    
+    #transforming: multiply by 1000 when needed (cells/uL are the proper units)
+    temp.ref2 <- which(ccc19x$transformed_cd4[temp.ref] < 1 &
+                         ccc19x$transformed_cd4[temp.ref] > 0)
+    ccc19x$transformed_cd4[temp.ref[temp.ref2]] <- 1000*ccc19x$transformed_cd4[temp.ref[temp.ref2]]
     
     #L21a. Dichotomized transformed ALC
     ccc19x$transformed_alc_v2 <- NA
