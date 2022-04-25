@@ -8317,6 +8317,37 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    ###################
+    #C19. Liver disease
+    ###################
+    ccc19x$der_liver <- NA
+    ccc19x$der_liver[which(ccc19x$significant_comorbidities___235856003 == 1 |
+                             ccc19x$significant_comorbidities___19943007 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___235856003|significant_comorbidities___19943007|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___235856003[i] == 0 &
+         ccc19x$significant_comorbidities___19943007[i] == 0) ccc19x$der_liver[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_liver[i] <- 99
+    }
+    
+    ccc19x$der_liver <- factor(ccc19x$der_liver)
+    
+    temp <- summary(ccc19x$der_liver[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_liver',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #######################
     #C10. Baseline dementia
     #######################
