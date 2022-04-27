@@ -5006,6 +5006,56 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #T17 & T18 Lower and upper bound years of cancer diagnosis
+    {
+      ccc19x$der_cancer_timing_lb <- NA
+      ccc19x$der_cancer_timing_ub <- NA
+      
+      #Exact year is provided
+      temp.ref <- which(!is.na(ccc19x$cancer_timing_yr))
+      ccc19x$der_cancer_timing_lb[temp.ref] <- ccc19x$cancer_timing_yr[temp.ref]
+      ccc19x$der_cancer_timing_ub[temp.ref] <- ccc19x$cancer_timing_yr[temp.ref]
+      
+      #At the time of COVID-19
+      temp.ref <- which(ccc19x$cancer_timing == 0 & is.na(ccc19x$der_cancer_timing_lb))
+      ccc19x$der_cancer_timing_lb[temp.ref] <- ccc19x$dx_year[temp.ref]
+      ccc19x$der_cancer_timing_ub[temp.ref] <- ccc19x$dx_year[temp.ref]
+      
+      #Within a year of COVID-19
+      temp.ref <- which(ccc19x$cancer_timing == 1 & is.na(ccc19x$der_cancer_timing_lb))
+      ccc19x$der_cancer_timing_lb[temp.ref] <- ccc19x$dx_year[temp.ref] - 1
+      ccc19x$der_cancer_timing_ub[temp.ref] <- ccc19x$dx_year[temp.ref]
+      
+      #Within 0-5 years of COVID-19
+      temp.ref <- which(ccc19x$cancer_timing == 2 & is.na(ccc19x$der_cancer_timing_lb))
+      ccc19x$der_cancer_timing_lb[temp.ref] <- ccc19x$dx_year[temp.ref] - 5
+      ccc19x$der_cancer_timing_ub[temp.ref] <- ccc19x$dx_year[temp.ref]
+      
+      #More than 5 years before COVID-19
+      temp.ref <- which(ccc19x$cancer_timing == 3 & is.na(ccc19x$der_cancer_timing_lb))
+      ccc19x$der_cancer_timing_lb[temp.ref] <- ccc19x$dx_year[temp.ref] - ccc19x$der_age_trunc[temp.ref]
+      ccc19x$der_cancer_timing_ub[temp.ref] <- ccc19x$dx_year[temp.ref] - 5
+      
+      temp <- summary(ccc19x$der_cancer_timing_lb[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_cancer_timing_lb',
+                                 timestamp = Sys.time(), 
+                                 values = paste(c(paste('Median:', temp[3]),
+                                                  paste('IQR:', temp[2], '-', temp[5]),
+                                                  paste('NA:', temp[7])), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      temp <- summary(ccc19x$der_cancer_timing_ub[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_cancer_timing_ub',
+                                 timestamp = Sys.time(), 
+                                 values = paste(c(paste('Median:', temp[3]),
+                                                  paste('IQR:', temp[2], '-', temp[5]),
+                                                  paste('NA:', temp[7])), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+    }
+    
     }
   print('Time measurements completed')
   
