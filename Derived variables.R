@@ -7164,6 +7164,23 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #D03c. Derived variable for smoking status collapsing the current/former smoker variables
+    ccc19x$der_smoking3 <- NA
+    ccc19x$der_smoking3[which(ccc19x$smoking_status == 1)] <- 'Current'
+    ccc19x$der_smoking3[which(ccc19x$smoking_status %in% c("3","2", "2b", "2c", "2d", "2a"))] <- 'Never or Former'
+    ccc19x$der_smoking3[which(ccc19x$smoking_status == 99)] <- 'Unknown'
+    
+    #Factor
+    ccc19x$der_smoking3 <- as.factor(ccc19x$der_smoking3)
+    ccc19x$der_smoking3 <- relevel(ccc19x$der_smoking3, ref = 'Never or Former')
+    
+    temp <- summary(ccc19x$der_smoking3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_smoking3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     ###############
     #Race/Ethnicity
     ###############
