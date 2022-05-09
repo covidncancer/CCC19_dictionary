@@ -5121,7 +5121,7 @@ var.log <- data.frame(name = character(),
       
       ccc19x$der_ordinal_v1a <- factor(ccc19x$der_ordinal_v1a, ordered = T)
       
-      temp <- summary(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == ''])
+      temp <- summary(ccc19x$der_ordinal_v1a[ccc19x$redcap_repeat_instrument == ''])
       temp.var.log <- data.frame(name = 'der_ordinal_v1a',
                                  timestamp = Sys.time(),
                                  values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
@@ -5204,7 +5204,7 @@ var.log <- data.frame(name = character(),
       
       ccc19x$der_ordinal_v2 <- factor(ccc19x$der_ordinal_v2, ordered = T)
       
-      temp <- summary(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == ''])
+      temp <- summary(ccc19x$der_ordinal_v2[ccc19x$redcap_repeat_instrument == ''])
       temp.var.log <- data.frame(name = 'der_ordinal_v2',
                                  timestamp = Sys.time(),
                                  values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
@@ -5244,7 +5244,7 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_ordinal_v3 <- factor(ccc19x$der_ordinal_v3, ordered = T)
     
-    temp <- summary(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == ''])
+    temp <- summary(ccc19x$der_ordinal_v3[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_ordinal_v3',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
@@ -5283,8 +5283,43 @@ var.log <- data.frame(name = character(),
     
     ccc19x$der_ordinal_v3a <- factor(ccc19x$der_ordinal_v3a, ordered = T)
     
-    temp <- summary(ccc19x$der_ordinal_v1[ccc19x$redcap_repeat_instrument == ''])
+    temp <- summary(ccc19x$der_ordinal_v3a[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_ordinal_v3a',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #O26b. ordinal_v3b (0 = never hospitalized; 1 = hospitalized and did NOT require O2;
+    #                  2 = hospitalized and required O2; 3 = ICU and/or vent; 4 = death at any time)
+    
+    #Declare as missing
+    ccc19x$der_ordinal_v3b <- NA
+    
+    #Start with non-hospitalized
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_hosp == 0)] <- 0
+    
+    #Hospitalized and did NOT require O2
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 0)] <- 1
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_hosp == 99|ccc19x$der_o2_ever == 99)] <- 99
+    
+    #Hospitalized and did require O2
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_hosp == 1 & ccc19x$der_o2_ever == 1)] <- 2
+    
+    #ICU
+    #ccc19x$der_ordinal_v3b[which(ccc19x$der_ICU == 0)]
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_ICU == 1|ccc19x$der_mv == 1)] <- 3
+    ccc19x$der_ordinal_v3b[which((ccc19x$der_ICU == 99|ccc19x$der_mv == 99) &
+                                   ccc19x$der_ordinal_v3b != 3)] <- 99
+    
+    #Death at any time
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_deadbinary == 1)] <- 4
+    ccc19x$der_ordinal_v3b[which(ccc19x$der_deadbinary == 99)] <- 99
+    
+    ccc19x$der_ordinal_v3b <- factor(ccc19x$der_ordinal_v3b, ordered = T)
+    
+    temp <- summary(ccc19x$der_ordinal_v3b[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_ordinal_v3b',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
