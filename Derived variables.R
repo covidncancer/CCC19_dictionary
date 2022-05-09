@@ -11044,7 +11044,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Ca21. Active versus inactive cancer
+    #Ca21. Active versus inactive cancer, including patients on treatment in definition of active
     ccc19x$der_active <- NA
     
     #Active
@@ -11074,6 +11074,30 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_active[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_active',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca21b. Active versus inactive cancer, only based on cancer status
+    ccc19x$der_active_v2 <- NA
+    
+    #Active
+    ccc19x$der_active_v2[which(ccc19x$cancer_status %in% 2:5|
+                                 ccc19x$mets_yn == 1)] <- 'Active'
+    
+    #Inactive
+    ccc19x$der_active_v2[which(ccc19x$cancer_status == 1 &
+                                 is.na(ccc19x$der_active_v2))] <- 'Inactive'
+    
+    #Unknown
+    ccc19x$der_active_v2[which(ccc19x$cancer_status == 99 &
+                                 is.na(ccc19x$der_active_v2))] <- 'Unknown'
+    
+    ccc19x$der_active_v2 <- as.factor(ccc19x$der_active_v2)
+    
+    temp <- summary(ccc19x$der_active_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_active_v2',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
