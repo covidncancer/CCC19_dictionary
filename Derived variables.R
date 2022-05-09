@@ -14099,6 +14099,41 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #X13. Derived variable whether any COVID-19 vaccine before COVID-19
+    ccc19x$der_vax_before <- NA
+    
+    #Yes, any vaccination received before COVID-19
+    ccc19x$der_vax_before[which(ccc19x$sars_vax_before == 1|
+                                  ccc19x$sars_vax_before_num > 0|
+                                  ccc19x$sars_vax_before_num_2 %in% 1:66|
+                                  ccc19x$sars_vax_when %in% 1:4)] <- 1
+    
+    #No
+    ccc19x$der_vax_before[which((ccc19x$sars_vax == 0|
+                                   ccc19x$sars_vax_before_num == 0|
+                                   ccc19x$sars_vax_before_num_2 == 0|
+                                   ccc19x$sars_vax_when == 88) &
+                                  is.na(ccc19x$der_vax_before))] <- 0
+    
+    #Unknown
+    ccc19x$der_vax_before[which((ccc19x$sars_vax == 99|
+                                   ccc19x$sars_vax_before == 99|
+                                   ccc19x$sars_vax_before_num_2 == 99|
+                                   ccc19x$sars_vax_when == 99) &
+                                  is.na(ccc19x$der_vax_before))] <- 99
+    
+    #Patient diagnosed in 2020 and value remains missing -> assume no
+    ccc19x$der_vax_before[which(ccc19x$dx_year == 2020 &
+                                  is.na(ccc19x$der_vax_before))] <- 0
+    
+    ccc19x$der_vax_before <- factor(ccc19x$der_vax_before)
+    
+    temp <- summary(ccc19x$der_vax_before[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_vax_before',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
   }
   print('Other derived variables completed')
   
