@@ -11967,7 +11967,7 @@ var.log <- data.frame(name = character(),
     for(i in 1:length(temp.ref))
     {
       if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
-             c('Blinatumomab', 'Amivantamab'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
+             c('Blinatumomab','Amivantamab','Flotetuzumab','Mosunetuzumab','BiTE antibody','REGN5458'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
                ccc19x$der_BiTE[temp.ref[i]] <- 0
     }
     
@@ -11977,14 +11977,14 @@ var.log <- data.frame(name = character(),
     #Ca4r. CAR-T
     ccc19x$der_cart <- NA
     ccc19x$der_cart[which(ccc19x$transplant_cellular_therapy == 6|
-                            grepl(ccc19x$drug1, pattern = 'leucel')|
-                            grepl(ccc19x$drug2, pattern = 'leucel')|
-                            grepl(ccc19x$drug3, pattern = 'leucel')|
-                            grepl(ccc19x$drug4, pattern = 'leucel')|
-                            grepl(ccc19x$drug5, pattern = 'leucel')|
-                            grepl(ccc19x$drug6, pattern = 'leucel')|
-                            grepl(ccc19x$drug7, pattern = 'leucel')|
-                            grepl(ccc19x$drug8, pattern = 'leucel'))] <- 1
+                            grepl(ccc19x$drug1, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug2, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug3, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug4, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug5, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug6, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug7, pattern = '[oca]leucel|CAR-T')|
+                            grepl(ccc19x$drug8, pattern = '[oca]leucel|CAR-T'))] <- 1
     ccc19x$der_cart[which(ccc19x$transplant_cellular_therapy == 99)] <- 99
     
     ccc19x$der_cart <- factor(ccc19x$der_cart)
