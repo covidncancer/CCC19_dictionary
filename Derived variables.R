@@ -11672,7 +11672,8 @@ var.log <- data.frame(name = character(),
     {
       if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
              c('Nivolumab', 'Pembrolizumab', 'Atezolizumab', 'Avelumab',
-               'Durvalumab', 'Cemiplimab', 'Anti-PD-1 antibody', 'Anti-PD-L1 antibody'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
+               'Durvalumab', 'Cemiplimab', 'Anti-PD-1 antibody', 'Anti-PD-L1 antibody',
+               'LAG/PD-1'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
                  ccc19x$der_pd1_l1[temp.ref[i]] <- 0
     }
     
@@ -11967,7 +11968,8 @@ var.log <- data.frame(name = character(),
     for(i in 1:length(temp.ref))
     {
       if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
-             c('Blinatumomab','Amivantamab','Flotetuzumab','Mosunetuzumab','BiTE antibody','REGN5458'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
+             c('Blinatumomab','Amivantamab','Flotetuzumab','Mosunetuzumab','Zenocutuzumab',
+               'BiTE antibody','REGN5458'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
                ccc19x$der_BiTE[temp.ref[i]] <- 0
     }
     
