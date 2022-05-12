@@ -11141,7 +11141,7 @@ var.log <- data.frame(name = character(),
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2022-01-08 with modalities.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2022-05-12 with modalities.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
@@ -11220,7 +11220,7 @@ var.log <- data.frame(name = character(),
       for(i in which(!is.na(ccc19x$drug1)))
       {
         #Get list of drugs
-        temp <- ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')]
+        temp <- ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')]
         temp <- temp[temp != '']
         temp <- paste('[', paste(temp[order(temp)],collapse = ', '), ']', sep = '')
         
@@ -11376,7 +11376,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20[temp.ref[i]] <- 1 else
                ccc19x$der_cd20[temp.ref[i]] <- 0
     }
@@ -11391,7 +11391,7 @@ var.log <- data.frame(name = character(),
                         (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment %in% 1:2))
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20_12mo[temp.ref[i]] <- 1 
     }
     
@@ -11415,7 +11415,7 @@ var.log <- data.frame(name = character(),
                         (ccc19x$recent_treatment %in% 1:3|ccc19x$hx_treatment == 1))
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Rituximab', 'Obinutuzumab', 'Ofatumumab', 'Ublituximab', 'Veltuzumab'))) ccc19x$der_cd20_3mo[temp.ref[i]] <- 1 
     }
     
@@ -11438,7 +11438,7 @@ var.log <- data.frame(name = character(),
     
     #Extra level if they were also receiving a steroid (e.g., R-CHOP)
     for(i in which(ccc19x$der_cd20_cyto_12mo == 1))
-      if(any(ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[i,c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Prednisone', 'Prednisolone', 'Methylprednisolone', 'Dexamethasone', 'Hydrocortisone'))) ccc19x$der_cd20_cyto_12mo[i] <- 2
     
     ccc19x$der_cd20_cyto_12mo[which(ccc19x$der_cd20_12mo == 0|ccc19x$der_any_cyto_12mo == 0)] <- 0
@@ -11453,7 +11453,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Daratumumab', 'Isatuximab'))) ccc19x$der_cd38[temp.ref[i]] <- 1 else
                ccc19x$der_cd38[temp.ref[i]] <- 0
     }
@@ -11467,7 +11467,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Ibrutinib', 'Acalabrutinib', 'LOXO-305'))) ccc19x$der_btki[temp.ref[i]] <- 1 else
                ccc19x$der_btki[temp.ref[i]] <- 0
     }
@@ -11487,7 +11487,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Fedratinib', 'Ruxolitinib', 'Lestaurtinib', 'Momelotinib', 'Pacritinib', 'Tofacitinib'))) ccc19x$der_jaki[temp.ref[i]] <- 1 else
                ccc19x$der_jaki[temp.ref[i]] <- 0
     }
@@ -11507,7 +11507,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Asciminib', 'Bosutinib', 'Dasatinib', 'Flumatinib',
                'Imatinib', 'Nilotinib', 'Ponatinib', 'Radotinib'))) ccc19x$der_bcrabli[temp.ref[i]] <- 1 else
                  ccc19x$der_bcrabli[temp.ref[i]] <- 0
@@ -11528,7 +11528,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Venetoclax'))) ccc19x$der_venet[temp.ref[i]] <- 1 else
                ccc19x$der_venet[temp.ref[i]] <- 0
     }
@@ -11542,7 +11542,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Tamoxifen'))) ccc19x$der_tam[temp.ref[i]] <- 1 else
                ccc19x$der_tam[temp.ref[i]] <- 0
     }
@@ -11556,7 +11556,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Letrozole', 'Exemestane', 'Anastrozole', 'Aromatase inhibitor'))) ccc19x$der_ai[temp.ref[i]] <- 1 else
                ccc19x$der_ai[temp.ref[i]] <- 0
     }
@@ -11570,7 +11570,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Axitinib', 'Bevacizumab', 'Cabozantinib', 'Lenvatinib', 'Pazopanib',
                'Sorafenib', 'Sunitinib', 'Vandetanib', 'Ramucirumab'))) ccc19x$der_vegfi[temp.ref[i]] <- 1 else
                ccc19x$der_vegfi[temp.ref[i]] <- 0
@@ -11585,7 +11585,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Afatinib', 'Alectinib', 'Axitinib', 'Brigatinib', 'Cabozantinib', 'Ceritinib',
                'Crizotinib', 'Entrectinib', 'Erlotinib', 'Gefitinib', 'Gilteritinib', 'Lapatinib',
                'Lenvatinib', 'Lorlatinib', 'Neratinib', 'Nilotinib', 'Niraparib', 'Osimertinib',
@@ -11605,7 +11605,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Afatinib', 'Alectinib', 'Brigatinib', 'Ceritinib', 'Crizotinib', 'Entrectinib', 'Erlotinib', 'Gefitinib', 'Lorlatinib', 'Osimertinib', 'Selpercatinib'))) ccc19x$der_tki_lung[temp.ref[i]] <- 1 else
                  ccc19x$der_tki_lung[temp.ref[i]] <- 0
     }
@@ -11619,7 +11619,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Abemaciclib', 'Palbociclib', 'Ribociclib'))) ccc19x$der_cdk46i[temp.ref[i]] <- 1 else
                ccc19x$der_cdk46i[temp.ref[i]] <- 0
     }
@@ -11639,7 +11639,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('ADT', 'Goserelin', 'Histrelin', 'Leuprolide', 'Triptorelin',
                'Abarelix', 'Degarelix', 'Relugolix'))) ccc19x$der_gnrh[temp.ref[i]] <- 1 else
                  ccc19x$der_gnrh[temp.ref[i]] <- 0
@@ -11654,7 +11654,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Abiraterone', 'Apalutamide', 'Darolutamide', 'Enzalutmide',
                'Flutamide', 'Nilutamide', 'Bicalutamide'))) ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 1 else
                  ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 0
@@ -11670,7 +11670,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Nivolumab', 'Pembrolizumab', 'Atezolizumab', 'Avelumab',
                'Durvalumab', 'Cemiplimab', 'Anti-PD-1 antibody', 'Anti-PD-L1 antibody',
                'LAG/PD-1'))) ccc19x$der_pd1_l1[temp.ref[i]] <- 1 else
@@ -11728,7 +11728,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Ipilimumab', 'Tremilimumab', 'Anti-CTLA4 antibody'))) ccc19x$der_ctla4[temp.ref[i]] <- 1 else
                ccc19x$der_ctla4[temp.ref[i]] <- 0
     }
@@ -11745,7 +11745,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Lapatinib', 'Neratinib', 'Tucatinib', 'Trastuzumab', 'Margetuximab',
                'Trastuzumab emtansine', 'Trastuzumab deruxtecan', 'Pertuzumab'))) ccc19x$der_her2[temp.ref[i]] <- 1 else
                  ccc19x$der_her2[temp.ref[i]] <- 0
@@ -11766,7 +11766,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Doxorubicin', 'Epirubicin', 'Daunorubicin', 'Mitoxantrone',
                'Aclarubicin', 'Amrubicin', 'Vyxeos', 'Daunorubicin liposomal',
                'Idarubicin', 'Pegylated liposomal doxorubicin', 'Valrubicin'))) ccc19x$der_anthracycline[temp.ref[i]] <- 1 else
@@ -11788,7 +11788,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Docetaxel', 'Paclitaxel', 'Cabazitaxel', 'nab-Paclitaxel'))) ccc19x$der_taxane[temp.ref[i]] <- 1 else
                ccc19x$der_taxane[temp.ref[i]] <- 0
     }
@@ -11808,7 +11808,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Gemcitabine'))) ccc19x$der_gemcitabine[temp.ref[i]] <- 1 else
                ccc19x$der_gemcitabine[temp.ref[i]] <- 0
     }
@@ -11828,7 +11828,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Irinotecan'))) ccc19x$der_irinotecan[temp.ref[i]] <- 1 else
                ccc19x$der_irinotecan[temp.ref[i]] <- 0
     }
@@ -11848,7 +11848,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Cisplatin', 'Carboplatin', 'Oxaliplatin', 'Heptaplatin', 'Nedaplatin'))) ccc19x$der_platinum[temp.ref[i]] <- 1 else
                ccc19x$der_platinum[temp.ref[i]] <- 0
     }
@@ -11868,7 +11868,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Capecitabine', 'Doxifluridine', 'Fluorouracil', 'Floxuridine', 'Tegafur and uracil', 'Trifluridine and tipiracil'))) ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 1 else
                ccc19x$der_fluoropyrimidine[temp.ref[i]] <- 0
     }
@@ -11888,7 +11888,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Afatinib', 'Dacomitinib', 'Erlotinib', 'Gefitinib', 'Icotinib', 'Mobocertinib', 'Osimertinib'))) ccc19x$der_egfri[temp.ref[i]] <- 1 else
                ccc19x$der_egfri[temp.ref[i]] <- 0
     }
@@ -11908,7 +11908,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Amivantamab', 'Cetuximab', 'Necitumumab', 'Panitumumab'))) ccc19x$der_egfr_mab[temp.ref[i]] <- 1 else
                ccc19x$der_egfr_mab[temp.ref[i]] <- 0
     }
@@ -11928,7 +11928,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Olaparib', 'Niraparib', 'Rucaparib', 'Talazoparib', 'Veliparib'))) ccc19x$der_parpi[temp.ref[i]] <- 1 else
                  ccc19x$der_parpi[temp.ref[i]] <- 0
     }
@@ -11942,7 +11942,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Alpelisib', 'Bevacizumab', 'Bortezomib', 'Cetuximab', 'Daratumumab',
                'Dasatinib', 'Erlotinib', 'Everolimus', 'Fedratinib', 'Gemtuzumab ozogamicin',
                'Gilteritinib', 'Ibrutinib', 'Imatinib', 'Lenalidomide', 'Neratinib',
@@ -11967,7 +11967,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Blinatumomab','Amivantamab','Flotetuzumab','Mosunetuzumab','Zenocutuzumab',
                'BiTE antibody','REGN5458'))) ccc19x$der_BiTE[temp.ref[i]] <- 1 else
                ccc19x$der_BiTE[temp.ref[i]] <- 0
@@ -11998,7 +11998,7 @@ var.log <- data.frame(name = character(),
     temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
     for(i in 1:length(temp.ref))
     {
-      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7')] %in%
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
              c('Thalidomide', 'Lenalidomide', 'Pomalidomide'))) ccc19x$der_imid[temp.ref[i]] <- 1 else
                ccc19x$der_imid[temp.ref[i]] <- 0
     }
