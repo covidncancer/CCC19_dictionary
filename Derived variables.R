@@ -3959,7 +3959,7 @@ var.log <- data.frame(name = character(),
       ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 1
       
       #7. Rescind status if days to death > 30
-      temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30)]
+      temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30 & ccc19x$der_days_to_death_combined < 9999)]
       ccc19x$der_dead30[which(ccc19x$record_id %in% temp)] <- 0
       
       #8. Declare unknown if days to death cannot be calculated and mortality flag not set
@@ -4090,7 +4090,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 1
     
     #7. Rescind status if days to death > 30
-    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30)]
+    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 30 & ccc19x$der_days_to_death_combined < 9999)]
     ccc19x$der_dead30a[which(ccc19x$record_id %in% temp)] <- 0
     
     #8. Declare unknown if days to death cannot be calculated and mortality flag not set
@@ -4220,7 +4220,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 1
     
     #7. Rescind status if days to death > 90
-    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 90)]
+    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 90 & ccc19x$der_days_to_death_combined < 9999)]
     ccc19x$der_dead90a[which(ccc19x$record_id %in% temp)] <- 0
     
     #8. Declare unknown if days to death cannot be calculated and mortality flag not set
@@ -4350,7 +4350,7 @@ var.log <- data.frame(name = character(),
     ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 1
     
     #7. Rescind status if days to death > 180
-    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 180)]
+    temp <- ccc19x$record_id[which(ccc19x$der_days_to_death_combined > 180 & ccc19x$der_days_to_death_combined < 9999)]
     ccc19x$der_dead180a[which(ccc19x$record_id %in% temp)] <- 0
     
     #8. Declare unknown if days to death cannot be calculated and mortality flag not set
