@@ -11368,7 +11368,7 @@ var.log <- data.frame(name = character(),
                ccc19x$der_btki[temp.ref[i]] <- 0
     }
     
-    #Overwrite if structured data is present
+    #Overwrite if structured data are present
     ccc19x$der_btki[which(ccc19x$what_targeted_tx___l01xe51 == 1|ccc19x$what_targeted_tx___l01xe27 == 1)] <- 1
     
     ccc19x$der_btki <- factor(ccc19x$der_btki)
@@ -11391,7 +11391,7 @@ var.log <- data.frame(name = character(),
                ccc19x$der_jaki[temp.ref[i]] <- 0
     }
     
-    #Overwrite if structured data is present
+    #Overwrite if structured data are present
     ccc19x$der_jaki[which(ccc19x$what_targeted_tx___l01xe57 == 1|ccc19x$what_targeted_tx___l01xe18 == 1)] <- 1
     
     ccc19x$der_jaki <- factor(ccc19x$der_jaki)
@@ -11415,7 +11415,7 @@ var.log <- data.frame(name = character(),
                  ccc19x$der_bcrabli[temp.ref[i]] <- 0
     }
     
-    #Overwrite if structured data is present
+    #Overwrite if structured data are present
     ccc19x$der_bcrabli[which(ccc19x$what_targeted_tx___l01xe06 == 1|
                                ccc19x$what_targeted_tx___l01xe01 == 1|
                                ccc19x$what_targeted_tx___l01xe08 == 1)] <- 1
@@ -11503,6 +11503,15 @@ var.log <- data.frame(name = character(),
                  ccc19x$der_tki[temp.ref[i]] <- 0
     }
     
+    #Overwrite if structured data are present
+    ccc19x$der_tki[which(ccc19x$what_targeted_tx___l01xe51 == 1|
+                            ccc19x$what_targeted_tx___l01xe06 == 1|
+                            ccc19x$what_targeted_tx___l01xe57 == 1|
+                            ccc19x$what_targeted_tx___l01xe27 == 1|
+                            ccc19x$what_targeted_tx___l01xe01 == 1|
+                            ccc19x$what_targeted_tx___l01xe08 == 1|
+                            ccc19x$what_targeted_tx___l01xe18 == 1)] <- 1
+    
     ccc19x$der_tki <- factor(ccc19x$der_tki)
     summary(ccc19x$der_tki[ccc19x$redcap_repeat_instrument == ''])
     
@@ -11552,6 +11561,9 @@ var.log <- data.frame(name = character(),
                  ccc19x$der_gnrh[temp.ref[i]] <- 0
     }
     
+    #Overwrite if structured data are present
+    ccc19x$der_gnrh[which(ccc19x$adt == 1)] <- 1
+    
     ccc19x$der_gnrh <- factor(ccc19x$der_gnrh)
     summary(ccc19x$der_gnrh[ccc19x$redcap_repeat_instrument == ''])
     
@@ -11566,6 +11578,15 @@ var.log <- data.frame(name = character(),
                'Flutamide', 'Nilutamide', 'Bicalutamide'))) ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 1 else
                  ccc19x$der_oral_antiandrogen[temp.ref[i]] <- 0
     }
+    
+    #Overwrite if structured data are present
+    ccc19x$der_oral_antiandrogen[which(ccc19x$prostate_tx___1100072 == 1|
+                                         ccc19x$prostate_tx___1307298 == 1|
+                                         ccc19x$prostate_tx___1999574 == 1|
+                                         ccc19x$prostate_tx___2180325 == 1|
+                                         ccc19x$prostate_tx___31805 == 1|
+                                         ccc19x$prostate_tx___4508 == 1|
+                                         ccc19x$prostate_tx___83008 == 1)] <- 1
     
     ccc19x$der_oral_antiandrogen <- factor(ccc19x$der_oral_antiandrogen)
     summary(ccc19x$der_oral_antiandrogen[ccc19x$redcap_repeat_instrument == ''])
@@ -11584,7 +11605,7 @@ var.log <- data.frame(name = character(),
                  ccc19x$der_pd1_l1[temp.ref[i]] <- 0
     }
     
-    #Structured data is present
+    #Structured data are present
     ccc19x$der_pd1_l1[which(ccc19x$what_immunotherapy %in% c('45446', '45170', '45838-45446'))] <- 1
     
     ccc19x$der_pd1_l1 <- factor(ccc19x$der_pd1_l1)
@@ -11640,7 +11661,7 @@ var.log <- data.frame(name = character(),
                ccc19x$der_ctla4[temp.ref[i]] <- 0
     }
     
-    #Structured data is present
+    #Structured data are present
     ccc19x$der_ctla4[which(ccc19x$what_immunotherapy %in% c('45838', '45838-45446'))] <- 1
     
     ccc19x$der_ctla4 <- factor(ccc19x$der_ctla4)
