@@ -11368,6 +11368,9 @@ var.log <- data.frame(name = character(),
                ccc19x$der_btki[temp.ref[i]] <- 0
     }
     
+    #Overwrite if structured data is present
+    ccc19x$der_btki[which(ccc19x$what_targeted_tx___l01xe51 == 1|ccc19x$what_targeted_tx___l01xe27 == 1)] <- 1
+    
     ccc19x$der_btki <- factor(ccc19x$der_btki)
     
     temp <- summary(ccc19x$der_btki[ccc19x$redcap_repeat_instrument == ''])
@@ -11387,6 +11390,9 @@ var.log <- data.frame(name = character(),
              c('Fedratinib', 'Ruxolitinib', 'Lestaurtinib', 'Momelotinib', 'Pacritinib', 'Tofacitinib'))) ccc19x$der_jaki[temp.ref[i]] <- 1 else
                ccc19x$der_jaki[temp.ref[i]] <- 0
     }
+    
+    #Overwrite if structured data is present
+    ccc19x$der_jaki[which(ccc19x$what_targeted_tx___l01xe57 == 1|ccc19x$what_targeted_tx___l01xe18 == 1)] <- 1
     
     ccc19x$der_jaki <- factor(ccc19x$der_jaki)
     
@@ -11408,6 +11414,11 @@ var.log <- data.frame(name = character(),
                'Imatinib', 'Nilotinib', 'Ponatinib', 'Radotinib'))) ccc19x$der_bcrabli[temp.ref[i]] <- 1 else
                  ccc19x$der_bcrabli[temp.ref[i]] <- 0
     }
+    
+    #Overwrite if structured data is present
+    ccc19x$der_bcrabli[which(ccc19x$what_targeted_tx___l01xe06 == 1|
+                               ccc19x$what_targeted_tx___l01xe01 == 1|
+                               ccc19x$what_targeted_tx___l01xe08 == 1)] <- 1
     
     ccc19x$der_bcrabli <- factor(ccc19x$der_bcrabli)
     
