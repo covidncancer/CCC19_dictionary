@@ -10127,140 +10127,6 @@ var.log <- data.frame(name = character(),
     ccc19x$der_anytx_4wk <- factor(ccc19x$der_anytx_4wk)
     summary(ccc19x$der_anytx_4wk[ccc19x$redcap_repeat_instrument == ''])
     
-    ###############################################################
-    #C05a. Immunosuppressed version 2 - with cytotoxic chemotherapy
-    ###############################################################
-    ccc19x$der_immunosuppressed_v2 <- NA
-    
-    #First, determine NOT immunosuppressed per comorbidity variable
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
-                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|significant_comorbidities___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-    {
-      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38013005[i] == 0) ccc19x$der_immunosuppressed_v2[i] <- 0
-    }
-    
-    #Next, rule in immunosuppression
-    
-    #1. Immunosuppression comorbidity checked
-    ccc19x$der_immunosuppressed_v2[which(ccc19x$significant_comorbidities___38013005 == 1)] <- 1
-    
-    #2. Receiving >20 mg/d prednisone equivalents at baseline
-    ccc19x$der_immunosuppressed_v2[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
-    
-    #3. Receiving "immunosuppressants" at baseline
-    ccc19x$der_immunosuppressed_v2[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
-    
-    #4. Receiving cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v2[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
-    
-    #Unknown
-    ccc19x$der_immunosuppressed_v2[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
-                                           is.na(ccc19x$der_immunosuppressed_v2))] <- 99
-    
-    ccc19x$der_immunosuppressed_v2 <- factor(ccc19x$der_immunosuppressed_v2)
-    
-    temp <- summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_immunosuppressed_v2',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
-    
-    ################################################################################################
-    #C05a1. Immunosuppressed version 2a - with cytotoxic chemotherapy and not based on "comorbidity"
-    ################################################################################################
-    
-    #Default is not immunosuppressed
-    ccc19x$der_immunosuppressed_v2a <- 0
-    
-    #Next, rule in immunosuppression
-    
-    #1. Receiving "immunosuppressants" medication at baseline
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
-    
-    #2. Receiving >20 mg/d prednisone equivalents at baseline
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
-    
-    #3. Receiving cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
-    
-    #Unknown
-    
-    #1. Baseline medications unknown
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___unk == 1 &
-                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
-    
-    #2. Known to be on steroids but dose is unknown
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___h02 == 1 &
-                                            ccc19x$steroid_specific_2 == 99 &
-                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
-    
-    #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
-    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 99 &
-                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
-    
-    ccc19x$der_immunosuppressed_v2a <- factor(ccc19x$der_immunosuppressed_v2a)
-    summary(ccc19x$der_immunosuppressed_v2a[ccc19x$redcap_repeat_instrument == ''])
-    
-    ############################################################################################
-    #C05b. Immunosuppressed version 3 - with cytotoxic chemotherapy, lymphodepletion, transplant
-    ############################################################################################
-    
-    #Default is not immunosuppressed
-    ccc19x$der_immunosuppressed_v3 <- 0
-    
-    #Next, rule in immunosuppression
-    
-    #1. Receiving "immunosuppressants" at baseline
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
-    
-    #2. Receiving >20 mg/d prednisone equivalents at baseline
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
-    
-    #3. Received cytotoxic chemotherapy within 3 months
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
-    
-    #4. Received BTKi within 3 months
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_btki == 1 & ccc19x$der_anytx_3mo == 1)] <- 1
-    
-    #5. Received anti-CD20 within 12 months
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_cd20_12mo == 1)] <- 1
-    
-    #6. Received SCT or cellular treatment within 12 months
-    ccc19x$der_immunosuppressed_v3[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
-                                            ccc19x$significant_comorbidities___234336002 == 1) &
-                                           ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
-    
-    #Unknown
-    
-    #1. Baseline medications unknown
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___unk == 1 &
-                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
-    
-    #2. Known to be on steroids but dose is unknown
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___h02 == 1 &
-                                           ccc19x$steroid_specific_2 == 99 &
-                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
-    
-    #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
-    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 99 &
-                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
-    
-    #4. Received BTKi or anti-CD20 but unknown when
-    ccc19x$der_immunosuppressed_v3[which((ccc19x$der_btki == 1|ccc19x$der_cd20 == 1) & 
-                                           (ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99) &
-                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
-    
-    #6. Received SCT or cellular treatment but unknown when
-    ccc19x$der_immunosuppressed_v3[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
-                                            ccc19x$significant_comorbidities___234336002 == 1) &
-                                           ccc19x$transplant_cellular_timing == 99 &
-                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
-    
-    ccc19x$der_immunosuppressed_v3 <- factor(ccc19x$der_immunosuppressed_v3)
-    summary(ccc19x$der_immunosuppressed_v3[ccc19x$redcap_repeat_instrument == ''])
-    
     ###################################
     #Ca22. Recency of cytotoxic therapy
     ###################################
@@ -12244,6 +12110,209 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    ###############################################################
+    #C05a. Immunosuppressed version 2 - with cytotoxic chemotherapy
+    ###############################################################
+    ccc19x$der_immunosuppressed_v2 <- NA
+    
+    #First, determine NOT immunosuppressed per comorbidity variable
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___38013005|significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___38013005[i] == 0) ccc19x$der_immunosuppressed_v2[i] <- 0
+    }
+    
+    #Next, rule in immunosuppression
+    
+    #1. Immunosuppression comorbidity checked
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$significant_comorbidities___38013005 == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Receiving "immunosuppressants" at baseline
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #4. Receiving cytotoxic chemotherapy within 3 months
+    ccc19x$der_immunosuppressed_v2[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
+    
+    #Unknown
+    ccc19x$der_immunosuppressed_v2[which((ccc19x$concomitant_meds___unk == 1|ccc19x$significant_comorbidities___unk == 1) &
+                                           is.na(ccc19x$der_immunosuppressed_v2))] <- 99
+    
+    ccc19x$der_immunosuppressed_v2 <- factor(ccc19x$der_immunosuppressed_v2)
+    
+    temp <- summary(ccc19x$der_immunosuppressed_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_immunosuppressed_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ################################################################################################
+    #C05a1. Immunosuppressed version 2a - with cytotoxic chemotherapy and not based on "comorbidity"
+    ################################################################################################
+    
+    #Default is not immunosuppressed
+    ccc19x$der_immunosuppressed_v2a <- 0
+    
+    #Next, rule in immunosuppression
+    
+    #1. Receiving "immunosuppressants" medication at baseline
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Receiving cytotoxic chemotherapy within 3 months
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
+    
+    #Unknown
+    
+    #1. Baseline medications unknown
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___unk == 1 &
+                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
+    
+    #2. Known to be on steroids but dose is unknown
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$concomitant_meds___h02 == 1 &
+                                            ccc19x$steroid_specific_2 == 99 &
+                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
+    
+    #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
+    ccc19x$der_immunosuppressed_v2a[which(ccc19x$der_any_cyto_3mo == 99 &
+                                            ccc19x$der_immunosuppressed_v2a == 0)] <- 99
+    
+    ccc19x$der_immunosuppressed_v2a <- factor(ccc19x$der_immunosuppressed_v2a)
+    
+    temp <- summary(ccc19x$der_immunosuppressed_v2a[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_immunosuppressed_v2a',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ############################################################################################
+    #C05b. Immunosuppressed version 3 - with cytotoxic chemotherapy, lymphodepletion, transplant
+    ############################################################################################
+    
+    #Default is not immunosuppressed
+    ccc19x$der_immunosuppressed_v3 <- 0
+    
+    #Next, rule in immunosuppression
+    
+    #1. Receiving "immunosuppressants" at baseline
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Received cytotoxic chemotherapy within 3 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 1)] <- 1
+    
+    #4. Received BTKi within 3 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_btki == 1 & ccc19x$der_anytx_3mo == 1)] <- 1
+    
+    #5. Received anti-CD20 within 12 months
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_cd20_12mo == 1)] <- 1
+    
+    #6. Received SCT or cellular treatment within 12 months
+    ccc19x$der_immunosuppressed_v3[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
+                                            ccc19x$significant_comorbidities___234336002 == 1) &
+                                           ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
+    
+    #Unknown
+    
+    #1. Baseline medications unknown
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___unk == 1 &
+                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
+    
+    #2. Known to be on steroids but dose is unknown
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$concomitant_meds___h02 == 1 &
+                                           ccc19x$steroid_specific_2 == 99 &
+                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
+    
+    #3. Unknown if patient was on cytotoxic cancer treatment in 3 months preceding COVID-19
+    ccc19x$der_immunosuppressed_v3[which(ccc19x$der_any_cyto_3mo == 99 &
+                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
+    
+    #4. Received BTKi or anti-CD20 but unknown when
+    ccc19x$der_immunosuppressed_v3[which((ccc19x$der_btki == 1|ccc19x$der_cd20 == 1) & 
+                                           (ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99) &
+                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
+    
+    #6. Received SCT or cellular treatment but unknown when
+    ccc19x$der_immunosuppressed_v3[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
+                                            ccc19x$significant_comorbidities___234336002 == 1) &
+                                           ccc19x$transplant_cellular_timing == 99 &
+                                           ccc19x$der_immunosuppressed_v3 == 0)] <- 99
+    
+    ccc19x$der_immunosuppressed_v3 <- factor(ccc19x$der_immunosuppressed_v3)
+    
+    temp <- summary(ccc19x$der_immunosuppressed_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_immunosuppressed_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    ####################################################################
+    #C05c. Immunosuppressed version 4 - with lymphodepletion, transplant
+    ####################################################################
+    
+    #Default is not immunosuppressed
+    ccc19x$der_immunosuppressed_v4 <- 0
+    
+    #Next, rule in immunosuppression
+    
+    #1. Receiving "immunosuppressants" at baseline
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$concomitant_meds___l04a == 1)] <- 1
+    
+    #2. Receiving >20 mg/d prednisone equivalents at baseline
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$steroid_specific_2 %in% 2:3)] <- 1
+    
+    #3. Received BTKi within 3 months
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$der_btki == 1 & ccc19x$der_anytx_3mo == 1)] <- 1
+    
+    #4. Received anti-CD20 within 12 months
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$der_cd20_12mo == 1)] <- 1
+    
+    #5. Received SCT or cellular treatment within 12 months
+    ccc19x$der_immunosuppressed_v4[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
+                                            ccc19x$significant_comorbidities___234336002 == 1) &
+                                           ccc19x$transplant_cellular_timing %in% 1:3)] <- 1
+    
+    #Unknown
+    
+    #1. Baseline medications unknown
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$concomitant_meds___unk == 1 &
+                                           ccc19x$der_immunosuppressed_v4 == 0)] <- 99
+    
+    #2. Known to be on steroids but dose is unknown
+    ccc19x$der_immunosuppressed_v4[which(ccc19x$concomitant_meds___h02 == 1 &
+                                           ccc19x$steroid_specific_2 == 99 &
+                                           ccc19x$der_immunosuppressed_v4 == 0)] <- 99
+    
+    #3. Received BTKi or anti-CD20 but unknown when
+    ccc19x$der_immunosuppressed_v4[which((ccc19x$der_btki == 1|ccc19x$der_cd20 == 1) & 
+                                           (ccc19x$recent_treatment == 99|ccc19x$hx_treatment == 99|ccc19x$on_treatment == 99) &
+                                           ccc19x$der_immunosuppressed_v4 == 0)] <- 99
+    
+    #4. Received SCT or cellular treatment but unknown when
+    ccc19x$der_immunosuppressed_v4[which((ccc19x$transplant_cellular_therapy %in% c(1:6,10)|
+                                            ccc19x$significant_comorbidities___234336002 == 1) &
+                                           ccc19x$transplant_cellular_timing == 99 &
+                                           ccc19x$der_immunosuppressed_v4 == 0)] <- 99
+    
+    ccc19x$der_immunosuppressed_v4 <- factor(ccc19x$der_immunosuppressed_v4)
+    
+    temp <- summary(ccc19x$der_immunosuppressed_v4[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_immunosuppressed_v4',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #Ca6: Center type
     ccc19x$der_site_type <- NA
     
@@ -13132,11 +13201,16 @@ var.log <- data.frame(name = character(),
     ccc19x$der_180d_complete[which(ccc19x$record_id %in% ccc19x$record_id[which(ccc19x$timing_of_report_weeks > 25)] 
                                    & ccc19x$redcap_repeat_instrument == '')] <- 'Yes, through an "other time interval" follow-up form'
     
-    #NA - patient is deceased prior to the due date
+    #NA - patient is deceased prior to the due date by days
     temp.ref <- which(ccc19x$der_days_to_death_combined %in% 0:9998 & ccc19x$redcap_repeat_instrument == '')
     ccc19x$der_30d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 30 & is.na(ccc19x$der_30d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
     ccc19x$der_90d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 90 & is.na(ccc19x$der_90d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
     ccc19x$der_180d_complete[temp.ref][which(ccc19x$der_days_to_death_combined[temp.ref] < 180 & is.na(ccc19x$der_180d_complete[temp.ref]))] <- "N/A - Patient died before form was due"
+    
+    #NA - patient is deceased prior to the due date by flags
+    ccc19x$der_30d_complete[which(ccc19x$der_dead30 == 1 & is.na(ccc19x$der_30d_complete))] <- "N/A - Patient died before form was due"
+    ccc19x$der_90d_complete[which(ccc19x$der_dead90a == 1 & is.na(ccc19x$der_90d_complete))] <- "N/A - Patient died before form was due"
+    ccc19x$der_180d_complete[which(ccc19x$der_dead180a == 1 & is.na(ccc19x$der_180d_complete))] <- "N/A - Patient died before form was due"
     
     #NA - baseline diagnostic interval exceed the required follow-up timeframe
     ccc19x$der_30d_complete[which(ccc19x$covid_19_dx_interval %in% 4:10 & is.na(ccc19x$der_30d_complete))] <- "N/A - Baseline diagnostic interval exceeds the follow-up period"
