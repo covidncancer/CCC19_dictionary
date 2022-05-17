@@ -8262,6 +8262,36 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    ##########################
+    #C08a. Patient on dialysis
+    ##########################
+    ccc19x$der_dialysis <- NA
+    ccc19x$der_dialysis[which(ccc19x$significant_comorbidities___236435004 == 1)] <- 1
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), 
+                               pattern = 'comorbidities___236435004|comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(any(ccc19x[i,temp.ref]) & ccc19x$significant_comorbidities___236435004[i] == 0) ccc19x$der_dialysis[i] <- 0
+    }
+    
+    temp.ref <- which(grepl(colnames(ccc19x), pattern = 'significant_comorbidities') &
+                        !grepl(colnames(ccc19x), pattern = 'significant_comorbidities___unk'))
+    for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    {
+      if(all(ccc19x[i,temp.ref] == 0) & ccc19x$significant_comorbidities___unk[i] == 1) ccc19x$der_dialysis[i] <- 99
+    }
+    
+    ccc19x$der_dialysis <- factor(ccc19x$der_dialysis)
+    
+    temp <- summary(ccc19x$der_dialysis[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_dialysis',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     ##################
     #C09. Hypertension
     ##################
