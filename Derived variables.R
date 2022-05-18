@@ -1867,7 +1867,6 @@ var.log <- data.frame(name = character(),
     var.log <- rbind(var.log, temp.var.log)
     
     #Comp12a Sepsis including hypotension that required pressors
-    
     ccc19x$der_sepsis_comp_v2 <- NA
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '91302008') & grepl(colnames(ccc19x), pattern = 'complications'))
     
@@ -1913,7 +1912,6 @@ var.log <- data.frame(name = character(),
     summary(ccc19x$der_sepsis_comp_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Comp12b Pressors (der_pressors)
-    
     ccc19x$der_pressors <- NA
     
     #Present at baseline
@@ -4755,6 +4753,8 @@ var.log <- data.frame(name = character(),
     #Unknown
     ccc19x$der_cancer_tx_timing[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
                                         is.na(ccc19x$der_cancer_tx_timing))] <- 99
+    ccc19x$der_cancer_tx_timing[which(ccc19x$on_treatment == 99 & 
+                                  is.na(ccc19x$der_cancer_tx_timing))] <- 99
     
     ccc19x$der_cancer_tx_timing <- as.factor(ccc19x$der_cancer_tx_timing)
     summary(ccc19x$der_cancer_tx_timing[ccc19x$redcap_repeat_instrument == ''])
@@ -4782,11 +4782,74 @@ var.log <- data.frame(name = character(),
     #Unknown
     ccc19x$der_cancer_tx_timing_v2[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
                                            is.na(ccc19x$der_cancer_tx_timing_v2))] <- 99
+    ccc19x$der_cancer_tx_timing_v2[which(ccc19x$on_treatment == 99 & 
+                                        is.na(ccc19x$der_cancer_tx_timing_v2))] <- 99
     
     ccc19x$der_cancer_tx_timing_v2 <- as.factor(ccc19x$der_cancer_tx_timing_v2)
     
     temp <- summary(ccc19x$der_cancer_tx_timing_v2[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_cancer_tx_timing_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #############################
+    #T19. Systemic cancer treatment timing - collapse 0-2 and 2-4 weeks
+    #############################
+    ccc19x$der_systemic_cancer_tx_timing <- NA
+    
+    #Modality known to be systemic
+    temp.ref <- which(ccc19x$treatment_modality___685 == 1|
+                        ccc19x$treatment_modality___694 == 1|
+                        ccc19x$treatment_modality___58229 == 1|
+                        ccc19x$treatment_modality___691 == 1|
+                        ccc19x$treatment_modality___45186 == 1)
+    
+    ccc19x$der_systemic_cancer_tx_timing[temp.ref] <- ccc19x$der_cancer_tx_timing_v2[temp.ref]
+    
+    #Known to have never received treatment (including after COVID-19 for the first time)
+    temp.ref <- which(ccc19x$der_cancer_tx_timing_v2 == 88)
+    ccc19x$der_systemic_cancer_tx_timing[temp.ref] <- 88
+    
+    #Unknown
+    temp.ref <- which(ccc19x$der_cancer_tx_timing_v2 == 99)
+    ccc19x$der_systemic_cancer_tx_timing[temp.ref] <- 99
+    
+    ccc19x$der_systemic_cancer_tx_timing <- as.factor(ccc19x$der_systemic_cancer_tx_timing)
+    
+    temp <- summary(ccc19x$der_systemic_cancer_tx_timing[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_systemic_cancer_tx_timing',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #############################
+    #T19a. Systemic cancer treatment timing not including endocrine therapy - collapse 0-2 and 2-4 weeks
+    #############################
+    ccc19x$der_systemic_cancer_tx_timing_v2 <- NA
+    
+    #Modality known to be systemic
+    temp.ref <- which(ccc19x$treatment_modality___685 == 1|
+                        ccc19x$treatment_modality___694 == 1|
+                        ccc19x$treatment_modality___58229 == 1|
+                        ccc19x$treatment_modality___45186 == 1)
+    
+    ccc19x$der_systemic_cancer_tx_timing_v2[temp.ref] <- ccc19x$der_cancer_tx_timing_v2[temp.ref]
+    
+    #Known to have never received treatment (including after COVID-19 for the first time)
+    temp.ref <- which(ccc19x$der_cancer_tx_timing_v2 == 88)
+    ccc19x$der_systemic_cancer_tx_timing_v2[temp.ref] <- 88
+    
+    #Unknown
+    temp.ref <- which(ccc19x$der_cancer_tx_timing_v2 == 99)
+    ccc19x$der_systemic_cancer_tx_timing_v2[temp.ref] <- 99
+    
+    ccc19x$der_systemic_cancer_tx_timing_v2 <- as.factor(ccc19x$der_systemic_cancer_tx_timing_v2)
+    
+    temp <- summary(ccc19x$der_systemic_cancer_tx_timing_v2[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_systemic_cancer_tx_timing_v2',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
@@ -4812,6 +4875,8 @@ var.log <- data.frame(name = character(),
     #Unknown
     ccc19x$der_cancer_tx_timing_v3[which((ccc19x$hx_treatment == 99|ccc19x$recent_treatment == 99) & 
                                            is.na(ccc19x$der_cancer_tx_timing_v3))] <- 99
+    ccc19x$der_cancer_tx_timing_v3[which(ccc19x$on_treatment == 99 & 
+                                        is.na(ccc19x$der_cancer_tx_timing_v3))] <- 99
     
     ccc19x$der_cancer_tx_timing_v3 <- as.factor(ccc19x$der_cancer_tx_timing_v3)
     
