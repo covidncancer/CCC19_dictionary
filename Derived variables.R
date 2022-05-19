@@ -6920,8 +6920,6 @@ var.log <- data.frame(name = character(),
                               ccc19x$covid_19_treatment_fu___b01ac == 1
     )] <- 1
     
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
-    
     #Never
     ccc19x$der_as_apa[which(is.na(ccc19x$der_as_apa) & ccc19x$concomitant_meds___n02ba == 0 &
                               ccc19x$concomitant_meds___b01ac == 0 &
@@ -6930,36 +6928,26 @@ var.log <- data.frame(name = character(),
                               (is.na(ccc19x$covid_19_treatment_fu___n02ba) | ccc19x$covid_19_treatment_fu___n02ba == 0) &
                               (is.na(ccc19x$covid_19_treatment_fu___b01ac) | ccc19x$covid_19_treatment_fu___b01ac == 0))] <- 0
     
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
-    
     #Unknown baseline or treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = 'concomitant_meds___|19_treatment___') & 
                         !grepl(colnames(ccc19x), pattern = 'concomitant_meds___unk|19_treatment___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_as_apa[i] == 0 | is.na(ccc19x$der_as_apa[i]))) ccc19x$der_as_apa[i] <- 99
     
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
-    
-    #Unknown f/u treatment
+   #Unknown f/u treatment
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
                         !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_as_apa[i] == 0 | is.na(ccc19x$der_as_apa[i]))) ccc19x$der_as_apa[i] <- 99
-    
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
     
     #Missing
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___|concomitant_meds___'))
     for(i in which(ccc19x$redcap_repeat_instrument == ''))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_as_apa[i] != 1|is.na(ccc19x$der_as_apa[i]))) ccc19x$der_as_apa[i] <- NA
     
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
-    
     temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___'))
     for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
       if(all(ccc19x[i,temp.ref] == 0) & (ccc19x$der_as_apa[i] != 1|is.na(ccc19x$der_as_apa[i]))) ccc19x$der_as_apa[i] <- NA
-    
-    summary(factor(ccc19x$der_as_apa[ccc19x$redcap_repeat_instrument == '']))
     
     #Merge baseline and followup if discrepancy
     for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
