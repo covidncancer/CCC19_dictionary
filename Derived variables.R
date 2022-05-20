@@ -10119,6 +10119,18 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
+      #Ca10ka. Same as above but omits the endocrine
+      ccc19x$der_any_systemic_3mo_v2 <- ccc19x$der_any_cyto_3mo
+      ccc19x$der_any_systemic_3mo_v2[which(ccc19x$der_any_immuno_3mo == 1|
+                                             ccc19x$der_any_targeted_3mo == 1)] <- 1
+      
+      temp <- summary(ccc19x$der_any_systemic_3mo_v2[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_any_systemic_3mo_v2',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
       #Ca10e. Any radiation therapy within 3 months
       ccc19x$der_any_rt_3mo <- ccc19x$der_anytx_3mo
       ccc19x$der_any_rt_3mo[which(ccc19x$der_any_rt_3mo == 1 & ccc19x$treatment_modality___695 == 0)] <- 0
