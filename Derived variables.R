@@ -13378,9 +13378,7 @@ var.log <- data.frame(name = character(),
       ###############
       
       #High levels of baseline missingness
-      setwd("~/HemOnc.org Dropbox/Jeremy Warner/CCC19 parent folder/CCC19 RCC/Data dictionary/CCC19_dictionary_and_derived_variables/CCC19_dictionary")
       dict <- read.csv(file = 'CCC19_DataDictionary.csv', header = T, stringsAsFactors = F)
-      setwd("~/Box Sync/CCC19 data")
       colnames(dict)[1] <- 'name'
       
       ccc19x$missing <- 0
