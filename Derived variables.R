@@ -8,8 +8,8 @@ require("dplyr")
 ccc19x <- foo
 
 #Define the desired suffix for the save function
- suffix <- 'data with derived variables for analysis'
-# suffix <- 'data with derived variables for site QA'
+# suffix <- 'data with derived variables for analysis'
+ suffix <- 'data with derived variables for site QA'
 #suffix <- 'data with derived variables for central QA'
 # suffix <- 'data with derived variables for appeal'
 
@@ -7388,6 +7388,42 @@ var.log <- data.frame(name = character(),
     
     temp <- summary(ccc19x$der_race_v2[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_race_v2',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #D04d. Derived variable for race/ethnicity including Asian and Native Hawaiian/Pacific Islander kept separate
+    ccc19x$der_race_v2b <- NA
+    
+    ccc19x$der_race_v2b[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0 &
+                                ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic Black"
+    ccc19x$der_race_v2b[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0 &
+                                ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- "Non-Hispanic White"
+    
+    #Overwrite the preceding if Asian
+    ccc19x$der_race_v2b[which(ccc19x$race___2028_9 == 1 &
+                                ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- 'Non-Hispanic Asian'
+    
+    #Overwrite the preceding if Native Hawaiian/Pacific Islander
+    ccc19x$der_race_v2b[which(ccc19x$race___2076_8 ==1 &
+                                ccc19x$ethnicity %in% c('2186-5', 'UNK'))] <- 'Non-Hispanic PI'
+    
+    #Other
+    ccc19x$der_race_v2b[which((ccc19x$race___1002_5 == 1|ccc19x$race___2131_1 == 1|
+                                 ccc19x$race___unk == 1) & !ccc19x$der_race_v2b %in% c('Non-Hispanic Black',
+                                                                                       'Non-Hispanic White',
+                                                                                       'Non-Hispanic Asian',
+                                                                                       'Non-Hispanic PI'))] <- 'Other'
+    
+    #Overwrite "Other" with Hispanic ethnicity
+    ccc19x$der_race_v2b[which(ccc19x$ethnicity == "2135-2")] <- "Hispanic"
+    
+    #Factor
+    ccc19x$der_race_v2b <- as.factor(ccc19x$der_race_v2b)
+    
+    temp <- summary(ccc19x$der_race_v2b[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_race_v2b',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
                                stringsAsFactors = F)
