@@ -9305,6 +9305,16 @@ var.log <- data.frame(name = character(),
     ccc19x$der_Bladder <- factor(ccc19x$der_Bladder)
     summary(ccc19x$der_Bladder[ccc19x$redcap_repeat_instrument == ''])
     
+    #Kidney (RCC)
+    ccc19x$der_RCC <- 0
+    ccc19x$der_RCC[which(ccc19x$cancer_type %in% c("C9385")|
+                               ccc19x$cancer_type_2 %in% c("C9385")|
+                               ccc19x$cancer_type_3 %in% c("C9385")|
+                               ccc19x$cancer_type_4 %in% c("C9385")|
+                               ccc19x$cancer_type_5 %in% c("C9385"))] <- 1
+    ccc19x$der_RCC <- factor(ccc19x$der_RCC)
+    summary(ccc19x$der_RCC[ccc19x$redcap_repeat_instrument == ''])
+    
     #Other GU (except prostate)
     ccc19x$der_Other_GU <- 0
     ccc19x$der_Other_GU[which(ccc19x$cancer_type %in% c("C9061","C9063","C4912","C6389",
