@@ -1060,7 +1060,58 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
-      #Comp01a. PE complications within 90 days (3 months)
+      #Comp01a. PE complications within 30 days
+      ccc19x$der_PE_comp_within_30d <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30)|
+                           ccc19x$timing_of_report_weeks <= 4)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_PE_comp_within_30d[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_pulm|complications_card') & !grepl(colnames(ccc19x), pattern = '59282003|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_PE_comp_within_30d[i])) ccc19x$der_PE_comp_within_30d[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_pulm___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp_within_30d) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_30d[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_pulm_fu___unk'))
+      for(i in which(is.na(ccc19x$der_PE_comp_within_30d) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_PE_comp_within_30d[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+      {
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_PE_comp_within_30d[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_PE_comp_within_30d[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_PE_comp_within_30d[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_PE_comp_within_30d[temp.ref] <- 0
+        }
+      }
+      
+      ccc19x$der_PE_comp_within_30d <- as.factor(ccc19x$der_PE_comp_within_30d)
+      
+      temp <- summary(ccc19x$der_PE_comp_within_30d[ccc19x$redcap_repeat_instrument == ''])
+      temp.var.log <- data.frame(name = 'der_PE_comp_within_30d',
+                                 timestamp = Sys.time(),
+                                 values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                                 stringsAsFactors = F)
+      var.log <- rbind(var.log, temp.var.log)
+      
+      #Comp01b. PE complications within 90 days (3 months)
       ccc19x$der_PE_comp_within_3mo <- NA
       temp.ref <- which(grepl(colnames(ccc19x), pattern = '59282003') & grepl(colnames(ccc19x), pattern = 'complications'))
       temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
@@ -1345,7 +1396,51 @@ var.log <- data.frame(name = character(),
                                  stringsAsFactors = F)
       var.log <- rbind(var.log, temp.var.log)
       
-      #Comp04a. thrombosis_NOS complications within 90 days (3 months)
+      ccc19x$der_thrombosis_NOS_comp_within_30d <- NA
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
+      temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
+                           ccc19x$fu_weeks %in% c(30)|
+                           ccc19x$timing_of_report_weeks <= 4)
+      #Present
+      for(i in temp.ref)
+        ccc19x$der_thrombosis_NOS_comp_within_30d[temp.ref2][which(ccc19x[temp.ref2,i] == 1)] <- 1
+      
+      #Not present, something else checked besides unknown
+      temp.ref <- which(grepl(colnames(ccc19x), pattern = 'complications_other|complications_card') & !grepl(colnames(ccc19x), pattern = '414086009|unk'))
+      for(i in temp.ref2)
+        if(any(ccc19x[i,temp.ref] == 1) & !is.na(any(ccc19x[i,temp.ref] == 1)) & is.na(ccc19x$der_thrombosis_NOS_comp_within_30d[i])) ccc19x$der_thrombosis_NOS_comp_within_30d[i] <- 0
+      
+      #Unknown
+      
+      #Baseline
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card___unk', 'c19_complications_other___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_30d) & ccc19x$redcap_repeat_instrument == ''))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_30d[i] <- 99
+      
+      #Followup
+      temp.ref <- which(colnames(ccc19x) %in% c('c19_complications_card_fu___unk', 'c19_complications_other_fu___unk'))
+      for(i in which(is.na(ccc19x$der_thrombosis_NOS_comp_within_30d) & ccc19x$redcap_repeat_instrument == 'followup' &
+                     (ccc19x$fu_weeks %in% c(30,90)|ccc19x$timing_of_report_weeks <= 13)))
+        if(all(ccc19x[i,temp.ref] == 1)) ccc19x$der_thrombosis_NOS_comp_within_30d[i] <- 99
+      
+      #Merge baseline and followup if discrepancy
+      for(i in unique(ccc19x$record_id[which(ccc19x$redcap_repeat_instrument == 'followup')]))
+      {
+        temp.ref <- which(ccc19x$record_id == i)
+        temp <- ccc19x$der_thrombosis_NOS_comp_within_30d[temp.ref]
+        temp <- as.numeric(unique(temp[!is.na(temp)]))
+        if(length(temp) > 0)
+        {
+          if(any(temp == 1)) ccc19x$der_thrombosis_NOS_comp_within_30d[temp.ref] <- 1
+          if(!any(temp == 1) & any(temp == 99)) ccc19x$der_thrombosis_NOS_comp_within_30d[temp.ref] <- 99
+          if(!any(temp == 1) & !any(temp == 99) & any(temp == 0)) ccc19x$der_thrombosis_NOS_comp_within_30d[temp.ref] <- 0
+        }
+      }
+      
+      ccc19x$der_thrombosis_NOS_comp_within_30d <- as.factor(ccc19x$der_thrombosis_NOS_comp_within_30d)
+      summary(ccc19x$der_thrombosis_NOS_comp_within_30d[ccc19x$redcap_repeat_instrument == ''])
+      
+      #Comp04b. thrombosis_NOS complications within 90 days (3 months)
       ccc19x$der_thrombosis_NOS_comp_within_3mo <- NA
       temp.ref <- which(grepl(colnames(ccc19x), pattern = '414086009') & grepl(colnames(ccc19x), pattern = 'complications'))
       temp.ref2 <- which(ccc19x$redcap_repeat_instrument == ''|
@@ -5440,105 +5535,105 @@ var.log <- data.frame(name = character(),
   ###########
   {
     "hca" 
-    #Rx1. Derived variable for hydroxychloroquine/azithro exposure used for TREATMENT of COVID-19
-    ccc19x$der_hca <- NA
-    
-    #Non-trial
-    #Neither, baseline
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment___unk|19_treatment___rxcui_18631|19_treatment___rxcui_5521'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(ccc19x$covid_19_treatment___rxcui_18631[i] == 0 &
-         ccc19x$covid_19_treatment___rxcui_5521[i] == 0 &
-         any(ccc19x[i,temp.ref])) ccc19x$der_hca[i] <- 'Neither HCQ nor AZ'
-    
-    #Neither, followup
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk|19_treatment_fu___rxcui_18631|19_treatment_fu___rxcui_5521'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(ccc19x$covid_19_treatment_fu___rxcui_18631[i] == 0 &
-         ccc19x$covid_19_treatment_fu___rxcui_5521[i] == 0 &
-         any(ccc19x[i,temp.ref])) ccc19x$der_hca[i] <- 'Neither HCQ nor AZ'
-    
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 1 & ccc19x$covid_19_treatment___rxcui_18631 == 0)] <- 'HCQ alone'
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 1 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 0)] <- 'HCQ alone'
-    
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 0 & ccc19x$covid_19_treatment___rxcui_18631 == 1)] <- 'AZ alone'
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 0 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 1)] <- 'AZ alone'
-    
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 1 & ccc19x$covid_19_treatment___rxcui_18631 == 1)] <- 'AZ+HCQ'
-    ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 1 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 1)] <- 'AZ+HCQ'
-    
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == ''))
-      if(ccc19x$covid_19_treatment___unk[i] == 1 &
-         all(ccc19x[i,temp.ref] == 0 )) ccc19x$der_hca[i] <- 'Unknown'
-    
-    temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
-                        !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
-    for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
-      if(ccc19x$covid_19_treatment_fu___unk[i] == 1 &
-         all(ccc19x[i,temp.ref] == 0 )) ccc19x$der_hca[i] <- 'Unknown'
-    
-    #Trial baseline
-    trial.ref <- which(ccc19x$covid_19_treatment_trial == 1)
-    for(i in 1:length(trial.ref))
-    {
-      temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx___rxcui_5521', 'covid_19_trial_tx___rxcui_18631')]
-      if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
-        if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
-          if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
-          
-          if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
-             ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
-             ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ' 
-          
-    }
-    
-    #Trial f/u
-    trial.ref <- which(ccc19x$covid_19_treatment_trial_fu == 1)
-    if(length(trial.ref) > 0)
-    {
-      for(i in 1:length(trial.ref))
-      {
-        temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx_fu___rxcui_5521', 'covid_19_trial_tx_fu___rxcui_18631')]
-        if(temp[1] != 0 & temp[2] != 0)
-        {
-        if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
-          if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
-            if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
-            
-            if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
-               ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
-               ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ'
-        }
-      }         
-    }
-    
-    #Resolve discrepancies between baseline and f/u
-    temp.ref <- which(ccc19x$redcap_repeat_instrument == 'followup')
-    for(i in temp.ref)
-    {
-      temp <- ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]]
-      temp <- temp[!is.na(temp)]
-      if(length(temp) > 0)
-      {
-        if((any(temp == 'AZ alone') & any(temp=='HCQ alone'))|any(temp == 'AZ+HCQ')) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- 'AZ+HCQ'
-        else if(any(temp %in% c('Neither HCQ nor AZ', 'Unknown')) & any(!temp %in% c('Neither HCQ nor AZ', 'Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ', 'Unknown')])
-      }
-    }
-    
-    #Factor
-    ccc19x$der_hca <- as.factor(ccc19x$der_hca)
-    ccc19x$der_hca <- relevel(ccc19x$der_hca, ref = 'Neither HCQ nor AZ')
-    
-    temp <- summary(ccc19x$der_hca[ccc19x$redcap_repeat_instrument == ''])
-    temp.var.log <- data.frame(name = 'der_hca',
-                               timestamp = Sys.time(),
-                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
-                               stringsAsFactors = F)
-    var.log <- rbind(var.log, temp.var.log)
+    # #Rx1. Derived variable for hydroxychloroquine/azithro exposure used for TREATMENT of COVID-19
+    # ccc19x$der_hca <- NA
+    # 
+    # #Non-trial
+    # #Neither, baseline
+    # temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
+    #                     !grepl(colnames(ccc19x), pattern = '19_treatment___unk|19_treatment___rxcui_18631|19_treatment___rxcui_5521'))
+    # for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    #   if(ccc19x$covid_19_treatment___rxcui_18631[i] == 0 &
+    #      ccc19x$covid_19_treatment___rxcui_5521[i] == 0 &
+    #      any(ccc19x[i,temp.ref])) ccc19x$der_hca[i] <- 'Neither HCQ nor AZ'
+    # 
+    # #Neither, followup
+    # temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+    #                     !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk|19_treatment_fu___rxcui_18631|19_treatment_fu___rxcui_5521'))
+    # for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+    #   if(ccc19x$covid_19_treatment_fu___rxcui_18631[i] == 0 &
+    #      ccc19x$covid_19_treatment_fu___rxcui_5521[i] == 0 &
+    #      any(ccc19x[i,temp.ref])) ccc19x$der_hca[i] <- 'Neither HCQ nor AZ'
+    # 
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 1 & ccc19x$covid_19_treatment___rxcui_18631 == 0)] <- 'HCQ alone'
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 1 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 0)] <- 'HCQ alone'
+    # 
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 0 & ccc19x$covid_19_treatment___rxcui_18631 == 1)] <- 'AZ alone'
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 0 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 1)] <- 'AZ alone'
+    # 
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment___rxcui_5521 == 1 & ccc19x$covid_19_treatment___rxcui_18631 == 1)] <- 'AZ+HCQ'
+    # ccc19x$der_hca[which(ccc19x$covid_19_treatment_fu___rxcui_5521 == 1 & ccc19x$covid_19_treatment_fu___rxcui_18631 == 1)] <- 'AZ+HCQ'
+    # 
+    # temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment___') & 
+    #                     !grepl(colnames(ccc19x), pattern = '19_treatment___unk'))
+    # for(i in which(ccc19x$redcap_repeat_instrument == ''))
+    #   if(ccc19x$covid_19_treatment___unk[i] == 1 &
+    #      all(ccc19x[i,temp.ref] == 0 )) ccc19x$der_hca[i] <- 'Unknown'
+    # 
+    # temp.ref <- which(grepl(colnames(ccc19x), pattern = '19_treatment_fu___') & 
+    #                     !grepl(colnames(ccc19x), pattern = '19_treatment_fu___unk'))
+    # for(i in which(ccc19x$redcap_repeat_instrument == 'followup'))
+    #   if(ccc19x$covid_19_treatment_fu___unk[i] == 1 &
+    #      all(ccc19x[i,temp.ref] == 0 )) ccc19x$der_hca[i] <- 'Unknown'
+    # 
+    # #Trial baseline
+    # trial.ref <- which(ccc19x$covid_19_treatment_trial == 1)
+    # for(i in 1:length(trial.ref))
+    # {
+    #   temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx___rxcui_5521', 'covid_19_trial_tx___rxcui_18631')]
+    #   if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
+    #     if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
+    #       if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
+    #       
+    #       if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
+    #          ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
+    #          ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ' 
+    #       
+    # }
+    # 
+    # #Trial f/u
+    # trial.ref <- which(ccc19x$covid_19_treatment_trial_fu == 1)
+    # if(length(trial.ref) > 0)
+    # {
+    #   for(i in 1:length(trial.ref))
+    #   {
+    #     temp <- ccc19x[trial.ref[i],c('covid_19_trial_tx_fu___rxcui_5521', 'covid_19_trial_tx_fu___rxcui_18631')]
+    #     if(temp[1] != 0 & temp[2] != 0)
+    #     {
+    #     if(temp[1] == 1 & temp[2] == 0) temp <- 'HCQ alone' else
+    #       if(temp[1] == 0 & temp[2] == 1) temp <- 'AZ alone' else
+    #         if(temp[1] == 1 & temp[2] == 1) temp <- 'AZ+HCQ' else temp <- 'Neither HCQ nor AZ'
+    #         
+    #         if(ccc19x$der_hca[trial.ref[i]] == 'HCQ alone' & temp == 'AZ alone' |
+    #            ccc19x$der_hca[trial.ref[i]] == 'AZ alone' & temp == 'HCQ alone' |
+    #            ccc19x$der_hca[trial.ref[i]] == 'AZ+HCQ') ccc19x$der_hca[trial.ref[i]] <- 'AZ+HCQ'
+    #     }
+    #   }         
+    # }
+    # 
+    # #Resolve discrepancies between baseline and f/u
+    # temp.ref <- which(ccc19x$redcap_repeat_instrument == 'followup')
+    # for(i in temp.ref)
+    # {
+    #   temp <- ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]]
+    #   temp <- temp[!is.na(temp)]
+    #   if(length(temp) > 0)
+    #   {
+    #     if((any(temp == 'AZ alone') & any(temp=='HCQ alone'))|any(temp == 'AZ+HCQ')) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- 'AZ+HCQ'
+    #     else if(any(temp %in% c('Neither HCQ nor AZ', 'Unknown')) & any(!temp %in% c('Neither HCQ nor AZ', 'Unknown'))) ccc19x$der_hca[ccc19x$record_id == ccc19x$record_id[i]] <- unique(temp[!temp %in% c('Neither HCQ nor AZ', 'Unknown')])
+    #   }
+    # }
+    # 
+    # #Factor
+    # ccc19x$der_hca <- as.factor(ccc19x$der_hca)
+    # ccc19x$der_hca <- relevel(ccc19x$der_hca, ref = 'Neither HCQ nor AZ')
+    # 
+    # temp <- summary(ccc19x$der_hca[ccc19x$redcap_repeat_instrument == ''])
+    # temp.var.log <- data.frame(name = 'der_hca',
+    #                            timestamp = Sys.time(),
+    #                            values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+    #                            stringsAsFactors = F)
+    # var.log <- rbind(var.log, temp.var.log)
     
     #Rx2. Oseltamivir ever (partial derived)
     ccc19x$der_oselt <- NA
