@@ -11940,6 +11940,24 @@ var.log <- data.frame(name = character(),
     ccc19x$der_vegfi <- factor(ccc19x$der_vegfi)
     summary(ccc19x$der_vegfi[ccc19x$redcap_repeat_instrument == ''])
     
+    #Ca04f1b: VEGF inhibitor (expanded list)
+    ccc19x$der_vegfi_v2 <- NA
+    
+    temp.ref <- which(!is.na(ccc19x$drug1) & ccc19x$redcap_repeat_instrument == '')
+    for(i in 1:length(temp.ref))
+    {
+      if(any(ccc19x[temp.ref[i],c('drug1', 'drug2', 'drug3', 'drug4', 'drug5', 'drug6', 'drug7', 'drug8')] %in%
+             c('Apatinib','Axitinib', 'Bevacizumab', 'Cabozantinib',
+               'Cediranib','Dovitinib','Fruquintinib',
+               'Lenvatinib','Motesanib','Nintedanib','Pazopanib','Ponatinib','Regorafenib','Ripretinib',
+               'Sorafenib', 'Sunitinib','Tivozanib','Vandetanib','Vorolanib', 
+               'Ramucirumab','Ziv-aflibercept'))) ccc19x$der_vegfi_v2[temp.ref[i]] <- 1 else
+                 ccc19x$der_vegfi_v2[temp.ref[i]] <- 0
+    }
+    
+    ccc19x$der_vegfi_v2 <- factor(ccc19x$der_vegfi_v2)
+    summary(ccc19x$der_vegfi_v2[ccc19x$redcap_repeat_instrument == ''])
+    
     #Ca04g: TKI inhibitor (incomplete list, possibly)
     ccc19x$der_tki <- NA
     
