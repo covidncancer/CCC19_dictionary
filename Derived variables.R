@@ -3443,7 +3443,7 @@ var.log <- data.frame(name = character(),
     #Composite complications
     ########################
     
-    #Comp42. Combined cardiovascular event (more comprehensive than der_CV_event)
+    #Comp42a. Combined cardiovascular event (more comprehensive than der_CV_event)
     ccc19x$der_CV_event_v2 <- NA
     
     #Yes
@@ -3499,7 +3499,104 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Comp43. Combined pulmonary event
+    #Comp42b. Combined cardiovascular event (more comprehensive than der_CV_event, slightly different than above)
+    ccc19x$der_CV_event_v3 <- NA
+    
+    #Yes
+    ccc19x$der_CV_event_v3[which(ccc19x$der_SVT_comp == 1|
+                                   ccc19x$der_MI_comp == 1|
+                                   ccc19x$der_card_isch_comp == 1|
+                                   ccc19x$der_AFib_comp == 1|
+                                   ccc19x$der_VF_comp == 1|
+                                   ccc19x$der_arry_oth_comp == 1|
+                                   ccc19x$der_CMY_comp == 1|
+                                   ccc19x$der_CHF_comp == 1|
+                                   ccc19x$der_PE_comp == 1|
+                                   ccc19x$der_DVT_comp == 1|
+                                   ccc19x$der_stroke_comp == 1|
+                                   ccc19x$der_thrombosis_NOS_comp == 1)] <- 1
+    
+    #No
+    ccc19x$der_CV_event_v3[which(ccc19x$der_SVT_comp == 0 &
+                                   ccc19x$der_MI_comp == 0 &
+                                   ccc19x$der_card_isch_comp == 0 &
+                                   ccc19x$der_AFib_comp == 0 &
+                                   ccc19x$der_VF_comp == 0 &
+                                   ccc19x$der_arry_oth_comp == 0 &
+                                   ccc19x$der_CMY_comp == 0 &
+                                   ccc19x$der_CHF_comp == 0 &
+                                   ccc19x$der_PE_comp == 0 &
+                                   ccc19x$der_DVT_comp == 0 &
+                                   ccc19x$der_stroke_comp == 0 &
+                                   ccc19x$der_thrombosis_NOS_comp == 0 &
+                                   is.na(ccc19x$der_CV_event_v3))] <- 0
+    
+    #Unknown
+    ccc19x$der_CV_event_v3[which((ccc19x$der_SVT_comp == 99|
+                                    ccc19x$der_MI_comp == 99|
+                                    ccc19x$der_card_isch_comp == 99|
+                                    ccc19x$der_AFib_comp == 99|
+                                    ccc19x$der_VF_comp == 99|
+                                    ccc19x$der_arry_oth_comp == 99|
+                                    ccc19x$der_CMY_comp == 99|
+                                    ccc19x$der_CHF_comp == 99|
+                                    ccc19x$der_PE_comp == 99|
+                                    ccc19x$der_DVT_comp == 99|
+                                    ccc19x$der_stroke_comp == 99|
+                                    ccc19x$der_thrombosis_NOS_comp == 99) & 
+                                   is.na(ccc19x$der_CV_event_v3))] <- 99
+    
+    ccc19x$der_CV_event_v3 <- factor(ccc19x$der_CV_event_v3)
+    
+    temp <- summary(ccc19x$der_CV_event_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_CV_event_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Comp43. Combined cardiac event
+    ccc19x$der_cardiac_event <- NA
+    
+    #Yes
+    ccc19x$der_cardiac_event[which(ccc19x$der_MI_comp == 1|
+                                     ccc19x$der_card_isch_comp == 1|
+                                     ccc19x$der_AFib_comp == 1|
+                                     ccc19x$der_VF_comp == 1|
+                                     ccc19x$der_arry_oth_comp == 1|
+                                     ccc19x$der_CMY_comp == 1|
+                                     ccc19x$der_CHF_comp == 1)] <- 1
+    
+    #No
+    ccc19x$der_cardiac_event[which(ccc19x$der_MI_comp == 0 &
+                                     ccc19x$der_card_isch_comp == 0 &
+                                     ccc19x$der_AFib_comp == 0 &
+                                     ccc19x$der_VF_comp == 0 &
+                                     ccc19x$der_arry_oth_comp == 0 &
+                                     ccc19x$der_CMY_comp == 0 &
+                                     ccc19x$der_CHF_comp == 0 &
+                                     is.na(ccc19x$der_cardiac_event))] <- 0
+    
+    #Unknown
+    ccc19x$der_cardiac_event[which((ccc19x$der_MI_comp == 99|
+                                      ccc19x$der_card_isch_comp == 99|
+                                      ccc19x$der_AFib_comp == 99|
+                                      ccc19x$der_VF_comp == 99|
+                                      ccc19x$der_arry_oth_comp == 99|
+                                      ccc19x$der_CMY_comp == 99|
+                                      ccc19x$der_CHF_comp == 99) & 
+                                     is.na(ccc19x$der_cardiac_event))] <- 99
+    
+    ccc19x$der_cardiac_event <- factor(ccc19x$der_cardiac_event)
+    
+    temp <- summary(ccc19x$der_cardiac_event[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_cardiac_event',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Comp44. Combined pulmonary event
     ccc19x$der_pulm_event <- NA
     
     #Yes
@@ -3540,7 +3637,7 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
-    #Comp44. Combined GI event
+    #Comp45. Combined GI event
     ccc19x$der_GI_event <- NA
     
     #Yes
@@ -3579,7 +3676,7 @@ var.log <- data.frame(name = character(),
     var.log <- rbind(var.log, temp.var.log)
     
     ####################################################
-    #Comp45. Complications with severity by adjudication
+    #Comp46. Complications with severity by adjudication
     ####################################################
     {
       ccc19x$der_complications_severity <- NA
