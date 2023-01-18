@@ -7693,6 +7693,26 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #D04e. Derived variable for race
+    ccc19x$der_race_v3 <- NA
+    
+    ccc19x$der_race_v3[which(ccc19x$race___2054_5 == 1 & ccc19x$race___2106_3 == 0)] <- "Black"
+    ccc19x$der_race_v3[which(ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 0)] <- "White"
+    
+    ccc19x$der_race_v3[which(ccc19x$race___1002_5 == 1|ccc19x$race___2028_9 == 1|
+                               ccc19x$race___2076_8 ==1|ccc19x$race___2131_1 == 1|
+                               (ccc19x$race___2106_3 == 1 & ccc19x$race___2054_5 == 1))] <- 'Other'
+    
+    #Factor
+    ccc19x$der_race_v3 <- as.factor(ccc19x$der_race_v3)
+    
+    temp <- summary(ccc19x$der_race_v3[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_race_v3',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #D05. Ethnicity (simply factor and redefine levels, declare blanks as missing)
     ccc19x$der_ethnicity <- ccc19x$ethnicity
     ccc19x$der_ethnicity[which(ccc19x$der_ethnicity == "2135-2")] <- 'Hispanic/Latinx'
@@ -9036,6 +9056,13 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #C12e. charlson_group: 0-1, 2+
+    ccc19x$der_ccc19cci_v6 <- as.character(ccc19x$der_ccc19cci)
+    ccc19x$der_ccc19cci_v6[which(ccc19x$der_ccc19cci_v6 %in% 0:1)] <- '0-1'
+    ccc19x$der_ccc19cci_v6[which(ccc19x$der_ccc19cci_v6 %in% 2:22)] <- '2+'
+    ccc19x$der_ccc19cci_v6 <- factor(ccc19x$der_ccc19cci_v6)
+    summary(ccc19x$der_ccc19cci_v6[ccc19x$redcap_repeat_instrument == ''])
+    
     ##############################
     #C13. CVD risk factor (binary)
     ##############################
@@ -9736,6 +9763,16 @@ var.log <- data.frame(name = character(),
     ccc19x$der_esophagogastric <- factor(ccc19x$der_esophagogastric)
     summary(ccc19x$der_esophagogastric[ccc19x$redcap_repeat_instrument == ''])
     
+    #Gastric & Pancreatobiliary
+    ccc19x$der_gastric_pancreatobiliary <- 0
+    ccc19x$der_gastric_pancreatobiliary[which(ccc19x$cancer_type %in% c("C4911","C3850","C4436","C3844")|
+                                                ccc19x$cancer_type_2 %in% c("C4911","C3850","C4436","C3844")|
+                                                ccc19x$cancer_type_3 %in% c("C4911","C3850","C4436","C3844")|
+                                                ccc19x$cancer_type_4 %in% c("C4911","C3850","C4436","C3844")|
+                                                ccc19x$cancer_type_5 %in% c("C4911","C3850","C4436","C3844"))] <- 1
+    ccc19x$der_gastric_pancreatobiliary <- factor(ccc19x$der_gastric_pancreatobiliary)
+    summary(ccc19x$der_gastric_pancreatobiliary[ccc19x$redcap_repeat_instrument == ''])
+    
     #GI overall
     ccc19x$der_GI <- 0
     ccc19x$der_GI[which(ccc19x$der_LowerGI == 1|ccc19x$der_UpperGI == 1)] <- 1
@@ -9783,6 +9820,16 @@ var.log <- data.frame(name = character(),
                              ccc19x$cancer_type_5 %in% c("C7431","C3867"))] <- 1
     ccc19x$der_Ovary <- factor(ccc19x$der_Ovary)
     summary(ccc19x$der_Ovary[ccc19x$redcap_repeat_instrument == ''])
+    
+    #Ovarian
+    ccc19x$der_Ovary_v2 <- 0
+    ccc19x$der_Ovary_v2[which(ccc19x$cancer_type %in% c("C7431")|
+                                ccc19x$cancer_type_2 %in% c("C7431")|
+                                ccc19x$cancer_type_3 %in% c("C7431")|
+                                ccc19x$cancer_type_4 %in% c("C7431")|
+                                ccc19x$cancer_type_5 %in% c("C7431"))] <- 1
+    ccc19x$der_Ovary_v2 <- factor(ccc19x$der_Ovary_v2)
+    summary(ccc19x$der_Ovary_v2[ccc19x$redcap_repeat_instrument == ''])
     
     #Uterine
     ccc19x$der_Uterine <- 0
