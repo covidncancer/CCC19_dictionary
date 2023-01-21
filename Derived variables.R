@@ -347,6 +347,73 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #O2d. Hospitalization with attribution
+    ccc19x$der_hosp_attrib <- NA
+    
+    #Baseline form hospitalizations
+    temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$redcap_repeat_instrument == '')
+    
+    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] < -7)
+    ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Unrelated'
+    
+    temp.ref2 <- which((ccc19x$dx_hosp_interval[temp.ref] >= -7 & ccc19x$dx_hosp_interval[temp.ref] < 0)|
+                         ccc19x$dx_hosp_interval[temp.ref] > 14 & ccc19x$dx_hosp_interval[temp.ref] < 9999)
+    ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Possibly related'
+    
+    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] >= 0 & ccc19x$dx_hosp_interval[temp.ref] <= 14)
+    ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Definitely related'
+    
+    #Follow-up form hospitalizations
+    temp.ref <- which(ccc19x$der_hosp_bl %in% c(0,99) & ccc19x$der_hosp == 1
+                      & ccc19x$redcap_repeat_instrument == '')
+    temp <- ccc19x$record_id[temp.ref]
+    for(i in 1:length(temp))
+    {
+      temp.ref2 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup')
+      temp2 <- ccc19x$admission_reason_fu[temp.ref2]
+      temp2 <- temp2[!is.na(temp2)]
+      if(length(temp2) > 0)
+        if(any(temp2 == 1)) ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Definitely related' else
+          if(any(temp2 == 2)) ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Possibly related' else
+            if(any(temp2 == 3)) ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Unrelated' else
+              ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Unknown'
+    }
+    
+    #Initial severity-based
+    temp.ref <- which(ccc19x$severity_of_covid_19_v2 %in% 2:3 & ccc19x$der_hosp_bl == 1 & is.na(ccc19x$der_hosp_attrib))
+    ccc19x$der_hosp_attrib[temp.ref] <- 'Definitely related'
+      
+    #Time anchor-based
+    temp.ref <- which(ccc19x$covid_19_dx_interval %in% 1:2 & ccc19x$der_hosp_bl == 1 & is.na(ccc19x$der_hosp_attrib))
+    ccc19x$der_hosp_attrib[temp.ref] <- 'Definitely related'
+    
+    temp.ref <- which(ccc19x$covid_19_dx_interval %in% 3:10 & ccc19x$der_hosp_bl == 1 & is.na(ccc19x$der_hosp_attrib))
+    ccc19x$der_hosp_attrib[temp.ref] <- 'Possibly related'
+    
+    temp.ref <- which(ccc19x$der_hosp == 1 & ccc19x$redcap_repeat_instrument == '' & is.na(ccc19x$der_hosp_attrib))
+    temp <- ccc19x$record_id[temp.ref]
+    for(i in 1:length(temp))
+    {
+      temp.ref2 <- which(ccc19x$record_id == temp[i] & ccc19x$redcap_repeat_instrument == 'followup' &
+                           !is.na(ccc19x$timing_of_report_weeks) & ccc19x$fu_reason == 1)
+      if(length(temp.ref2) > 0)
+      {
+        temp2 <- ccc19x$timing_of_report_weeks[temp.ref2]
+        if(any(temp2 <= 2)) ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Definitely related' else
+          ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Possibly related'
+      } else ccc19x$der_hosp_attrib[temp.ref[i]] <- 'Possibly related'
+    }
+    
+    #Factor
+    ccc19x$der_hosp_attrib <- as.factor(ccc19x$der_hosp_attrib)
+    
+    temp <- summary(ccc19x$der_hosp_attrib[which(ccc19x$redcap_repeat_instrument == '' & ccc19x$der_hosp == 1)])
+    temp.var.log <- data.frame(name = 'der_hosp_attrib',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     "ICU"
     #O3. Derived variable indicating time in the ICU (ever/never)
     ccc19x$der_ICU <- NA
@@ -11491,7 +11558,7 @@ var.log <- data.frame(name = character(),
     #Ca4. Number of anti-cancer drugs
     
     #Load the curated file
-    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2022-05-12 with modalities.csv', header = T, stringsAsFactors = F)
+    drugs <- read.csv(file = 'Mapping - medications/CCC19-ca-drugs-2023-01-18 with modalities.csv', header = T, stringsAsFactors = F)
     drugs <- drugs[order(drugs$record_id),]
     
     #Just keep the rows with drug information
