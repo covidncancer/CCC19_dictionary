@@ -353,15 +353,25 @@ var.log <- data.frame(name = character(),
     #Baseline form hospitalizations
     temp.ref <- which(ccc19x$der_hosp_bl == 1 & ccc19x$redcap_repeat_instrument == '')
     
-    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] < -7)
+    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] < -7|
+                         ((ccc19x$c19_workup_why_2___1[temp.ref] == 0 & ccc19x$symptoms___84387000[temp.ref] == 1) & 
+                            (ccc19x$c19_workup_why_2___2[temp.ref] == 1|ccc19x$c19_workup_why_2___3[temp.ref] == 1|ccc19x$c19_workup_why_2___4[temp.ref] == 1|ccc19x$c19_workup_why_2___5[temp.ref] == 1)))
     ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Unrelated'
     
-    temp.ref2 <- which((ccc19x$dx_hosp_interval[temp.ref] >= -7 & ccc19x$dx_hosp_interval[temp.ref] < 0)|
-                         ccc19x$dx_hosp_interval[temp.ref] > 14 & ccc19x$dx_hosp_interval[temp.ref] < 9999)
+    temp.ref2 <- which(((ccc19x$dx_hosp_interval[temp.ref] >= -7 & ccc19x$dx_hosp_interval[temp.ref] < 0)|
+                         (ccc19x$dx_hosp_interval[temp.ref] > 14 & ccc19x$dx_hosp_interval[temp.ref] < 9999)|
+                         (ccc19x$dx_hosp_interval[temp.ref] == 0 & ccc19x$c19_workup_why_2___1[temp.ref] == 0)) &
+                         is.na(ccc19x$der_hosp_attrib[temp.ref]))
     ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Possibly related'
     
-    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] >= 0 & ccc19x$dx_hosp_interval[temp.ref] <= 14)
+    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] >= 0 & ccc19x$dx_hosp_interval[temp.ref] <= 14 &
+                         ccc19x$c19_workup_why_2___1[temp.ref] == 1 &
+                         is.na(ccc19x$der_hosp_attrib[temp.ref]))
     ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Definitely related'
+    
+    temp.ref2 <- which(ccc19x$dx_hosp_interval[temp.ref] >= 0 & ccc19x$dx_hosp_interval[temp.ref] <= 14 &
+                         is.na(ccc19x$der_hosp_attrib[temp.ref]))
+    ccc19x$der_hosp_attrib[temp.ref][temp.ref2] <- 'Possibly related'
     
     #Follow-up form hospitalizations
     temp.ref <- which(ccc19x$der_hosp_bl %in% c(0,99) & ccc19x$der_hosp == 1
