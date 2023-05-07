@@ -838,6 +838,42 @@ var.log <- data.frame(name = character(),
                                stringsAsFactors = F)
     var.log <- rbind(var.log, temp.var.log)
     
+    #O7b. Supplemental oxygen ordinal
+    ccc19x$der_o2_ordinal <- NA
+    temp.ref <- which(ccc19x$resp_failure_tx %in% c(1:6))
+    ccc19x$der_o2_ordinal[temp.ref] <- ccc19x$resp_failure_tx[temp.ref]
+    
+    #Follow-up, ignoring unknowns if there is a known
+    temp <- unique(ccc19x$record_id[which(ccc19x$resp_failure_tx_fu %in% c(1:6))])
+    for(i in 1:length(temp))
+    {
+      temp.ref2 <- which(ccc19x$record_id == temp[i])
+      temp2 <- c(ccc19x$resp_failure_tx[temp.ref2],ccc19x$resp_failure_tx_fu[temp.ref2])
+      ccc19x$der_o2_ordinal[temp.ref2] <- max(temp2[!is.na(temp2) & temp2 != 99])
+    }
+    
+    #Unknown
+    temp.ref <- which(ccc19x$resp_failure_tx == 99 & is.na(ccc19x$der_o2_ordinal))
+    ccc19x$der_o2_ordinal[temp.ref] <- 99
+    
+    temp <- ccc19x$record_id[which(ccc19x$resp_failure_tx_fu == 99)]
+    temp.ref <- which(ccc19x$record_id %in% temp & is.na(ccc19x$der_o2_ordinal) & ccc19x$redcap_repeat_instrument == '')
+    ccc19x$der_o2_ordinal[temp.ref] <- 99
+    
+    #No oxygen required
+    temp.ref <- which(ccc19x$der_o2_ever == 0 & is.na(ccc19x$der_o2_ordinal) & ccc19x$redcap_repeat_instrument == '')
+    ccc19x$der_o2_ordinal[temp.ref] <- 0
+    
+    #Factor
+    ccc19x$der_o2_ordinal <- as.factor(ccc19x$der_o2_ordinal)
+    
+    temp <- summary(ccc19x$der_o2_ordinal[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_o2_ordinal',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
     #O8a. Severe composite outcome - mechanical ventilation, severe illness requiring hospitalization, intensive care unit (ICU) requirement, or death
     ccc19x$der_severe <- NA
     
@@ -11594,6 +11630,34 @@ var.log <- data.frame(name = character(),
     ccc19x$der_met_visceral <- as.factor(ccc19x$der_met_visceral)
     
     temp <- summary(ccc19x$der_met_visceral[ccc19x$redcap_repeat_instrument == ''])
+    temp.var.log <- data.frame(name = 'der_met_visceral',
+                               timestamp = Sys.time(),
+                               values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
+                               stringsAsFactors = F)
+    var.log <- rbind(var.log, temp.var.log)
+    
+    #Ca19h. Metastatic sites (bone, brain, liver, and/or lung)
+    ccc19x$der_met_sites_no <- 0
+    
+    temp.ref <- which(ccc19x$der_met_bone == 1)
+    ccc19x$der_met_sites_no[temp.ref] <- ccc19x$der_met_sites_no[temp.ref] + 1
+    
+    temp.ref <- which(ccc19x$der_met_lung_v2 == 1)
+    ccc19x$der_met_sites_no[temp.ref] <- ccc19x$der_met_sites_no[temp.ref] + 1
+    
+    temp.ref <- which(ccc19x$der_met_liver == 1)
+    ccc19x$der_met_sites_no[temp.ref] <- ccc19x$der_met_sites_no[temp.ref] + 1
+    
+    temp.ref <- which(ccc19x$der_met_brain == 1)
+    ccc19x$der_met_sites_no[temp.ref] <- ccc19x$der_met_sites_no[temp.ref] + 1
+    
+    #Unknown
+    ccc19x$der_met_sites_no[which((ccc19x$der_met_bone == 99|ccc19x$der_met_lung_v2 == 99|ccc19x$der_met_liver == 99|ccc19x$der_met_brain == 99) &
+                                    ccc19x$der_met_sites_no == 0)] <- 99
+    
+    ccc19x$der_met_sites_no <- as.factor(ccc19x$der_met_sites_no)
+    
+    temp <- summary(ccc19x$der_met_sites_no[ccc19x$redcap_repeat_instrument == ''])
     temp.var.log <- data.frame(name = 'der_met_visceral',
                                timestamp = Sys.time(),
                                values = paste(paste(names(temp), temp, sep = ': '), collapse = '; '),
